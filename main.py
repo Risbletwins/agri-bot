@@ -1,6 +1,9 @@
 from flask import Flask, request, jsonify
 import os
-from google import genai  # new SDK
+from google import genai  # new SDKa
+import json
+
+
 
 app = Flask(__name__)
 
@@ -112,6 +115,7 @@ Remember: your job is to help — not redirect.
 @app.route('/ask', methods=['POST'])
 def ask_bot():
     data = request.get_json()
+    json.dumps(data, ensure_ascii=False)
     question = data.get('question')
     if not question:
         return jsonify({'error': 'Missing question'}), 400
@@ -123,6 +127,7 @@ def ask_bot():
             contents=full_prompt
         )
         answer = resp.text
+       
         return jsonify({'answer': answer})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
