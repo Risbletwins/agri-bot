@@ -1,12 +1,32 @@
-
-import os
-from google import genai  # new SDK
 from flask import Flask, request, jsonify, send_file
 from gtts import gTTS
-import os
 import io
+import os
+from google import generativeai as genai  # ✅ correct import
 
 app = Flask(__name__)
+
+# Initialize Gemini API
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or "YOUR_API_KEY_HERE"
+genai.configure(api_key=GEMINI_API_KEY)
+
+@app.route('/')
+def home():
+    return "Agri Bot API with Gemini AI ✅"
+
+@app.route('/ask', methods=['POST'])
+def ask_bot():
+    data = request.get_json()
+    question = data.get('question')
+    if not question:
+        return jsonify({'error': 'Missing question'}), 400
+
+    try:
+        model = genai.GenerativeModel("gemini-1.5-flash")  # ✅ correct model
+        response = model.generate_content(question)
+        return jsonify({'answer': response.text})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/tts', methods=['POST'])
 def bangla_tts():
@@ -22,31 +42,6 @@ def bangla_tts():
         tts.write_to_fp(mp3_fp)
         mp3_fp.seek(0)
         return send_file(mp3_fp, mimetype='audio/mpeg')
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-    
-    
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or "AIzaSyCAbZBgv8pzC7o-m0SoPlQerQvlQwZPH68"
-client = genai.Client(api_key=GEMINI_API_KEY)
-
-@app.route('/')
-def home():
-    return "Agri Bot API with Gemini AI ✅"
-
-@app.route('/ask', methods=['POST'])
-def ask_bot():
-    data = request.get_json()
-    question = data.get('question')
-    if not question:
-        return jsonify({'error': 'Missing question'}), 400
-
-    try:
-        resp = client.models.generate_content(
-            model="gemini-2.0-flash",  # approved model name
-            contents=question
-        )
-        answer = resp.text
-        return jsonify({'answer': answer})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
