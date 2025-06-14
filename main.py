@@ -1,10 +1,31 @@
-from flask import Flask, request, jsonify
+
 import os
 from google import genai  # new SDK
+from flask import Flask, request, jsonify, send_file
+from gtts import gTTS
+import os
+import io
 
 app = Flask(__name__)
 
-# Read API key from environment or placeholder
+@app.route('/tts', methods=['POST'])
+def bangla_tts():
+    data = request.get_json()
+    text = data.get('text')
+
+    if not text:
+        return jsonify({'error': 'Missing text'}), 400
+
+    try:
+        tts = gTTS(text=text, lang='bn')
+        mp3_fp = io.BytesIO()
+        tts.write_to_fp(mp3_fp)
+        mp3_fp.seek(0)
+        return send_file(mp3_fp, mimetype='audio/mpeg')
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+    
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or "AIzaSyCAbZBgv8pzC7o-m0SoPlQerQvlQwZPH68"
 client = genai.Client(api_key=GEMINI_API_KEY)
 
