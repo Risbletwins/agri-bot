@@ -1,25 +1,12 @@
 from flask import Flask, request, jsonify
-import google.generativeai as genai
 import os
+from google import genai  # new SDK
 
 app = Flask(__name__)
 
-# Configure Gemini API
+# Read API key from environment or placeholder
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or "AIzaSyCAbZBgv8pzC7o-m0SoPlQerQvlQwZPH68"
-genai.configure(api_key=GEMINI_API_KEY)
-
-# Use the latest correct model setup
-generation_config = {
-    "temperature": 0.7,
-    "top_p": 1,
-    "top_k": 1,
-    "max_output_tokens": 1024
-}
-
-model = genai.GenerativeModel(
-    model_name="models/gemini-pro",
-    generation_config=generation_config
-)
+client = genai.Client(api_key=GEMINI_API_KEY)
 
 @app.route('/')
 def home():
@@ -29,10 +16,16 @@ def home():
 def ask_bot():
     data = request.get_json()
     question = data.get('question')
+    if not question:
+        return jsonify({'error': 'Missing question'}), 400
 
     try:
-        response = model.generate_content([question])
-        return jsonify({'answer': response.text})
+        resp = client.models.generate_content(
+            model="gemini-2.0-flash",  # approved model name
+            contents=question
+        )
+        answer = resp.text
+        return jsonify({'answer': answer})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
