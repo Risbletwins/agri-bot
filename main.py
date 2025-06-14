@@ -1,14 +1,12 @@
-from flask import Flask, request, jsonify, send_file
-from gtts import gTTS
-import io
+from flask import Flask, request, jsonify
 import os
-from google import generativeai as genai  # ✅ correct import
+from google import genai  # new SDK
 
 app = Flask(__name__)
 
-# Initialize Gemini API
+# Read API key from environment or placeholder
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or "AIzaSyCAbZBgv8pzC7o-m0SoPlQerQvlQwZPH68"
-genai.configure(api_key=GEMINI_API_KEY)
+client = genai.Client(api_key=GEMINI_API_KEY)
 
 @app.route('/')
 def home():
@@ -22,26 +20,12 @@ def ask_bot():
         return jsonify({'error': 'Missing question'}), 400
 
     try:
-        model = genai.GenerativeModel("gemini-1.5-flash")  # ✅ correct model
-        response = model.generate_content(question)
-        return jsonify({'answer': response.text})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/tts', methods=['POST'])
-def bangla_tts():
-    data = request.get_json()
-    text = data.get('text')
-
-    if not text:
-        return jsonify({'error': 'Missing text'}), 400
-
-    try:
-        tts = gTTS(text=text, lang='bn')
-        mp3_fp = io.BytesIO()
-        tts.write_to_fp(mp3_fp)
-        mp3_fp.seek(0)
-        return send_file(mp3_fp, mimetype='audio/mpeg')
+        resp = client.models.generate_content(
+            model="gemini-2.0-flash",  # approved model name
+            contents=question
+        )
+        answer = resp.text
+        return jsonify({'answer': answer})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
