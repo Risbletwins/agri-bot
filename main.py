@@ -109,10 +109,14 @@ Remember: your job is to help — not redirect and also optimize the text for vo
 
 """
 
-@app.route('/ask', methods=['POST'])
+@app.route('/ask', methods=['GET', 'POST'])
 def ask_bot():
-    data = request.get_json()
-    question = data.get('question')
+    if request.method == 'POST':
+        data = request.get_json()
+        question = data.get('question') if data else None
+    else:
+        question = request.args.get('q')
+
     if not question:
         return Response(
             json.dumps({'error': 'Missing question'}, ensure_ascii=False),
@@ -127,7 +131,6 @@ def ask_bot():
         )
         answer = resp.text
 
-        # ✅ Proper UTF-8 JSON response
         response_data = {'answer': answer}
         return Response(
             json.dumps(response_data, ensure_ascii=False),
