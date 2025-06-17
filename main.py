@@ -4,10 +4,8 @@ from google import genai
 import json
 
 app = Flask(__name__)
-request.headers.get("User-Agent")
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or "AIzaSyCAbZBgv8pzC7o-m0SoPlQerQvlQwZPH68"
-client = genai.Client(api_key=GEMINI_API_KEY)
+client = genai.Client(api_key="AIzaSyCAbZBgv8pzC7o-m0SoPlQerQvlQwZPH68")
 
 @app.route('/')
 def home():
@@ -110,14 +108,9 @@ Remember: your job is to help — not redirect and also optimize the text for vo
 
 """
 
-@app.route('/ask', methods=['GET', 'POST'])
+@app.route('/ask', methods=['GET'])
 def ask_bot():
-    if request.method == 'POST':
-        data = request.get_json()
-        question = data.get('question') if data else None
-    else:
-        question = request.args.get('q')
-
+    question = request.args.get('q')
     if not question:
         return Response(
             json.dumps({'error': 'Missing question'}, ensure_ascii=False),
@@ -142,6 +135,7 @@ def ask_bot():
             json.dumps({'error': str(e)}, ensure_ascii=False),
             content_type='application/json; charset=utf-8'
         )
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
