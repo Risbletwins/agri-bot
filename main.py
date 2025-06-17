@@ -108,33 +108,36 @@ Remember: your job is to help — not redirect and also optimize the text for vo
 
 """
 
-@app.route('/ask', methods=['GET'])
-def ask_bot():
-    question = request.args.get('q')
-    if not question:
-        return Response(
-            json.dumps({'error': 'Missing question'}, ensure_ascii=False),
-            content_type='application/json; charset=utf-8'
-        )
+# @app.route('/ask', methods=['GET'])
+# def ask_bot():
+#     question = request.args.get('q')
+#     if not question:
+#         return Response(
+#             json.dumps({'error': 'Missing question'}, ensure_ascii=False),
+#             content_type='application/json; charset=utf-8'
+#         )
 
-    try:
-        full_prompt = f"{SYSTEM_INSTRUCTION}\n\nপ্রশ্ন: {question}\n\nউত্তর দিন:"
-        resp = client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=full_prompt
-        )
-        answer = resp.text
+#     try:
+#         full_prompt = f"{SYSTEM_INSTRUCTION}\n\nপ্রশ্ন: {question}\n\nউত্তর দিন:"
+#         resp = client.models.generate_content(
+#             model="gemini-2.0-flash",
+#             contents=full_prompt
+#         )
+#         answer = resp.text
 
-        response_data = {'answer': answer}
-        return Response(
-            json.dumps(response_data, ensure_ascii=False),
-            content_type='application/json; charset=utf-8'
-        )
-    except Exception as e:
-        return Response(
-            json.dumps({'error': str(e)}, ensure_ascii=False),
-            content_type='application/json; charset=utf-8'
-        )
+#         response_data = {'answer': answer}
+#         return Response(
+#             json.dumps(response_data, ensure_ascii=False),
+#             content_type='application/json; charset=utf-8'
+#         )
+#     except Exception as e:
+#         return Response(
+#             json.dumps({'error': str(e)}, ensure_ascii=False),
+#             content_type='application/json; charset=utf-8'
+#         )
+@app.route('/ping', methods=['GET'])
+def ping():
+    return "pong"
 
 
 if __name__ == "__main__":
