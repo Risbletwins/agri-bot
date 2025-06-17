@@ -1,15 +1,21 @@
-from flask import Flask, request, Response
+from flask import Flask, request, Response, send_file
 import os
+import uuid
 from google import genai
 import json
+import requests
+from pydub import AudioSegment
 
 app = Flask(__name__)
 
 client = genai.Client(api_key="AIzaSyCAbZBgv8pzC7o-m0SoPlQerQvlQwZPH68")
 
+# Create audio folder if not exist
+os.makedirs("static/audio", exist_ok=True)
+
 @app.route('/')
 def home():
-    return "Agri Bot API with Gemini AI ✅"
+    return "Agri Bot API with Gemini AI + TTS ✅"
 
 SYSTEM_INSTRUCTION = """ 
 You are a Bangladeshi কৃষি সহকারী (agriculture assistant) designed to help farmers who may be অশিক্ষিত (illiterate) or not tech-savvy. You reply only in সহজ ও সুন্দর বাংলা (simple and clear Bangla). All your replies must sound natural, friendly, and easy to speak aloud.
@@ -118,6 +124,7 @@ def ask_bot():
         )
 
     try:
+        # Step 1: Generate Answer
         full_prompt = f"{SYSTEM_INSTRUCTION}\n\nপ্রশ্ন: {question}\n\nউত্তর দিন:"
         resp = client.models.generate_content(
             model="gemini-2.0-flash",
@@ -125,20 +132,60 @@ def ask_bot():
         )
         answer = resp.text
 
-        response_data = {'answer': answer}
+        # Step 2: Generate Bangla TTS using Google Translate TTS
+        tts_url = "https://translate.google.com/translate_tts"
+        params = {
+            "ie": "UTF-8",
+            "q": answer,
+            "tl": "bn",
+            "client": "tw-ob"
+        }
+        headers = {
+            "User-Agent": "Mozilla/5.0"
+        }
+
+        tts_response = requests.get(tts_url, params=params, headers=headers)
+
+        if tts_response.status_code != 200:
+            raise Exception("TTS generation failed.")
+
+        mp3_path = f"static/audio/{uuid.uuid4()}.mp3"
+        wav_path = mp3_path.replace(".mp3", ".wav")
+
+        # Save MP3
+        with open(mp3_path, "wb") as f:
+            f.write(tts_response.content)
+
+        # Convert MP3 → WAV
+        sound = AudioSegment.from_mp3(mp3_path)
+        sound.export(wav_path, format="wav")
+
+        # Delete MP3 to save space
+        os.remove(mp3_path)
+
+        # Return response with audio path
+        response_data = {
+            'answer': answer,
+            'audio_url': request.url_root + wav_path
+        }
         return Response(
             json.dumps(response_data, ensure_ascii=False),
             content_type='application/json; charset=utf-8'
         )
+
     except Exception as e:
         return Response(
             json.dumps({'error': str(e)}, ensure_ascii=False),
             content_type='application/json; charset=utf-8'
         )
+
 @app.route('/ping', methods=['GET'])
 def ping():
     return "pong"
 
+@app.route('/tts/<filename>')
+def get_audio(filename):
+    return send_file(f'static/audio/{filename}', mimetype='audio/wav')
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
