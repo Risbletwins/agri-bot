@@ -140,7 +140,11 @@ def split_text(text, max_length=200):
 
 @app.route('/')
 def serve_webpage():
-    return render_template('index.html')
+    return render_template('homepage.html')
+
+@app.route('/chat')
+def chat():
+    return render_template('chat.html')
 
 @app.route('/ask', methods=['GET'])
 def ask_bot():
