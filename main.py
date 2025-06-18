@@ -5,18 +5,27 @@ from google import genai
 import json
 import requests
 from pydub import AudioSegment
+import logging
 
+# Initialize Flask app
 app = Flask(__name__)
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Initialize Gemini AI client
 client = genai.Client(api_key="AIzaSyCAbZBgv8pzC7o-m0SoPlQerQvlQwZPH68")
 
-# Create audio folder if not exist
+# Create audio folder if it doesn't exist
 os.makedirs("static/audio", exist_ok=True)
 
+# Home route
 @app.route('/')
 def home():
     return "Agri Bot API with Gemini AI + TTS ✅"
 
+# System instruction for the AI assistant
 SYSTEM_INSTRUCTION = """ 
 You are a Bangladeshi কৃষি সহকারী (agriculture assistant) designed to help farmers who may be অশিক্ষিত (illiterate) or not tech-savvy. You reply only in সহজ ও সুন্দর বাংলা (simple and clear Bangla). All your replies must sound natural, friendly, and easy to speak aloud.
 
@@ -29,7 +38,7 @@ Give clear, practical advice that a farmer can follow **without needing to go to
 - Use real product names or methods if helpful (e.g. ইউরিয়া, ভার্টিমেক, ট্রাইসাইক্লাজোল).
 - Always make sure the solution is possible at home or with products from a local দোকান (shop).
 - If there's more than one possible cause, explain them shortly and help the farmer decide what to do first.
-- Don't ask farmars for photos.
+- Don't ask farmers for photos.
 
 🔹 TTS Friendly Guidelines:
 - Use short sentences.
@@ -46,7 +55,7 @@ Expected answer:
 'এই দাগ যদি পাতার মাঝখানে হয় আর ধীরে ধীরে ছড়ায়, তাহলে এটা "ব্লাস্ট" রোগ।  
 সমাধান:  
 ১. বাজারে "টিল্ট" বা "নাটিভো" নামের ঔষধ পাওয়া যায়। সেটা ১০ লিটার পানিতে ৫–৬ মিলি মিশিয়ে স্প্রে দেন।  
-২. সার যদি বেশি দিয়ে থাকেন, একটু কমান।  
+�２. সার যদি বেশি দিয়ে থাকেন, একটু কমান।  
 ৩. রোদের সময় স্প্রে করবেন — বিকেলে নয়।  
 
 ২–৩ দিন পর আবার দেখেন। ভালো না হলে আবার স্প্রে করতে হবে।'  
@@ -90,7 +99,7 @@ Question:
 Expected answer:  
 'ফুল ঝরে গেলে ফল কম হয়। এই সমস্যা হয়:
 ১. গাছে যদি অতিরিক্ত ইউরিয়া দেওয়া হয় — তাই ইউরিয়া কমান।
-২. পানি যদি অনিয়মিত দেন, গাছ টান সহ্য করতে পারে না।
+�２. পানি যদি অনিয়মিত দেন, গাছ টান সহ্য করতে পারে না।
 ৩. আবহাওয়া যদি ঠান্ডা হয়, তাও ফুল ঝরে।
 
 সমাধান:  
@@ -107,13 +116,10 @@ Expected answer:
 
 আগে সার আর পানির দিক দেখেন। সমস্যা না কমলে পরে কীটনাশক ব্যবহার করুন।'
 
-
-
 Remember: your job is to help — not redirect and also optimize the text for voice output.
-
-
 """
 
+# Main route to handle questions and generate TTS
 @app.route('/ask', methods=['GET'])
 def ask_bot():
     question = request.args.get('q')
@@ -124,68 +130,88 @@ def ask_bot():
         )
 
     try:
-        # Step 1: Generate Answer
+        # Step 1: Generate Answer using Gemini AI
         full_prompt = f"{SYSTEM_INSTRUCTION}\n\nপ্রশ্ন: {question}\n\nউত্তর দিন:"
         resp = client.models.generate_content(
             model="gemini-2.0-flash",
             contents=full_prompt
         )
         answer = resp.text
+        logger.info("Generated answer: %s", answer)
 
-        # Step 2: Generate Bangla TTS using Google Translate TTS
+        # Step 2: Generate Bangla TTS using Google Translate
         tts_url = "https://translate.google.com/translate_tts"
-        params = {
-            "ie": "UTF-8",
-            "q": answer,
-            "tl": "bn",
-            "client": "tw-ob"
-        }
-        headers = {
-            "User-Agent": "Mozilla/5.0"
-        }
+        params = {"ie": "UTF-8", "q": answer, "tl": "bn", "client": "tw-ob"}
+        headers = {"User-Agent": "Mozilla/5.0"}
 
+        logger.info("Requesting TTS from Google Translate")
         tts_response = requests.get(tts_url, params=params, headers=headers)
-
         if tts_response.status_code != 200:
-            raise Exception("TTS generation failed.")
+            logger.error("TTS request failed with status: %d", tts_response.status_code)
+            raise Exception(f"TTS request failed with status {tts_response.status_code}")
 
+        # Step 3: Save MP3 and Convert to WAV
         mp3_path = f"static/audio/{uuid.uuid4()}.mp3"
         wav_path = mp3_path.replace(".mp3", ".wav")
 
-        # Save MP3
-        with open(mp3_path, "wb") as f:
-            f.write(tts_response.content)
+        # Save MP3 file
+        try:
+            with open(mp3_path, "wb") as f:
+                f.write(tts_response.content)
+            logger.info("Saved MP3 to %s", mp3_path)
+        except Exception as e:
+            logger.error("Failed to save MP3: %s", e)
+            raise
 
-        # Convert MP3 → WAV
-        sound = AudioSegment.from_mp3(mp3_path)
-        sound.export(wav_path, format="wav")
+        # Convert MP3 to WAV
+        try:
+            sound = AudioSegment.from_mp3(mp3_path)
+            sound.export(wav_path, format="wav")
+            logger.info("Converted to WAV: %s", wav_path)
+        except Exception as e:
+            logger.error("Failed to convert MP3 to WAV: %s", e)
+            raise
 
-        # Delete MP3 to save space
-        os.remove(mp3_path)
+        # Clean up MP3 file
+        try:
+            os.remove(mp3_path)
+            logger.info("Deleted MP3: %s", mp3_path)
+        except Exception as e:
+            logger.warning("Failed to delete MP3: %s", e)
 
-        # Return response with audio path
-        response_data = {
-            'answer': answer,
-            'audio_url': request.url_root + wav_path
-        }
+        # Step 4: Generate audio URL
+        audio_url = request.url_root + wav_path
+        logger.info("Generated audio_url: %s", audio_url)
+
+        # Step 5: Return response with answer and audio URL
+        response_data = {'answer': answer, 'audio_url': audio_url}
         return Response(
             json.dumps(response_data, ensure_ascii=False),
             content_type='application/json; charset=utf-8'
         )
 
     except Exception as e:
+        logger.error("Error in /ask route: %s", e)
+        # Return answer if generated, otherwise a fallback message
+        response_data = {
+            'answer': answer if 'answer' in locals() else "প্রশ্নের উত্তর দিতে সমস্যা হচ্ছে। আবার চেষ্টা করুন।",
+            'error': str(e)
+        }
         return Response(
-            json.dumps({'error': str(e)}, ensure_ascii=False),
+            json.dumps(response_data, ensure_ascii=False),
             content_type='application/json; charset=utf-8'
         )
 
+# Ping route for health check
 @app.route('/ping', methods=['GET'])
 def ping():
     return "pong"
 
+# Route to serve audio files
 @app.route('/tts/<filename>')
 def get_audio(filename):
     return send_file(f'static/audio/{filename}', mimetype='audio/wav')
 
+# Run the app
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
