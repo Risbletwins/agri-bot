@@ -3,21 +3,20 @@ import os
 import uuid
 import json
 import requests
-from pydub import AudioSegment
-from google import genai  # Adjust import based on actual library
 import time
 import glob
+from google import genai  # Adjust import based on actual library
 
 app = Flask(__name__)
 
-# Initialize Gemini AI client (adjust based on actual library)
-client = genai.Client(api_key="AIzaSyCAbZBgv8pzC7o-m0SoPlQerQvlQwZPH68")
+# Initialize Gemini AI client
+client = genai.Client(api_key="YOUR_GEMINI_API_KEY")
 
 # Create audio folder if not exist
 os.makedirs("static/audio", exist_ok=True)
 
 # System instruction for Gemini AI (unchanged)
-SYSTEM_INSTRUCTION = """ 
+SYSTEM_INSTRUCTION =""" 
 You are a Bangladeshi কৃষি সহকারী (agriculture assistant) designed to help farmers who may be অশিক্ষিত (illiterate) or not tech-savvy. You reply only in সহজ ও সুন্দর বাংলা (simple and clear Bangla). All your replies must sound natural, friendly, and easy to speak aloud.
 
 🔹 Your goal:

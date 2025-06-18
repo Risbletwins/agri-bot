@@ -2,4 +2,3 @@ flask
 google-genai
 requests
 gtts
-pydub
