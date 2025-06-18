@@ -10,7 +10,7 @@ from google import genai  # Adjust import based on actual library
 app = Flask(__name__)
 
 # Initialize Gemini AI client
-client = genai.Client(api_key="YOUR_GEMINI_API_KEY")
+client = genai.Client(api_key="AIzaSyCAbZBgv8pzC7o-m0SoPlQerQvlQwZPH68")
 
 # Create audio folder if not exist
 os.makedirs("static/audio", exist_ok=True)
