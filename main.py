@@ -2,12 +2,17 @@ from flask import Flask, request, Response, send_file, render_template
 import os
 import uuid
 import json
-import requests
 import time
 import glob
+import logging
+from gtts import gTTS
 from google import genai  # Adjust import based on actual library
 
 app = Flask(__name__)
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Initialize Gemini AI client
 client = genai.Client(api_key="AIzaSyCAbZBgv8pzC7o-m0SoPlQerQvlQwZPH68")
@@ -16,7 +21,7 @@ client = genai.Client(api_key="AIzaSyCAbZBgv8pzC7o-m0SoPlQerQvlQwZPH68")
 os.makedirs("static/audio", exist_ok=True)
 
 # System instruction for Gemini AI (unchanged)
-SYSTEM_INSTRUCTION = """ 
+SYSTEM_INSTRUCTION =  """ 
 You are a Bangladeshi কৃষি সহকারী (agriculture assistant) designed to help farmers who may be অশিক্ষিত (illiterate) or not tech-savvy. You reply only in সহজ ও সুন্দর বাংলা (simple and clear Bangla). All your replies must sound natural, friendly, and easy to speak aloud.
 
 🔹 Your goal:
@@ -113,6 +118,26 @@ Remember: your job is to help — not redirect and also optimize the text for vo
 
 """ 
 
+
+def split_text(text, max_length=200):
+    """Split text into chunks for gTTS compatibility."""
+    sentences = text.split('।')  # Split on Bangla full stop
+    chunks = []
+    current_chunk = ""
+    for sentence in sentences:
+        sentence = sentence.strip()
+        if not sentence:
+            continue
+        if len(current_chunk) + len(sentence) <= max_length:
+            current_chunk += sentence + "। "
+        else:
+            if current_chunk:
+                chunks.append(current_chunk.strip())
+            current_chunk = sentence + "। "
+    if current_chunk:
+        chunks.append(current_chunk.strip())
+    return chunks
+
 @app.route('/')
 def serve_webpage():
     return render_template('index.html')
@@ -128,50 +153,51 @@ def ask_bot():
 
     try:
         # Step 1: Generate Answer
+        logger.info(f"Processing question: {question}")
         full_prompt = f"{SYSTEM_INSTRUCTION}\n\nপ্রশ্ন: {question}\n\nউত্তর দিন:"
         resp = client.models.generate_content(
             model="gemini-2.0-flash",
             contents=full_prompt
         )
         answer = resp.text
+        logger.info(f"Generated answer: {answer[:100]}... (length: {len(answer)})")
 
-        # Step 2: Generate Bangla TTS using Google Translate TTS
-        tts_url = "https://translate.google.com/translate_tts"
-        params = {
-            "ie": "UTF-8",
-            "q": answer,
-            "tl": "bn",
-            "client": "tw-ob"
-        }
-        headers = {
-            "User-Agent": "Mozilla/5.0"
-        }
-
-        tts_response = requests.get(tts_url, params=params, headers=headers)
-
-        if tts_response.status_code != 200:
-            raise Exception("TTS generation failed.")
-
+        # Step 2: Generate Bangla TTS using gTTS
         mp3_path = f"static/audio/{uuid.uuid4()}.mp3"
+        audio_urls = []
 
-        # Save MP3
-        with open(mp3_path, "wb") as f:
-            f.write(tts_response.content)
+        # Split answer if too long
+        answer_chunks = split_text(answer) if len(answer) > 200 else [answer]
+        logger.info(f"Answer split into {len(answer_chunks)} chunks")
 
-        # Cleanup old audio files (older than 1 hour)
+        if len(answer_chunks) == 1:
+            tts = gTTS(text=answer, lang='bn', slow=False)
+            tts.save(mp3_path)
+            audio_urls.append(request.url_root + mp3_path)
+        else:
+            # Generate multiple MP3s for chunks
+            for i, chunk in enumerate(answer_chunks):
+                chunk_mp3 = f"static/audio/{uuid.uuid4()}.mp3"
+                tts = gTTS(text=chunk, lang='bn', slow=False)
+                tts.save(chunk_mp3)
+                audio_urls.append(request.url_root + chunk_mp3)
+
+        # Cleanup old audio files
         cleanup_audio_files()
 
-        # Return response with audio path
+        # Return response with audio URLs
         response_data = {
             'answer': answer,
-            'audio_url': request.url_root + mp3_path
+            'audio_urls': audio_urls  # Support multiple URLs for chunks
         }
+        logger.info(f"Returning response with {len(audio_urls)} audio URLs")
         return Response(
             json.dumps(response_data, ensure_ascii=False),
             content_type='application/json; charset=utf-8'
         )
 
     except Exception as e:
+        logger.error(f"Error processing request: {str(e)}")
         return Response(
             json.dumps({'error': str(e)}, ensure_ascii=False),
             content_type='application/json; charset=utf-8'
