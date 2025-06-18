@@ -1,20 +1,15 @@
-from flask import Flask, request, Response, send_file
-import os
-import uuid
+from flask import Flask, request, Response, send_file, render_template
+import os, uuid, json, requests
 from google import genai
-import json
-import requests
 
 app = Flask(__name__)
-
-client = genai.Client(api_key="AIzaSyCAbZBgv8pzC7o-m0SoPlQerQvlQwZPH68")
-
-# Create audio folder if it doesn’t exist
+client = genai.Client(api_key="YOUR_GEMINI_KEY")
 os.makedirs("static/audio", exist_ok=True)
 
+# Home (chat UI)
 @app.route('/')
 def home():
-    return "Agri Bot API with Gemini AI + TTS ✅"
+    return render_template('index.html')  # needs the frontend template below
 
 SYSTEM_INSTRUCTION = """ 
 You are a Bangladeshi কৃষি সহকারী (agriculture assistant) designed to help farmers who may be অশিক্ষিত (illiterate) or not tech-savvy. You reply only in সহজ ও সুন্দর বাংলা (simple and clear Bangla). All your replies must sound natural, friendly, and easy to speak aloud.
@@ -111,73 +106,37 @@ Expected answer:
 Remember: your job is to help — not redirect and also optimize the text for voice output.
 
 
-"""
+"""  # (your existing Gemini prompt)
 
-@app.route('/ask', methods=['GET'])
+# Gemini + TTS endpoint
+@app.route('/ask', methods=['POST'])
 def ask_bot():
-    question = request.args.get('q')
+    data = request.get_json()
+    question = data.get('q', '')
     if not question:
-        return Response(
-            json.dumps({'error': 'Missing question'}, ensure_ascii=False),
-            content_type='application/json; charset=utf-8'
-        )
+        return jsonify({'error':'No question'}),400
 
-    try:
-        # Step 1: Generate Answer
-        full_prompt = f"{SYSTEM_INSTRUCTION}\n\nপ্রশ্ন: {question}\n\nউত্তর দিন:"
-        resp = client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=full_prompt
-        )
-        answer = resp.text
+    # Step 1: Generate answer
+    resp = client.models.generate_content(model="gemini-2.0-flash",
+                                         contents=f"{SYSTEM_INSTRUCTION}\n\nপ্রশ্ন: {question}\n\nউত্তর দিন:")
+    answer = resp.text
 
-        # Step 2: Generate Bangla TTS using Google Translate TTS
-        tts_url = "https://translate.google.com/translate_tts"
-        params = {
-            "ie": "UTF-8",
-            "q": answer,
-            "tl": "bn",
-            "client": "tw-ob"
-        }
-        headers = {
-            "User-Agent": "Mozilla/5.0"
-        }
+    # Step 2: Generate Bangla TTS MP3
+    tts_resp = requests.get(
+        "https://translate.google.com/translate_tts",
+        params={"ie":"UTF-8","q":answer,"tl":"bn","client":"tw-ob"},
+        headers={"User-Agent":"Mozilla/5.0"}
+    )
+    mp3_file = f"{uuid.uuid4()}.mp3"
+    path = os.path.join("static", "audio", mp3_file)
+    with open(path, "wb") as f:
+        f.write(tts_resp.content)
 
-        tts_response = requests.get(tts_url, params=params, headers=headers)
+    audio_url = request.url_root + "audio/" + mp3_file
+    return Response(json.dumps({'answer':answer,'audio_url':audio_url}, ensure_ascii=False),
+                    content_type='application/json; charset=utf-8')
 
-        if tts_response.status_code != 200:
-            raise Exception("TTS generation failed.")
-
-        # Save the MP3 file
-        mp3_filename = f"{uuid.uuid4()}.mp3"
-        mp3_path = f"static/audio/{mp3_filename}"
-        with open(mp3_path, "wb") as f:
-            f.write(tts_response.content)
-
-        # Return response with answer and audio URL
-        response_data = {
-            'answer': answer,
-            'audio_url': request.url_root + 'audio/' + mp3_filename
-        }
-        return Response(
-            json.dumps(response_data, ensure_ascii=False),
-            content_type='application/json; charset=utf-8'
-        )
-
-    except Exception as e:
-        return Response(
-            json.dumps({'error': str(e)}, ensure_ascii=False),
-            content_type='application/json; charset=utf-8'
-        )
-
-# New route to serve MP3 files
+# Serve MP3 files
 @app.route('/audio/<filename>')
 def get_audio(filename):
-    return send_file(f'static/audio/{filename}', mimetype='audio/mpeg')
-
-@app.route('/ping', methods=['GET'])
-def ping():
-    return "pong"
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    return send_file(os.path.join('static','audio',filename), mimetype='audio/mpeg')

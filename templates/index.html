@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <title>AgriBot Chat</title>
+  <style>
+    /* Basic chat styles */
+    body { font-family: sans-serif; background:#f0f0f0; margin:0; padding:0; }
+    #container { max-width:600px; margin:20px auto; background:white; padding:20px; border-radius:10px; }
+    #chat { height:400px; overflow-y:auto; border:1px solid #ccc; padding:10px; margin-bottom:10px; background:#fafafa; }
+    .msg { margin:8px; padding:10px; border-radius:8px; max-width:80%; word-wrap:break-word; }
+    .user { background:#d1e7dd; align-self:flex-end; text-align:right; }
+    .bot { background:#f8d7da; align-self:flex-start; text-align:left; }
+    #input { display:flex; }
+    #text { flex:1; font-size:16px; padding:10px; }
+    #send { padding:10px 20px; font-size:16px; background:#198754; color:white; border:none; cursor:pointer; }
+    #send:hover { background:#145c41; }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h2>AgriBot 🤖</h2>
+    <div id="chat"></div>
+    <div id="input">
+      <input type="text" id="text" placeholder="প্রশ্ন লিখুন..." />
+      <button id="send">পাঠান</button>
+    </div>
+  </div>
+
+  <script>
+    const chat = document.getElementById('chat');
+    const textBox = document.getElementById('text');
+    document.getElementById('send').addEventListener('click', sendMsg);
+    textBox.addEventListener('keydown', e => e.key==='Enter' && sendMsg());
+
+    async function sendMsg() {
+      const msg = textBox.value.trim();
+      if (!msg) return;
+      append(msg, 'user');
+      textBox.value = '';
+
+      try {
+        const res = await fetch('/ask', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({q: msg})
+        });
+        const {answer, audio_url} = await res.json();
+        append(answer, 'bot');
+
+        const audio = new Audio(audio_url);
+        audio.play();
+      } catch {
+        append('❌ সমস্যা হয়েছে, পরে চেষ্টা করুন।', 'bot');
+      }
+    }
+
+    function append(txt, cls) {
+      const d = document.createElement('div');
+      r = document.createElement('div');
+      d.classList.add('msg', cls);
+      d.textContent = txt;
+      chat.appendChild(d);
+      chat.scrollTop = chat.scrollHeight;
+    }
+  </script>
+</body>
+</html>
