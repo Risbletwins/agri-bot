@@ -6,26 +6,26 @@
   <title>কৃষি সহকারী</title>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    :root {
+  --vh: 100%;
+}
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Hind Siliguri', sans-serif;
-      display: flex;
-      height: 100vh;
       background: linear-gradient(to bottom right, #d8f3ff, #fffbe0);
       color: #2b2b2b;
+      height: calc(var(--vh, 1vh) * 100);
+  overflow: hidden;
     }
 
-    /* Sidebar Drawer */
+    .container {
+  display: flex;
+  height: calc(var(--vh, 1vh) * 100);
+}
+
+    /* Sidebar */
     .sidebar {
-      position: fixed;
-      top: 0;
-      left: -250px;
       width: 220px;
-      height: 100%;
       background: linear-gradient(180deg, #ff9800, #ff6f00);
       color: white;
       padding: 1.5rem 1rem;
@@ -33,12 +33,7 @@
       flex-direction: column;
       gap: 1rem;
       box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
-      transition: left 0.3s ease;
-      z-index: 1000;
-    }
-
-    .sidebar.open {
-      left: 0;
+      transition: transform 0.3s ease;
     }
 
     .sidebar h2 {
@@ -59,42 +54,26 @@
       transition: background 0.3s;
     }
 
-    .tab-btn:hover, .tab-btn.active {
+    .tab-btn:hover,
+    .tab-btn.active {
       background: rgba(255, 255, 255, 0.3);
     }
 
-    /* Menu toggle button */
-    .menu-btn {
-      position: absolute;
-      top: 1rem;
-      left: 1rem;
-      background: #ff9800;
-      border: none;
-      color: white;
-      font-size: 1.5rem;
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      cursor: pointer;
-      z-index: 1100;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    }
-
-    /* Main area */
+    /* Chat Area */
     .main-content {
       flex: 1;
       display: flex;
       flex-direction: column;
-      width: 100%;
-      margin-left: 0;
+      height: 100%;
+      position: relative;
     }
 
     header {
       background: linear-gradient(45deg, #ff9800, #ff6f00);
       color: white;
       text-align: center;
-      padding: 1rem 3rem;
+      padding: 1rem;
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-      position: relative;
     }
 
     header h1 {
@@ -154,12 +133,6 @@
       border: 1px solid #ccc;
       border-radius: 12px;
       outline: none;
-      transition: 0.3s;
-    }
-
-    input[type="text"]:focus {
-      border-color: #ff9800;
-      box-shadow: 0 0 3px #ff9800;
     }
 
     button {
@@ -170,7 +143,6 @@
       border: none;
       border-radius: 12px;
       cursor: pointer;
-      transition: 0.2s;
     }
 
     button:hover {
@@ -196,64 +168,98 @@
       100% { opacity: 1; }
     }
 
-    @media (min-width: 768px) {
-      .menu-btn {
-        display: none;
-      }
-      .sidebar {
-        position: relative;
-        left: 0;
-      }
-      .main-content {
-        margin-left: 220px;
-      }
+    /* Toggle Button */
+    .menu-btn {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      background: #ff9800;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      padding: 0.4rem 1rem;
+      border-radius: 8px;
+      z-index: 2000;
+      display: none;
+    }
+
+    .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 220px;
+    height: 100%;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    }
+    .sidebar.open {
+    transform: translateX(0);
+    }
+    .menu-btn {
+    display: block;
     }
   </style>
 </head>
 <body>
 
-  <!-- Sidebar -->
-  <div class="sidebar" id="sidebar">
-    <h2>🌱 অপশন</h2>
-    <button class="tab-btn active">কন্ট্রোলার</button>
-    <button class="tab-btn">বীজ বপন</button>
-    <button class="tab-btn">মাটি আর্দ্রতা</button>
-  </div>
-
-  <!-- Toggle Button -->
-  <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-
-  <!-- Main Content -->
-  <div class="main-content">
-    <header>
-      <h1>🌾 কৃষি সহকারী</h1>
-    </header>
-
-    <div id="chat"></div>
-
-    <div id="inputArea">
-      <input type="text" id="msgInput" placeholder="আপনার প্রশ্ন লিখুন..." />
-      <button onclick="sendMsg()">পাঠান</button>
-      <button id="voiceBtn" onclick="startSpeechRecognition()">🎤</button>
+  <div class="container">
+    <div class="sidebar" id="sidebar">
+      <h2>🌱 অপশন</h2>
+      <button class="tab-btn active">কন্ট্রোলার</button>
+      <button class="tab-btn">বীজ বপন</button>
+      <button class="tab-btn">মাটি আর্দ্রতা</button>
     </div>
 
-    <audio id="ttsAudio" autoplay></audio>
+    <div class="main-content" id="mainContent">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <header>
+        <h1>🌾 কৃষি সহকারী</h1>
+      </header>
+
+      <div id="chat"></div>
+
+      <div id="inputArea">
+        <input type="text" id="msgInput" placeholder="আপনার প্রশ্ন লিখুন..." />
+        <button onclick="sendMsg()">পাঠান</button>
+        <button id="voiceBtn" onclick="startSpeechRecognition()">🎤</button>
+      </div>
+
+      <audio id="ttsAudio" autoplay></audio>
+    </div>
   </div>
 
-  <!-- JS Logic -->
   <script>
-    const chat = document.getElementById('chat');
-    const msgInput = document.getElementById('msgInput');
-    const audioPlayer = document.getElementById('ttsAudio');
-    const voiceBtn = document.getElementById('voiceBtn');
     const sidebar = document.getElementById('sidebar');
-    let audioQueue = [];
-    let isPlaying = false;
-    let isRecording = false;
+    const mainContent = document.getElementById('mainContent');
+    const menuBtn = document.querySelector('.menu-btn');
 
     function toggleSidebar() {
       sidebar.classList.toggle('open');
     }
+
+    // Close sidebar when clicking outside (mobile only)
+    document.addEventListener('click', (e) => {
+      const isMobile = window.innerWidth < 768;
+      if (!isMobile) return;
+
+      if (
+        sidebar.classList.contains('open') &&
+        !sidebar.contains(e.target) &&
+        !menuBtn.contains(e.target)
+      ) {
+        sidebar.classList.remove('open');
+      }
+    });
+
+    // Chat functionality
+    const chat = document.getElementById('chat');
+    const msgInput = document.getElementById('msgInput');
+    const audioPlayer = document.getElementById('ttsAudio');
+    const voiceBtn = document.getElementById('voiceBtn');
+    let audioQueue = [];
+    let isPlaying = false;
+    let isRecording = false;
 
     function addMessage(text, cls) {
       const div = document.createElement('div');
@@ -277,9 +283,7 @@
       });
     }
 
-    audioPlayer.onended = () => {
-      playNextAudio();
-    };
+    audioPlayer.onended = () => playNextAudio();
 
     async function sendMsg() {
       const msg = msgInput.value.trim();
@@ -296,9 +300,7 @@
         }
         addMessage(`🤖 ${data.answer}`, 'bot');
         audioQueue = data.audio_urls || [data.audio_url];
-        if (!isPlaying && audioQueue.length > 0) {
-          playNextAudio();
-        }
+        if (!isPlaying && audioQueue.length > 0) playNextAudio();
       } catch (err) {
         addMessage(`❌ ত্রুটি: ${err}`, 'bot');
       }
@@ -337,6 +339,12 @@
     msgInput.addEventListener('keydown', e => {
       if (e.key === 'Enter') sendMsg();
     });
+  function setVhUnit() {
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+  }
+  setVhUnit();
+  window.addEventListener('resize', setVhUnit);
   </script>
 </body>
 </html>
