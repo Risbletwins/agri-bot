@@ -6,14 +6,19 @@
   <title>কৃষি সহকারী</title>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri&display=swap" rel="stylesheet">
   <style>
-    html, body {
-      height: 100%;
-      overflow: hidden;
+    :root {
+      --vh: 100%;
     }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+    }
+
+    html, body {
+      height: calc(var(--vh, 1vh) * 100);
+      overflow: hidden;
     }
 
     body {
@@ -22,12 +27,15 @@
       color: #2b2b2b;
       font-size: 16px;
       line-height: 1.6;
-      position: relative;
+      display: flex;
+      flex-direction: column;
     }
 
     .container {
+      flex: 1;
       display: flex;
       height: 100%;
+      overflow: hidden;
     }
 
     .sidebar {
@@ -89,13 +97,22 @@
       cursor: pointer;
     }
 
+    .main-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      margin-left: 0;
+    }
+
+
+
     header {
       background: linear-gradient(45deg, #ff9800, #ff6f00);
       color: white;
       text-align: center;
-      padding: 1.2rem;
+      padding: 1rem;
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-      padding-left: 3rem;
     }
 
     header h1 {
@@ -106,10 +123,9 @@
 
     main {
       flex: 1;
-      padding: 1.5rem 1rem;
-      text-align: center;
-      padding-left: 3rem;
       overflow-y: auto;
+      padding: 1rem;
+      text-align: center;
     }
 
     .intro p {
@@ -200,7 +216,7 @@
 
   <!-- Main Content -->
   <div class="container">
-    <div style="flex:1; display:flex; flex-direction:column; height:100%;">
+    <div class="main-wrapper">
       <header>
         <h1> কৃষি সহকারী</h1>
       </header>
@@ -243,6 +259,14 @@
         sidebar.classList.remove('open');
       }
     });
+
+    // Set dynamic vh for mobile devices
+    function setVhUnit() {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+    setVhUnit();
+    window.addEventListener('resize', setVhUnit);
   </script>
 </body>
 </html>
