@@ -232,25 +232,25 @@ def get_controller_page():
 
 
 @app.route('/controller/moveup', methods=['POST'])
-def handle_button():
+def handle_button_up():
     data = request.get_json()
     state = data.get("state")
     print(f"Button state: {state}")
     return jsonify({"status": f"Button is {state}"})
 @app.route('/controller/movedown', methods=['POST'])
-def handle_button():
+def handle_button_down():
     data = request.get_json()
     state = data.get("state")
     print(f"Button state: {state}")
     return jsonify({"status": f"Button is {state}"})
 @app.route('/controller/moveright', methods=['POST'])
-def handle_button():
+def handle_button_right():
     data = request.get_json()
     state = data.get("state")
     print(f"Button state: {state}")
     return jsonify({"status": f"Button is {state}"})
 @app.route('/controller/moveleft', methods=['POST'])
-def handle_button():
+def handle_button_left():
     data = request.get_json()
     state = data.get("state")
     print(f"Button state: {state}")
