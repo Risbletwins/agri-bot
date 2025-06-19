@@ -231,25 +231,25 @@ def get_controller_page():
     return render_template("controller.html")
 
 
-@app.route('controller/moveup', methods=['POST'])
+@app.route('/controller/moveup', methods=['POST'])
 def handle_button():
     data = request.get_json()
     state = data.get("state")
     print(f"Button state: {state}")
     return jsonify({"status": f"Button is {state}"})
-@app.route('controller/movedown', methods=['POST'])
+@app.route('/controller/movedown', methods=['POST'])
 def handle_button():
     data = request.get_json()
     state = data.get("state")
     print(f"Button state: {state}")
     return jsonify({"status": f"Button is {state}"})
-@app.route('controller/moveright', methods=['POST'])
+@app.route('/controller/moveright', methods=['POST'])
 def handle_button():
     data = request.get_json()
     state = data.get("state")
     print(f"Button state: {state}")
     return jsonify({"status": f"Button is {state}"})
-@app.route('controller/moveleft', methods=['POST'])
+@app.route('/controller/moveleft', methods=['POST'])
 def handle_button():
     data = request.get_json()
     state = data.get("state")
