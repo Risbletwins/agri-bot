@@ -186,10 +186,10 @@
 
       <div class="joystick">
         <div class="joystick-inner">
-          <button class="control-btn forward" onclick="sendData()">⬆️</button>
-          <button class="control-btn backward" onclick="sendData()">⬇️</button>
-          <button class="control-btn left" onclick="sendData()">⬅️</button>
-          <button class="control-btn right" onclick="sendData()">➡️</button>
+          <button class="control-btn forward" onclick="sendData('up')">⬆️</button>
+          <button class="control-btn backward" onclick="sendData('down')">⬇️</button>
+          <button class="control-btn left" onclick="sendData('left')">⬅️</button>
+          <button class="control-btn right" onclick="sendData('right')">➡️</button>
         </div>
       </div>
     </div>
@@ -215,13 +215,13 @@
       }
     });
 
-    function sendData() {
+    function sendData(txt) {
   fetch('/api/button', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({msg: "Hello from button!"})
+    body: JSON.stringify({msg: txt})
   })
   .then(response => response.json())
   .then(data => console.log(data));
