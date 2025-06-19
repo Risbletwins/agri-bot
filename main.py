@@ -6,7 +6,7 @@ import time
 import glob
 import logging
 from gtts import gTTS
-from google import genai  # Adjust import based on actual library
+from google import genai
 
 app = Flask(__name__)
 
@@ -20,8 +20,10 @@ client = genai.Client(api_key="AIzaSyCAbZBgv8pzC7o-m0SoPlQerQvlQwZPH68")
 # Create audio folder if not exist
 os.makedirs("static/audio", exist_ok=True)
 
-# System instruction for Gemini AI (unchanged)
-SYSTEM_INSTRUCTION =  """ 
+# Store latest ESP32 command
+target_command = {"action": "stop"}
+
+SYSTEM_INSTRUCTION = """
 You are a Bangladeshi কৃষি সহকারী (agriculture assistant) designed to help farmers who may be অশিক্ষিত (illiterate) or not tech-savvy. You reply only in সহজ ও সুন্দর বাংলা (simple and clear Bangla). All your replies must sound natural, friendly, and easy to speak aloud.
 
 🔹 Your goal:
@@ -116,12 +118,10 @@ Expected answer:
 Remember: your job is to help — not redirect and also optimize the text for voice output.
 
 
-""" 
-
+"""   # Omitted for brevity, unchanged
 
 def split_text(text, max_length=200):
-    """Split text into chunks for gTTS compatibility."""
-    sentences = text.split('।')  # Split on Bangla full stop
+    sentences = text.split('।')
     chunks = []
     current_chunk = ""
     for sentence in sentences:
@@ -150,123 +150,106 @@ def chat():
 def ask_bot():
     question = request.args.get('q')
     if not question:
-        return Response(
-            json.dumps({'error': 'Missing question'}, ensure_ascii=False),
-            content_type='application/json; charset=utf-8'
-        )
+        return Response(json.dumps({'error': 'Missing question'}, ensure_ascii=False), content_type='application/json; charset=utf-8')
 
     try:
-        # Step 1: Generate Answer
-        logger.info(f"Processing question: {question}")
         full_prompt = f"{SYSTEM_INSTRUCTION}\n\nপ্রশ্ন: {question}\n\nউত্তর দিন:"
-        resp = client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=full_prompt
-        )
+        resp = client.models.generate_content(model="gemini-2.0-flash", contents=full_prompt)
         answer = resp.text
-        logger.info(f"Generated answer: {answer[:100]}... (length: {len(answer)})")
-
-        # Step 2: Generate Bangla TTS using gTTS
         mp3_path = f"static/audio/{uuid.uuid4()}.mp3"
         audio_urls = []
-
-        # Split answer if too long
         answer_chunks = split_text(answer) if len(answer) > 200 else [answer]
-        logger.info(f"Answer split into {len(answer_chunks)} chunks")
 
         if len(answer_chunks) == 1:
             tts = gTTS(text=answer, lang='bn', slow=False)
             tts.save(mp3_path)
             audio_urls.append(request.url_root + mp3_path)
         else:
-            # Generate multiple MP3s for chunks
-            for i, chunk in enumerate(answer_chunks):
+            for chunk in answer_chunks:
                 chunk_mp3 = f"static/audio/{uuid.uuid4()}.mp3"
                 tts = gTTS(text=chunk, lang='bn', slow=False)
                 tts.save(chunk_mp3)
                 audio_urls.append(request.url_root + chunk_mp3)
 
-        # Cleanup old audio files
         cleanup_audio_files()
 
-        # Return response with audio URLs
-        response_data = {
+        return Response(json.dumps({
             'answer': answer,
-            'audio_urls': audio_urls  # Support multiple URLs for chunks
-        }
-        logger.info(f"Returning response with {len(audio_urls)} audio URLs")
-        return Response(
-            json.dumps(response_data, ensure_ascii=False),
-            content_type='application/json; charset=utf-8'
-        )
+            'audio_urls': audio_urls
+        }, ensure_ascii=False), content_type='application/json; charset=utf-8')
 
     except Exception as e:
-        logger.error(f"Error processing request: {str(e)}")
-        return Response(
-            json.dumps({'error': str(e)}, ensure_ascii=False),
-            content_type='application/json; charset=utf-8'
-        )
+        logger.error(f"Error: {str(e)}")
+        return Response(json.dumps({'error': str(e)}, ensure_ascii=False), content_type='application/json; charset=utf-8')
 
 def cleanup_audio_files():
-    max_age = 3600  # 1 hour in seconds
+    max_age = 3600
     for file in glob.glob("static/audio/*.mp3"):
         if os.path.getmtime(file) < time.time() - max_age:
             os.remove(file)
 
-@app.route('/ping', methods=['GET'])
-def ping():
-    return "pong"
-
 @app.route('/static/audio/<filename>')
 def get_audio(filename):
     return send_file(f'static/audio/{filename}', mimetype='audio/mpeg')
+
 @app.route("/seed_sowing", methods=["GET"])
 def get_seed_swing_page():
     return render_template("seed_sowing.html")
+
 @app.route("/soil_moisture", methods=["GET"])
 def get_soil_moisture_page():
     return render_template("soil_moisture.html")
+
 @app.route("/controller", methods=["GET"])
 def get_controller_page():
     return render_template("controller.html")
 
-
+# Update command state from button presses
 @app.route('/controller/moveup', methods=['POST'])
 def handle_button_up():
-    data = request.get_json()
-    state = data.get("state")
-    print(f"Button state: {state}")
-    return jsonify({"status": f"Button is {state}"})
+    global target_command
+    target_command = {"action": "moveup"}
+    return jsonify({"status": "Command set to moveup"})
+
 @app.route('/controller/movedown', methods=['POST'])
 def handle_button_down():
-    data = request.get_json()
-    state = data.get("state")
-    print(f"Button state: {state}")
-    return jsonify({"status": f"Button is {state}"})
+    global target_command
+    target_command = {"action": "movedown"}
+    return jsonify({"status": "Command set to movedown"})
+
 @app.route('/controller/moveright', methods=['POST'])
 def handle_button_right():
-    data = request.get_json()
-    state = data.get("state")
-    print(f"Button state: {state}")
-    return jsonify({"status": f"Button is {state}"})
+    global target_command
+    target_command = {"action": "moveright"}
+    return jsonify({"status": "Command set to moveright"})
+
 @app.route('/controller/moveleft', methods=['POST'])
 def handle_button_left():
-    data = request.get_json()
-    state = data.get("state")
-    print(f"Button state: {state}")
-    return jsonify({"status": f"Button is {state}"})
+    global target_command
+    target_command = {"action": "moveleft"}
+    return jsonify({"status": "Command set to moveleft"})
+
+@app.route('/controller/stop', methods=['POST'])
+def handle_button_stop():
+    global target_command
+    target_command = {"action": "stop"}
+    return jsonify({"status": "Command set to stop"})
+
+@app.route('/esp32/command', methods=['GET'])
+def get_current_command():
+    return jsonify(target_command)
+
 @app.route('/seed_sowing/button', methods=['POST'])
 def seed_sowing_button():
-    data = request.get_json() 
-    print(data)               
-    return jsonify({"received": data})  
+    data = request.get_json()
+    print(data)
+    return jsonify({"received": data})
+
 @app.route('/soil_moisture/button', methods=['POST'])
 def soil_moisture_button():
-    data = request.get_json() 
-    print(data)               
-    return jsonify({"received": data})  
-
-
+    data = request.get_json()
+    print(data)
+    return jsonify({"received": data})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
