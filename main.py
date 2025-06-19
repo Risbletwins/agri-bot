@@ -220,6 +220,15 @@ def ping():
 @app.route('/static/audio/<filename>')
 def get_audio(filename):
     return send_file(f'static/audio/{filename}', mimetype='audio/mpeg')
+@app.route("/seed_sowing", methods=["GET"])
+def get_seed_swing_page():
+    return render_template("seed_sowing.html")
+@app.route("/soil_moisture", methods=["GET"])
+def get_soil_moisture_page():
+    return render_template("soil_moisture.html")
+@app.route("/controller", methods=["GET"])
+def get_controller_page():
+    return render_template("controller.html")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
