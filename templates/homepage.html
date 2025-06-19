@@ -2,17 +2,22 @@
 <html lang="bn">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no"/>
   <title>কৃষি সহকারী</title>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --vh: 100%;
+    html, body {
+      height: 100%;
+      overflow: hidden;
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Hind Siliguri', sans-serif;
-      min-height: calc(var(--vh, 1vh) * 100);
       background: linear-gradient(to bottom right, #d8f3ff, #fffbe0);
       color: #2b2b2b;
       font-size: 16px;
@@ -22,7 +27,7 @@
 
     .container {
       display: flex;
-      min-height: calc(var(--vh, 1vh) * 100);
+      height: 100%;
     }
 
     .sidebar {
@@ -104,6 +109,7 @@
       padding: 1.5rem 1rem;
       text-align: center;
       padding-left: 3rem;
+      overflow-y: auto;
     }
 
     .intro p {
@@ -113,10 +119,10 @@
     }
 
     .features {
-      margin-top: 2rem;
+      margin-top: 1rem;
       background: #ffffff;
       border-radius: 12px;
-      padding: 1.5rem;
+      padding: 1rem;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       max-width: 700px;
       margin-left: auto;
@@ -124,10 +130,9 @@
     }
 
     .features h2 {
-      font-size: 1.6rem;
+      font-size: 1.4rem;
       color: #ff6f00;
       margin-bottom: 1rem;
-      text-align: center;
     }
 
     .features ul {
@@ -144,6 +149,7 @@
     }
 
     .features li::before {
+      content: "🔸";
       position: absolute;
       left: 0;
       top: 0;
@@ -153,12 +159,12 @@
     .cta-button {
       display: inline-block;
       padding: 1rem 2.2rem;
-      font-size: 1.25rem;
+      font-size: 1.1rem;
       background-color: #2e7d32;
       color: white;
       text-decoration: none;
       border-radius: 12px;
-      margin-top: 2rem;
+      margin-top: 1.5rem;
       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
       transition: all 0.3s ease;
     }
@@ -175,24 +181,6 @@
       font-size: 0.95rem;
       color: #444;
       box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
-    }
-
-    @media (min-width: 768px) {
-      .menu-btn {
-        display: block;
-      }
-
-      main {
-        padding: 2rem 3rem;
-      }
-
-      .intro p {
-        font-size: 1.25rem;
-      }
-
-      .cta-button {
-        font-size: 1.3rem;
-      }
     }
   </style>
 </head>
@@ -212,7 +200,7 @@
 
   <!-- Main Content -->
   <div class="container">
-    <div style="flex:1;">
+    <div style="flex:1; display:flex; flex-direction:column; height:100%;">
       <header>
         <h1> কৃষি সহকারী</h1>
       </header>
@@ -238,7 +226,6 @@
     </div>
   </div>
 
-  <!-- JavaScript for sidebar + viewport fix -->
   <script>
     const sidebar = document.getElementById('sidebar');
     const menuBtn = document.querySelector('.menu-btn');
@@ -247,7 +234,6 @@
       sidebar.classList.toggle('open');
     }
 
-    // Close sidebar on outside click
     document.addEventListener('click', function (e) {
       if (
         sidebar.classList.contains('open') &&
@@ -257,14 +243,6 @@
         sidebar.classList.remove('open');
       }
     });
-
-    // Set --vh CSS variable for mobile 100vh fix
-    function setVhUnit() {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
-    }
-    setVhUnit();
-    window.addEventListener('resize', setVhUnit);
   </script>
 </body>
 </html>
