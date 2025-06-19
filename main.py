@@ -1,4 +1,4 @@
-from flask import Flask, request, Response, send_file, render_template
+from flask import Flask, request, Response, send_file, render_template, jsonify
 import os
 import uuid
 import json
@@ -229,6 +229,12 @@ def get_soil_moisture_page():
 @app.route("/controller", methods=["GET"])
 def get_controller_page():
     return render_template("controller.html")
+@app.route('/api/button', methods=['POST'])
+def api_button():
+    data = request.get_json()  # 👈 Receive the JSON
+    print(data)                # (Optional) See it in terminal
+    return jsonify({"received": data})  # 👈 Send response back
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
