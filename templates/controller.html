@@ -113,14 +113,14 @@
     }
 
     .forward {
-      background-color: #388e3c;
+      background-color: #1976d2;
       top: 0;
       left: 50%;
       transform: translateX(-50%);
     }
 
     .backward {
-      background-color: #c62828;
+      background-color: #1976d2;
       bottom: 0;
       left: 50%;
       transform: translateX(-50%);
@@ -134,7 +134,7 @@
     }
 
     .right {
-      background-color: #f57c00;
+      background-color: #1976d2;
       right: 0;
       top: 50%;
       transform: translateY(-50%);
@@ -177,7 +177,7 @@
         <a href="/seed_sowing"><button class="tab-btn">বীজ বপন ব্যবস্থা</button></a>
         <a href="/chat"><button class="tab-btn">কৃষি সহকারী</button></a>
     </div>
-
+    
     <div class="main-content">
       <button class="menu-btn" onclick="toggleSidebar()">☰</button>
       <header>
@@ -186,10 +186,10 @@
 
       <div class="joystick">
         <div class="joystick-inner">
-          <button class="control-btn forward" onclick="move('forward')">⬆️</button>
-          <button class="control-btn backward" onclick="move('backward')">⬇️</button>
-          <button class="control-btn left" onclick="move('left')">⬅️</button>
-          <button class="control-btn right" onclick="move('right')">➡️</button>
+          <button class="control-btn forward" onclick="sendData()">⬆️</button>
+          <button class="control-btn backward" onclick="sendData()">⬇️</button>
+          <button class="control-btn left" onclick="sendData()">⬅️</button>
+          <button class="control-btn right" onclick="sendData()">➡️</button>
         </div>
       </div>
     </div>
@@ -215,10 +215,17 @@
       }
     });
 
-    function move(direction) {
-      alert(`📡 "${direction}" এ পাঠানো হয়েছে`);
-      // Replace with: fetch(`/move?dir=${direction}`);
-    }
+    function sendData() {
+  fetch('/api/button', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({msg: "Hello from button!"})
+  })
+  .then(response => response.json())
+  .then(data => console.log(data));
+}
   </script>
 </body>
 </html>
