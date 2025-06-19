@@ -229,11 +229,33 @@ def get_soil_moisture_page():
 @app.route("/controller", methods=["GET"])
 def get_controller_page():
     return render_template("controller.html")
-@app.route('/api/button', methods=['POST'])
-def api_button():
-    data = request.get_json()  # 👈 Receive the JSON
-    print(data)                # (Optional) See it in terminal
-    return jsonify({"received": data})  # 👈 Send response back
+
+
+@app.route('controller/moveup', methods=['POST'])
+def handle_button():
+    data = request.get_json()
+    state = data.get("state")
+    print(f"Button state: {state}")
+    return jsonify({"status": f"Button is {state}"})
+@app.route('controller/movedown', methods=['POST'])
+def handle_button():
+    data = request.get_json()
+    state = data.get("state")
+    print(f"Button state: {state}")
+    return jsonify({"status": f"Button is {state}"})
+@app.route('controller/moveright', methods=['POST'])
+def handle_button():
+    data = request.get_json()
+    state = data.get("state")
+    print(f"Button state: {state}")
+    return jsonify({"status": f"Button is {state}"})
+@app.route('controller/moveleft', methods=['POST'])
+def handle_button():
+    data = request.get_json()
+    state = data.get("state")
+    print(f"Button state: {state}")
+    return jsonify({"status": f"Button is {state}"})
+
 
 
 if __name__ == "__main__":

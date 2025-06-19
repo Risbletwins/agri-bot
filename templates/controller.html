@@ -186,10 +186,10 @@
 
       <div class="joystick">
         <div class="joystick-inner">
-          <button class="control-btn forward" onclick="sendData('up')">⬆️</button>
-          <button class="control-btn backward" onclick="sendData('down')">⬇️</button>
-          <button class="control-btn left" onclick="sendData('left')">⬅️</button>
-          <button class="control-btn right" onclick="sendData('right')">➡️</button>
+          <button class="control-btn forward" id="btnnup">⬆️</button>
+          <button class="control-btn backward" id="btnndown">⬇️</button>
+          <button class="control-btn left" id="btnnleft">⬅️</button>
+          <button class="control-btn right" id="btnnright">➡️</button>
         </div>
       </div>
     </div>
@@ -215,17 +215,49 @@
       }
     });
 
-    function sendData(txt) {
-  fetch('/api/button', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({msg: txt})
-  })
-  .then(response => response.json())
-  .then(data => console.log(data));
-}
+    const btnUP = document.getElementById("btnnup");
+    const btnDOWN = document.getElementById("btnndown");
+    const btnRIGHT = document.getElementById("btnnright");
+    const btnLEFT = document.getElementById("btnnleft");
+
+    function press_btn(btn,yrl){
+    btn.addEventListener("mousedown", () => {
+    fetch(yrl, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({state: "on"})
+    });
+    });
+
+    btn.addEventListener("mouseup", () => {
+    fetch(yrl, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({state: "off"})
+    });
+    });
+
+    btn.addEventListener("touchstart", () => {
+    fetch(yrl, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({state: "on"})
+    });
+    });
+
+    btn.addEventListener("touchend", () => {
+    fetch(yrl, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({state: "off"})
+    });
+    });
+    }
+    press_btn(btnUP,"controller/moveup");
+    press_btn(btnDOWN,"controller/movedown");
+    press_btn(btnRIGHT,"controller/moveright");
+    press_btn(btnLEFT,"controller/moveleft");
+    
   </script>
 </body>
 </html>
