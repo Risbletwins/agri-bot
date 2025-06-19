@@ -175,8 +175,8 @@
       </header>
 
       <div class="control-area">
-        <button class="control-btn on-btn" onclick="sendCommand('on')">চালু</button>
-        <button class="control-btn off-btn" onclick="sendCommand('off')">বন্ধ</button>
+        <button class="control-btn on-btn" onclick="sendData('on')">চালু</button>
+        <button class="control-btn off-btn" onclick="sendData('off')">বন্ধ</button>
       </div>
     </div>
   </div>
@@ -201,11 +201,17 @@
       }
     });
 
-    function sendCommand(state) {
-      alert(`🔥 আপনি "${state === 'on' ? 'চালু' : 'বন্ধ'}" ক্লিক করেছেন`);
-      // Here, replace with your real backend call
-      // fetch(`/control?state=${state}`)
-    }
-  </script>
+    function sendData(txt) {
+  fetch('/seed_sowing/button', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({msg: txt})
+  })
+  .then(response => response.json())
+  .then(data => {
+    document.getElementById("output").innerText = data.received.msg;
+  });
+}
+</script>
 </body>
 </html>

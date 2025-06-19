@@ -255,6 +255,16 @@ def handle_button_left():
     state = data.get("state")
     print(f"Button state: {state}")
     return jsonify({"status": f"Button is {state}"})
+@app.route('/seed_sowing/button', methods=['POST'])
+def api_button():
+    data = request.get_json() 
+    print(data)               
+    return jsonify({"received": data})  
+@app.route('/soil_moisture/button', methods=['POST'])
+def api_button():
+    data = request.get_json() 
+    print(data)               
+    return jsonify({"received": data})  
 
 
 
