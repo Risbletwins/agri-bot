@@ -34,7 +34,6 @@
       overflow: hidden;
     }
 
-    /* Sidebar */
     .sidebar {
       position: fixed;
       top: 0;
@@ -96,11 +95,30 @@
       text-align: center;
       padding: 0.8rem;
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+      position: relative;
     }
 
     header h1 {
       font-size: 1.6rem;
       text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+    }
+
+    #soundToggle {
+      position: absolute;
+      top: 0.8rem;
+      right: 1rem;
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      color: white;
+      font-size: 1.3rem;
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    #soundToggle:hover {
+      background: rgba(255, 255, 255, 0.3);
     }
 
     #chat {
@@ -203,7 +221,6 @@
       display: block;
     }
 
-    /* Prevent scroll due to any weird overflow */
     @media (max-width: 768px) {
       body, html {
         overflow: hidden;
@@ -217,19 +234,20 @@
   <div class="container">
     <div class="sidebar" id="sidebar">
       <h2>অপশন</h2>
-        <a href="/"><button class="tab-btn">হোম</button></a>
-        <a href="/controller"><button class="tab-btn">কন্ট্রোলার</button></a>
-        <a href="/soil_moisture_measuring_system"><button class="tab-btn">মাটির আর্দ্রতা ব্যবস্থা</button></a>
-        <a href="/seed_sowing_system"><button class="tab-btn">কৃষি সহকারী</button></a>
-        <a href="/water_pump_system"><button class="tab-btn">পানি পাম্প ব্যবস্থা</button></a>
-        <a href="/humidity_measuring_system"><button class="tab-btn">তাপ ও পরিবেশের আদ্রতা<br>পরিমাপ ব্যবস্থা</button></a>
-        <a href="/chat"><button class="tab-btn">কৃষি সহকারী</button></a>
+      <a href="/"><button class="tab-btn">হোম</button></a>
+      <a href="/controller"><button class="tab-btn">কন্ট্রোলার</button></a>
+      <a href="/soil_moisture_measuring_system"><button class="tab-btn">মাটির আর্দ্রতা ব্যবস্থা</button></a>
+      <a href="/seed_sowing_system"><button class="tab-btn">বীজ বপন ব্যবস্থা</button></a>
+      <a href="/water_pump_system"><button class="tab-btn">পানি পাম্প ব্যবস্থা</button></a>
+      <a href="/humidity_measuring_system"><button class="tab-btn">তাপ ও আদ্রতা পরিমাপ</button></a>
+      <a href="/chat"><button class="tab-btn active">কৃষি সহকারী</button></a>
     </div>
 
     <div class="main-content" id="mainContent">
       <button class="menu-btn" onclick="toggleSidebar()">☰</button>
       <header>
         <h1>কৃষি সহকারী</h1>
+        <button id="soundToggle" onclick="toggleSound()">🔊</button>
       </header>
 
       <div id="chat"></div>
@@ -271,6 +289,12 @@
     let audioQueue = [];
     let isPlaying = false;
     let isRecording = false;
+    let isSoundEnabled = true;
+
+    function toggleSound() {
+      isSoundEnabled = !isSoundEnabled;
+      document.getElementById('soundToggle').textContent = isSoundEnabled ? '🔊' : '🔇';
+    }
 
     function addMessage(text, cls) {
       const div = document.createElement('div');
@@ -282,6 +306,11 @@
 
     function playNextAudio() {
       if (audioQueue.length === 0) {
+        isPlaying = false;
+        return;
+      }
+      if (!isSoundEnabled) {
+        audioQueue = [];
         isPlaying = false;
         return;
       }
@@ -351,11 +380,11 @@
       if (e.key === 'Enter') sendMsg();
     });
 
-    // fix for mobile vh height
     function setVhUnit() {
       const vh = window.innerHeight * 0.01;
       document.documentElement.style.setProperty('--vh', `${vh}px`);
     }
+
     setVhUnit();
     window.addEventListener('resize', setVhUnit);
   </script>
