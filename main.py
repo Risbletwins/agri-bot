@@ -210,22 +210,40 @@ def seed_sowing_button():
         seed_command_state = data  # Save the command
         return jsonify({"received": data})
     else:
-        return jsonify(seed_command_state) 
+        return jsonify(seed_command_state)
 
 @app.route('/soil_moisture_measuring_system/button', methods=["GET",'POST'])
-def soil_moisture_button():
-    data = request.get_json()
-    return "SoilMoistureMeasuringSystem"+str(data)
+def seed_sowing_button():
+    global seed_command_state
+    if request.method == 'POST':
+        data = request.get_json()
+        print("Seed Sowing Button Pressed:", data)
+        seed_command_state = data  # Save the command
+        return jsonify({"received": data})
+    else:
+        return jsonify(seed_command_state)
 
 @app.route('/water_pump_system/button', methods=["GET",'POST'])
-def water_pump_system_button():
-    data = request.get_json()
-    return "WaterPumpSystem"+str(data)
+def seed_sowing_button():
+    global seed_command_state
+    if request.method == 'POST':
+        data = request.get_json()
+        print("Seed Sowing Button Pressed:", data)
+        seed_command_state = data  # Save the command
+        return jsonify({"received": data})
+    else:
+        return jsonify(seed_command_state)
 
 @app.route('/humidity_measuring_system/button', methods=["GET",'POST'])
-def humidity_measuring_system_button():
-    data = request.get_json()
-    return "HumidityMeasuringSystem"+str(data)
+def seed_sowing_button():
+    global seed_command_state
+    if request.method == 'POST':
+        data = request.get_json()
+        print("Seed Sowing Button Pressed:", data)
+        seed_command_state = data  # Save the command
+        return jsonify({"received": data})
+    else:
+        return jsonify(seed_command_state)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
