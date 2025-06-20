@@ -199,14 +199,18 @@ def handle_button_left():
     return "ControllerMoveLeft"
 
 
-@app.route('/seed_sowing_system/button', methods=['GET','POST'])
+seed_command_state = {"msg": "off"}
+
+@app.route('/seed_sowing_system/button', methods=['GET', 'POST'])
 def seed_sowing_button():
-    data = request.get_json()
-    if data == None:
-        data == "off"
+    global seed_command_state
+    if request.method == 'POST':
+        data = request.get_json()
+        print("Seed Sowing Button Pressed:", data)
+        seed_command_state = data  # Save the command
+        return jsonify({"received": data})
     else:
-        data = data["msg"]
-    return "SeedSowingSystem"+str(data)
+        return jsonify(seed_command_state) 
 
 @app.route('/soil_moisture_measuring_system/button', methods=["GET",'POST'])
 def soil_moisture_button():
