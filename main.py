@@ -202,6 +202,10 @@ def handle_button_left():
 @app.route('/seed_sowing_system/button', methods=['GET','POST'])
 def seed_sowing_button():
     data = request.get_json()
+    if data == None:
+        data == "off"
+    else:
+        data = data["msg"]
     return "SeedSowingSystem"+str(data)
 
 @app.route('/soil_moisture_measuring_system/button', methods=["GET",'POST'])
