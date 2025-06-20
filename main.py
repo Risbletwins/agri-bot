@@ -37,6 +37,7 @@ Give clear, practical advice that a farmer can follow **without needing to go to
 - If there's more than one possible cause, explain them shortly and help the farmer decide what to do first.
 - Don't ask farmars for photos.
 - Never use any numbering or asterisk sign in the response
+- Never use any symbols and 
 
 🔹 TTS Friendly Guidelines:
 - Use short sentences and also short answers.
@@ -183,61 +184,40 @@ def get_controller_page():
 # Update command state from button presses
 @app.route('/controller/moveup', methods=["GET",'POST'])
 def handle_button_up():
-    global target_command
-    target_command = {"action": "moveup"}
-    return jsonify({"status": "Command set to moveup"})
+    return "ControllerMoveUp"
 
 @app.route('/controller/movedown', methods=["GET",'POST'])
 def handle_button_down():
-    global target_command
-    target_command = {"action": "movedown"}
-    return jsonify({"status": "Command set to movedown"})
+    return "ControllerMoveDown"
 
 @app.route('/controller/moveright', methods=['GET','POST'])
 def handle_button_right():
-    global target_command
-    target_command = {"action": "moveright"}
-    return jsonify({"status": "Command set to moveright"})
+    return "ControllerMoveRight"
 
 @app.route('/controller/moveleft', methods=['GET','POST'])
 def handle_button_left():
-    global target_command
-    target_command = {"action": "moveleft"}
-    return jsonify({"status": "Command set to moveleft"})
+    return "ControllerMoveLeft"
 
-@app.route('/controller/stop', methods=['GET','POST'])
-def handle_button_stop():
-    global target_command
-    target_command = {"action": "stop"}
-    return jsonify({"status": "Command set to stop"})
-
-@app.route('/esp32/command', methods=['GET','POST'])
-def get_current_command():
-    return jsonify(target_command)
 
 @app.route('/seed_sowing_system/button', methods=['GET','POST'])
 def seed_sowing_button():
     data = request.get_json()
-    print(data)
-    return jsonify({"received": data})
+    return "SeedSowingSystem"+data
 
 @app.route('/soil_moisture_measuring_system/button', methods=["GET",'POST'])
 def soil_moisture_button():
     data = request.get_json()
-    print(data)
-    return jsonify({"received": data})
+    return "SoilMoistureMeasuringSystem"+data
 
 @app.route('/water_pump_system/button', methods=["GET",'POST'])
 def water_pump_system_button():
     data = request.get_json()
-    print(data)
-    return jsonify({"received": data})
+    return "WaterPumpSystem"+data
 
 @app.route('/humidity_measuring_system/button', methods=["GET",'POST'])
 def humidity_measuring_system_button():
     data = request.get_json()
-    print(data)
-    return jsonify({"received": data})
+    return "HumidityMeasuringSystem"+data
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
