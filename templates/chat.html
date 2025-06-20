@@ -296,9 +296,13 @@
   document.getElementById('soundToggle').textContent = isSoundEnabled ? '🔊' : '🔇';
 
   if (!isSoundEnabled) {
-    audioQueue = [];
     audioPlayer.pause();
     audioPlayer.currentTime = 0;
+  } else {
+
+    if (audioQueue.length > 0 && !isPlaying) {
+      playNextAudio();
+    }
   }
 }
 
@@ -309,15 +313,8 @@
       chat.appendChild(div);
       chat.scrollTop = chat.scrollHeight;
     }
-
 function playNextAudio() {
-  if (!isSoundEnabled) {
-    audioQueue = [];
-    isPlaying = false;
-    return;
-  }
-
-  if (audioQueue.length === 0) {
+  if (!isSoundEnabled || audioQueue.length === 0) {
     isPlaying = false;
     return;
   }
@@ -330,6 +327,7 @@ function playNextAudio() {
     isPlaying = false;
   });
 }
+
 
 
     audioPlayer.onended = () => playNextAudio();
