@@ -202,22 +202,22 @@ def handle_button_left():
 @app.route('/seed_sowing_system/button', methods=['GET','POST'])
 def seed_sowing_button():
     data = request.get_json()
-    return "SeedSowingSystem"+data
+    return "SeedSowingSystem"+str(data)
 
 @app.route('/soil_moisture_measuring_system/button', methods=["GET",'POST'])
 def soil_moisture_button():
     data = request.get_json()
-    return "SoilMoistureMeasuringSystem"+data
+    return "SoilMoistureMeasuringSystem"+str(data)
 
 @app.route('/water_pump_system/button', methods=["GET",'POST'])
 def water_pump_system_button():
     data = request.get_json()
-    return "WaterPumpSystem"+data
+    return "WaterPumpSystem"+str(data)
 
 @app.route('/humidity_measuring_system/button', methods=["GET",'POST'])
 def humidity_measuring_system_button():
     data = request.get_json()
-    return "HumidityMeasuringSystem"+data
+    return "HumidityMeasuringSystem"+str(data)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
