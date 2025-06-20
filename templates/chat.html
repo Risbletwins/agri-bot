@@ -325,6 +325,7 @@ function playNextAudio() {
   const nextSrc = audioQueue.shift();
   if (nextSrc) {
     audioPlayer.src = nextSrc;
+    audioPlayer.playbackRate = 2.0;  // 💨 Faster playback!
     audioPlayer.play().catch(err => {
       console.error('Audio playback error:', err);
       addMessage('❌ অডিও চালাতে সমস্যা। আবার "পাঠান" ক্লিক করুন।', 'bot');
@@ -334,6 +335,7 @@ function playNextAudio() {
     isPlaying = false;
   }
 }
+
 
 
 
