@@ -164,9 +164,11 @@
       <h2>অপশন</h2>
         <a href="/"><button class="tab-btn">হোম</button></a>
         <a href="/controller"><button class="tab-btn">কন্ট্রোলার</button></a>
-        <a href="/seed_sowing"><button class="tab-btn">বীজ বপন ব্যবস্থা</button></a>
+        <a href="/soil_moisture_measuring_system"><button class="tab-btn">মাটির আর্দ্রতা ব্যবস্থা</button></a>
+        <a href="/seed_sowing_system"><button class="tab-btn">কৃষি সহকারী</button></a>
+        <a href="/water_pump_system"><button class="tab-btn">পানি পাম্প ব্যবস্থা</button></a>
+        <a href="/humidity_measuring_system"><button class="tab-btn">তাপ ও পরিবেশের আদ্রতা<br>পরিমাপ ব্যবস্থা</button></a>
         <a href="/chat"><button class="tab-btn">কৃষি সহকারী</button></a>
-
     </div>
 
     <div class="main-content">
@@ -203,7 +205,7 @@
     });
 
     function sendData(txt) {
-  fetch('/soil_moisture/button', {
+  fetch('/soil_moisture_measuring_system/button', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({msg: txt})

@@ -192,61 +192,81 @@ def cleanup_audio_files():
 def get_audio(filename):
     return send_file(f'static/audio/{filename}', mimetype='audio/mpeg')
 
-@app.route("/seed_sowing", methods=["GET"])
-def get_seed_swing_page():
-    return render_template("seed_sowing.html")
+@app.route("/seed_sowing_system", methods=["GET","POST"])
+def get_seed_sowing_system_page():
+    return render_template("seed_sowing_system.html")
 
-@app.route("/soil_moisture", methods=["GET"])
-def get_soil_moisture_page():
-    return render_template("soil_moisture.html")
+@app.route("/water_pump_system", methods=["GET","POST"])
+def get_water_pump_system_page():
+    return render_template("water_pump_system.html")
 
-@app.route("/controller", methods=["GET"])
+@app.route("/humidity_measuring_system", methods=["GET","POST"])
+def get_humidity_measuring_system_page():
+    return render_template("humidity_measuring_system.html")
+
+@app.route("/soil_moisture_measuring_system", methods=["GET","POST"])
+def get_soil_moisture_measuring_system_page():
+    return render_template("soil_moisture_measuring_system.html")
+
+@app.route("/controller", methods=["GET","POST"])
 def get_controller_page():
     return render_template("controller.html")
 
 # Update command state from button presses
-@app.route('/controller/moveup', methods=['POST'])
+@app.route('/controller/moveup', methods=["GET",'POST'])
 def handle_button_up():
     global target_command
     target_command = {"action": "moveup"}
     return jsonify({"status": "Command set to moveup"})
 
-@app.route('/controller/movedown', methods=['POST'])
+@app.route('/controller/movedown', methods=["GET",'POST'])
 def handle_button_down():
     global target_command
     target_command = {"action": "movedown"}
     return jsonify({"status": "Command set to movedown"})
 
-@app.route('/controller/moveright', methods=['POST'])
+@app.route('/controller/moveright', methods=['GET','POST'])
 def handle_button_right():
     global target_command
     target_command = {"action": "moveright"}
     return jsonify({"status": "Command set to moveright"})
 
-@app.route('/controller/moveleft', methods=['POST'])
+@app.route('/controller/moveleft', methods=['GET','POST'])
 def handle_button_left():
     global target_command
     target_command = {"action": "moveleft"}
     return jsonify({"status": "Command set to moveleft"})
 
-@app.route('/controller/stop', methods=['POST'])
+@app.route('/controller/stop', methods=['GET','POST'])
 def handle_button_stop():
     global target_command
     target_command = {"action": "stop"}
     return jsonify({"status": "Command set to stop"})
 
-@app.route('/esp32/command', methods=['GET'])
+@app.route('/esp32/command', methods=['GET','POST'])
 def get_current_command():
     return jsonify(target_command)
 
-@app.route('/seed_sowing/button', methods=['POST'])
+@app.route('/seed_sowing_system/button', methods=['GET','POST'])
 def seed_sowing_button():
     data = request.get_json()
     print(data)
     return jsonify({"received": data})
 
-@app.route('/soil_moisture/button', methods=['POST'])
+@app.route('/soil_moisture_measuring_system/button', methods=["GET",'POST'])
 def soil_moisture_button():
+    data = request.get_json()
+    print(data)
+    return jsonify({"received": data})
+
+@app.route('/water_pump_system/button', methods=["GET",'POST'])
+def water_pump_system_button():
+    data = request.get_json()
+    print(data)
+    return jsonify({"received": data})
+
+@app.route('/humidity_measuring_system/button', methods=["GET",'POST'])
+def humidity_measuring_system_button():
     data = request.get_json()
     print(data)
     return jsonify({"received": data})
