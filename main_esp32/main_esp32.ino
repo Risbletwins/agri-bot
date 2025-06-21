@@ -2,8 +2,8 @@
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 
-const char* ssid = "Wifi abar ki jinis";
-const char* password = "passdemunah!";
+const char* ssid = "TECNO SPARK Go 1";
+const char* password = "123456678";
 
 const char* seed_sowing_system = "https://agri-bot-kwis.onrender.com/seed_sowing_system/button";
 const char* humidity_measuring_system = "https://agri-bot-kwis.onrender.com/humidity_measuring_system/button";
@@ -14,9 +14,6 @@ const char* msg_of_seed_sowing_system;
 const char* msg_of_humidity_measuring_system;
 const char* msg_of_water_pump_system;
 const char* msg_of_soil_moisture_measuring_system;
-
-const char* on = "on";
-const char* off = "off";
 
 void setup() {
   Serial.begin(115200);
@@ -118,22 +115,20 @@ void loop() {
       Serial.printf("HTTP Error code (soil moisture): %d\n", httpCode);
     }
     http.end();
-    Serial.println(msg_of_soil_moisture_measuring_system);
-    Serial.println(on);
 
-    if (strcmp(msg_of_soil_moisture_measuring_system, on) == 0) {
-    Serial.println("meaw");
-    Serial2.println("on");
+    if (strcmp(msg_of_soil_moisture_measuring_system, "soil_mos_on") == 0) {
+    Serial.println("soil_mos_on");
+    Serial2.println("soil_mos_on");
 }else{
-      Serial.println("meawww");
-    Serial2.println("off");
+    Serial.println("soil_mos_off");
+    Serial2.println("soil_mos_off");
 }
-   if(strcmp(msg_of_seed_sowing_system, on) == 0) {
-    Serial.println("meaw");
-    Serial2.println("on1");
+   if(strcmp(msg_of_seed_sowing_system, "seed_sowing_on") == 0) {
+    Serial.println("seed_sowing_on");
+    Serial2.println("seed_sowing_on");
 }else{
-    Serial.println("meawww");
-    Serial2.println("off1");
+    Serial.println("seed_sowing_off");
+    Serial2.println("seed_sowing_off");
 }
 
 
