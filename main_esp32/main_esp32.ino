@@ -115,6 +115,9 @@ void loop() {
       Serial.printf("HTTP Error code (soil moisture): %d\n", httpCode);
     }
     http.end();
+    Serial.prinln("meaw");
+    Serial.println(msg_of_soil_moisture_measuring_system);
+    Serial.println(msg_of_seed_sowing_system);
 
     if (strcmp(msg_of_soil_moisture_measuring_system, "soil_mos_on") == 0) {
     Serial.println("soil_mos_on");

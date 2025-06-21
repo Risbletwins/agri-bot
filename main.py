@@ -201,10 +201,10 @@ def handle_button_left():
 
 
 target_command = {"action": "stop"}
-seed_command_state = {"msg": "off"}
-soil_moisture_measuring_system_command_state = {"msg": "off"}
-water_pump_system_state = {"msg": "off"}
-humidity_measuring_system_command_state = {"msg": "off"}
+seed_command_state = {"msg": "seed_sowing_off"}
+soil_moisture_measuring_system_command_state = {"msg": "soil_mos_off"}
+water_pump_system_state = {"msg": "water_pump_off"}
+humidity_measuring_system_command_state = {"msg": "humidity_off"}
 
 @app.route('/seed_sowing_system/button', methods=['GET', 'POST'])
 def seed_sowing_button():
