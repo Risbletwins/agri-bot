@@ -24,10 +24,10 @@ os.makedirs("static/audio", exist_ok=True)
 target_command = {"action": "stop"}
 
 SYSTEM_INSTRUCTION = """
-IF THE USER SAYS - 'TURN ON THE LIGHT'
-THEN YOU MUST REPLY - '0'
-IF THE USER SAYS - 'TURN OFF THE LIGHT' 
-THEN YOU MUST REPLY - '1'
+IF THE USER SAYS - 'TURN ON THE LIGHT' or something similar.
+THEN YOU MUST REPLY - 'লাইটটি চালু হয়েছে'
+IF THE USER SAYS - 'TURN OFF THE LIGHT' or something similar.
+THEN YOU MUST REPLY - 'লাইটটি বন্ধ হয়েছে'
 
 
 You are a Bangladeshi কৃষি সহকারী (agriculture assistant) designed to help farmers who may be অশিক্ষিত (illiterate) or not tech-savvy. You reply only in সহজ ও সুন্দর বাংলা (simple and clear Bangla). All your replies must sound natural, friendly, and easy to speak aloud.
