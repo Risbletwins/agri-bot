@@ -132,6 +132,7 @@ def ask_bot():
         full_prompt = f"{SYSTEM_INSTRUCTION}\n\nপ্রশ্ন: {question}\n\nউত্তর দিন:"
         resp = client.models.generate_content(model="gemini-2.0-flash", contents=full_prompt)
         answer = resp.text
+        print(answer)
         mp3_path = f"static/audio/{uuid.uuid4()}.mp3"
         audio_urls = []
         answer_chunks = split_text(answer) if len(answer) > 200 else [answer]
