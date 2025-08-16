@@ -136,10 +136,8 @@ def split_text(text, max_length=200):
         chunks.append(current_chunk.strip())
     return chunks
 
-@app.route("/esp32-receive/",methods=["GET"])
-def esp32_receive(req_data_esp):
-    return {"message": str(req_data_esp), "value": 42}
 
+answer = 0
 
 @app.route('/')
 def serve_webpage():
@@ -160,31 +158,7 @@ def ask_bot():
         resp = client.models.generate_content(model="gemini-2.0-flash", contents=full_prompt)
         answer = resp.text
 
-        if "লাইটটি চালু হয়েছে" in answer:
-            esp32_receive("light_on")
-            
-        if "লাইটটি বন্ধ হয়েছে" in answer:
-            esp32_receive("light_off")
-        
-        if "বীজ বপন ব্যবস্থা চালু হয়েছে" in answer:
-            esp32_receive("seed_sow_on")
-        if "বীজ বপন ব্যবস্থা বন্ধ হয়েছে" in answer:
-            esp32_receive("seed_sow_off")
-        
-        if "কীটনাশক ব্যবস্থা চালু হয়েছে" in answer:
-            esp32_receive("fertilzer_on")
-        if "কীটনাশক ব্যবস্থা বন্ধ হয়েছে" in answer:
-            esp32_receive("fertilizer_off")
 
-        if "ওয়াটার পাম্প চালু হয়েছে" in answer:
-            esp32_receive("water_pump_on")
-        if "ওয়াটার পাম্প বন্ধ হয়েছে" in answer:
-            esp32_receive("water_pump_off")
-
-        if "ঘাস কাটার যন্ত্র চালু হয়েছে" in answer:
-            esp32_receive("grass_cutter_on")
-        if "ঘাস কাটার যন্ত্র বন্ধ হয়েছে" in answer:
-            esp32_receive("grass_cutter_off")
 
         mp3_path = f"static/audio/{uuid.uuid4()}.mp3"
         audio_urls = []
@@ -221,6 +195,35 @@ def cleanup_audio_files():
 @app.route('/static/audio/<filename>')
 def get_audio(filename):
     return send_file(f'static/audio/{filename}', mimetype='audio/mpeg')
+@app.route("/esp32-receive/",methods=["GET"])
+def esp32_receive():
+    if "লাইটটি চালু হয়েছে" in answer:
+        return "light_on"
+        
+    if "লাইটটি বন্ধ হয়েছে" in answer:
+        return "light_off"
+    
+    if "বীজ বপন ব্যবস্থা চালু হয়েছে" in answer:
+        return "seed_sow_on"
+    if "বীজ বপন ব্যবস্থা বন্ধ হয়েছে" in answer:
+        return "seed_sow_off"
+    
+    if "কীটনাশক ব্যবস্থা চালু হয়েছে" in answer:
+        return "fertilzer_on"
+    if "কীটনাশক ব্যবস্থা বন্ধ হয়েছে" in answer:
+        return "fertilizer_off"
+
+    if "ওয়াটার পাম্প চালু হয়েছে" in answer:
+        return "water_pump_on"
+    if "ওয়াটার পাম্প বন্ধ হয়েছে" in answer:
+        return "water_pump_off"
+
+    if "ঘাস কাটার যন্ত্র চালু হয়েছে" in answer:
+        return "grass_cutter_on"
+    if "ঘাস কাটার যন্ত্র বন্ধ হয়েছে" in answer:
+        return "grass_cutter_off"
+    
+
 
 
 
