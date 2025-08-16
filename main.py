@@ -136,7 +136,10 @@ def split_text(text, max_length=200):
         chunks.append(current_chunk.strip())
     return chunks
 
-req_data_esp = 0
+@app.route("/esp32-receive/",methods=["GET"])
+def esp32_receive(req_data_esp):
+    return {"message": str(req_data_esp), "value": 42}
+
 
 @app.route('/')
 def serve_webpage():
@@ -158,29 +161,30 @@ def ask_bot():
         answer = resp.text
 
         if "লাইটটি চালু হয়েছে" in answer:
-            req_data_esp = "light_on"
+            esp32_receive("light_on")
+            
         if "লাইটটি বন্ধ হয়েছে" in answer:
-            req_data_esp = "light_off"
+            esp32_receive("light_off")
         
         if "বীজ বপন ব্যবস্থা চালু হয়েছে" in answer:
-            req_data_esp = "seed_sow_on"
+            esp32_receive("seed_sow_on")
         if "বীজ বপন ব্যবস্থা বন্ধ হয়েছে" in answer:
-            req_data_esp = "seed_sow_off"
+            esp32_receive("seed_sow_off")
         
         if "কীটনাশক ব্যবস্থা চালু হয়েছে" in answer:
-            req_data_esp = "fertilzer_on"
+            esp32_receive("fertilzer_on")
         if "কীটনাশক ব্যবস্থা বন্ধ হয়েছে" in answer:
-            req_data_esp = "fertilizer_off"
+            esp32_receive("fertilizer_off")
 
         if "ওয়াটার পাম্প চালু হয়েছে" in answer:
-            req_data_esp = "water_pump_on"
+            esp32_receive("water_pump_on")
         if "ওয়াটার পাম্প বন্ধ হয়েছে" in answer:
-            req_data_esp = "water_pump_off"
+            esp32_receive("water_pump_off")
 
         if "ঘাস কাটার যন্ত্র চালু হয়েছে" in answer:
-            req_data_esp = "grass_cutter_on"
+            esp32_receive("grass_cutter_on")
         if "ঘাস কাটার যন্ত্র বন্ধ হয়েছে" in answer:
-            req_data_esp = "grass_cutter_off"
+            esp32_receive("grass_cutter_off")
 
         mp3_path = f"static/audio/{uuid.uuid4()}.mp3"
         audio_urls = []
@@ -218,9 +222,6 @@ def cleanup_audio_files():
 def get_audio(filename):
     return send_file(f'static/audio/{filename}', mimetype='audio/mpeg')
 
-@app.route("/esp32-receive/",methods=["GET"])
-def esp32_recieve():
-    return {"message": str(req_data_esp), "value": 42}
 
 
 
