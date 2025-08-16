@@ -222,6 +222,7 @@ def esp32_receive():
         return "grass_cutter_on"
     if "ঘাস কাটার যন্ত্র বন্ধ হয়েছে" in answer:
         return "grass_cutter_off"
+    return "none_for_now"
     
 
 
