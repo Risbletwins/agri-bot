@@ -136,6 +136,8 @@ def split_text(text, max_length=200):
         chunks.append(current_chunk.strip())
     return chunks
 
+req_data_esp = 0
+
 @app.route('/')
 def serve_webpage():
     return render_template('homepage.html')
@@ -154,7 +156,7 @@ def ask_bot():
         full_prompt = f"{SYSTEM_INSTRUCTION}\n\nপ্রশ্ন: {question}\n\nউত্তর দিন:"
         resp = client.models.generate_content(model="gemini-2.0-flash", contents=full_prompt)
         answer = resp.text
-        req_data_esp = 0
+
         if "লাইটটি চালু হয়েছে" in answer:
             req_data_esp = "light_on"
         if "লাইটটি বন্ধ হয়েছে" in answer:
@@ -179,10 +181,6 @@ def ask_bot():
             req_data_esp = "grass_cutter_on"
         if "ঘাস কাটার যন্ত্র বন্ধ হয়েছে" in answer:
             req_data_esp = "grass_cutter_off"
-
-        @app.route("/esp32-receive/",methods=["GET"])
-        def esp32_recieve():
-            return req_data_esp
 
         mp3_path = f"static/audio/{uuid.uuid4()}.mp3"
         audio_urls = []
@@ -219,6 +217,11 @@ def cleanup_audio_files():
 @app.route('/static/audio/<filename>')
 def get_audio(filename):
     return send_file(f'static/audio/{filename}', mimetype='audio/mpeg')
+
+@app.route("/esp32-receive/",methods=["GET"])
+def esp32_recieve():
+    return req_data_esp
+
 
 
 if __name__ == "__main__":
