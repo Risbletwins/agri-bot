@@ -220,7 +220,7 @@ def get_audio(filename):
 
 @app.route("/esp32-receive/",methods=["GET"])
 def esp32_recieve():
-    return req_data_esp
+    return {"message": str(req_data_esp), "value": 42}
 
 
 
