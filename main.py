@@ -137,7 +137,7 @@ def split_text(text, max_length=200):
     return chunks
 
 
-answer = 0
+answer = ""
 
 @app.route('/')
 def serve_webpage():
