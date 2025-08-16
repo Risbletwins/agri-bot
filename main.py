@@ -137,7 +137,7 @@ def split_text(text, max_length=200):
     return chunks
 
 
-answer = ""
+answer = "yo"
 
 @app.route('/')
 def serve_webpage():
@@ -156,6 +156,7 @@ def ask_bot():
     try:
         full_prompt = f"{SYSTEM_INSTRUCTION}\n\nপ্রশ্ন: {question}\n\nউত্তর দিন:"
         resp = client.models.generate_content(model="gemini-2.0-flash", contents=full_prompt)
+        global answer 
         answer = resp.text
 
 
