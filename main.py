@@ -179,8 +179,8 @@ def ask_bot():
             req_data_esp = "grass_cutter_on"
         if "ঘাস কাটার যন্ত্র বন্ধ হয়েছে" in answer:
             req_data_esp = "grass_cutter_off"
-            
-        @app.route("/esp32-receive",methods=["GET"])
+
+        @app.route("/esp32-receive/",methods=["GET"])
         def esp32_recieve():
             return req_data_esp
 
