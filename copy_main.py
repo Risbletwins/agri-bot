@@ -29,28 +29,6 @@ THEN YOU MUST REPLY - 'লাইটটি চালু হয়েছে'
 IF THE USER SAYS - 'TURN OFF THE LIGHT' or something similar.
 THEN YOU MUST REPLY - 'লাইটটি বন্ধ হয়েছে'
 
-IF THE USER SAYS - 'TURN ON THE SEED SOW' or something similar.
-THEN YOU MUST REPLY - 'বীজ বপন ব্যবস্থা চালু হয়েছে'
-IF THE USER SAYS - 'TURN OFF THE SEED SOW' or something similar.
-THEN YOU MUST REPLY - 'বীজ বপন ব্যবস্থা বন্ধ হয়েছে'
-
-IF THE USER SAYS - 'TURN ON THE FERTILIZER SYSTEM' or something similar.
-THEN YOU MUST REPLY - 'কীটনাশক ব্যবস্থা চালু হয়েছে'
-IF THE USER SAYS - 'TURN OFF THE FERTILIZER SYSTEM' or something similar.
-THEN YOU MUST REPLY - 'কীটনাশক ব্যবস্থা বন্ধ হয়েছে'
-
-IF THE USER SAYS - 'TURN ON WATER PUMP' or something similar.
-THEN YOU MUST REPLY - 'ওয়াটার পাম্প চালু হয়েছে'
-IF THE USER SAYS - 'TURN OFF WATER PUMP' or something similar.
-THEN YOU MUST REPLY - 'ওয়াটার পাম্প বন্ধ হয়েছে'
-
-IF THE USER SAYS - 'TURN ON THE GRASS CUTTER' or something similar.
-THEN YOU MUST REPLY - 'ঘাস কাটার যন্ত্র চালু হয়েছে'
-IF THE USER SAYS - 'TURN OFF GRASS CUTTER' or something similar.
-THEN YOU MUST REPLY - 'ঘাস কাটার যন্ত্র বন্ধ হয়েছে'
-
-
-
 
 You are a Bangladeshi কৃষি সহকারী (agriculture assistant) designed to help farmers who may be অশিক্ষিত (illiterate) or not tech-savvy. You reply only in সহজ ও সুন্দর বাংলা (simple and clear Bangla). All your replies must sound natural, friendly, and easy to speak aloud.
 
@@ -154,36 +132,7 @@ def ask_bot():
         full_prompt = f"{SYSTEM_INSTRUCTION}\n\nপ্রশ্ন: {question}\n\nউত্তর দিন:"
         resp = client.models.generate_content(model="gemini-2.0-flash", contents=full_prompt)
         answer = resp.text
-        req_data_esp = 0
-        if "লাইটটি চালু হয়েছে" in answer:
-            req_data_esp = "light_on"
-        if "লাইটটি বন্ধ হয়েছে" in answer:
-            req_data_esp = "light_off"
-        
-        if "বীজ বপন ব্যবস্থা চালু হয়েছে" in answer:
-            req_data_esp = "seed_sow_on"
-        if "বীজ বপন ব্যবস্থা বন্ধ হয়েছে" in answer:
-            req_data_esp = "seed_sow_off"
-        
-        if "কীটনাশক ব্যবস্থা চালু হয়েছে" in answer:
-            req_data_esp = "fertilzer_on"
-        if "কীটনাশক ব্যবস্থা বন্ধ হয়েছে" in answer:
-            req_data_esp = "fertilizer_off"
-
-        if "ওয়াটার পাম্প চালু হয়েছে" in answer:
-            req_data_esp = "water_pump_on"
-        if "ওয়াটার পাম্প বন্ধ হয়েছে" in answer:
-            req_data_esp = "water_pump_off"
-
-        if "ঘাস কাটার যন্ত্র চালু হয়েছে" in answer:
-            req_data_esp = "grass_cutter_on"
-        if "ঘাস কাটার যন্ত্র বন্ধ হয়েছে" in answer:
-            req_data_esp = "grass_cutter_off"
-            
-        @app.route("/esp32-receive",methods=["GET"])
-        def esp32_recieve():
-            return req_data_esp
-
+        print(answer)
         mp3_path = f"static/audio/{uuid.uuid4()}.mp3"
         audio_urls = []
         answer_chunks = split_text(answer) if len(answer) > 200 else [answer]
@@ -220,6 +169,93 @@ def cleanup_audio_files():
 def get_audio(filename):
     return send_file(f'static/audio/{filename}', mimetype='audio/mpeg')
 
+@app.route("/seed_sowing_system", methods=["GET","POST"])
+def get_seed_sowing_system_page():
+    return render_template("seed_sowing_system.html")
+
+@app.route("/water_pump_system", methods=["GET","POST"])
+def get_water_pump_system_page():
+    return render_template("water_pump_system.html")
+
+@app.route("/humidity_measuring_system", methods=["GET","POST"])
+def get_humidity_measuring_system_page():
+    return render_template("humidity_measuring_system.html")
+
+@app.route("/soil_moisture_measuring_system", methods=["GET","POST"])
+def get_soil_moisture_measuring_system_page():
+    return render_template("soil_moisture_measuring_system.html")
+
+@app.route("/controller", methods=["GET","POST"])
+def get_controller_page():
+    return render_template("controller.html")
+
+# Update command state from button presses
+@app.route('/controller/moveup', methods=["GET",'POST'])
+def handle_button_up():
+    return "ControllerMoveUp"
+
+@app.route('/controller/movedown', methods=["GET",'POST'])
+def handle_button_down():
+    return "ControllerMoveDown"
+
+@app.route('/controller/moveright', methods=['GET','POST'])
+def handle_button_right():
+    return "ControllerMoveRight"
+
+@app.route('/controller/moveleft', methods=['GET','POST'])
+def handle_button_left():
+    return "ControllerMoveLeft"
+
+
+target_command = {"action": "stop"}
+seed_command_state = {"msg": "seed_sowing_off"}
+soil_moisture_measuring_system_command_state = {"msg": "soil_mos_off"}
+water_pump_system_state = {"msg": "water_pump_off"}
+humidity_measuring_system_command_state = {"msg": "humidity_off"}
+
+@app.route('/seed_sowing_system/button', methods=['GET', 'POST'])
+def seed_sowing_button():
+    global seed_command_state
+    if request.method == 'POST':
+        data = request.get_json()
+        print("Seed Sowing Button Pressed:", data)
+        seed_command_state = data  # Save the command
+        return jsonify({"received": data})
+    else:
+        return jsonify(seed_command_state)
+
+@app.route('/soil_moisture_measuring_system/button', methods=["GET",'POST'])
+def soil_moisture_measuring_system_button():
+    global soil_moisture_measuring_system_command_state
+    if request.method == 'POST':
+        data = request.get_json()
+        print("soil_moisture_measuring_system Button Pressed:", data)
+        soil_moisture_measuring_system_command_state = data  # Save the command
+        return jsonify({"received": data})
+    else:
+        return jsonify(soil_moisture_measuring_system_command_state)
+
+@app.route('/water_pump_system/button', methods=["GET",'POST'])
+def water_pump_system_button():
+    global water_pump_system_state
+    if request.method == 'POST':
+        data = request.get_json()
+        print("water_pump_system Button Pressed:", data)
+        water_pump_system_state = data  # Save the command
+        return jsonify({"received": data})
+    else:
+        return jsonify( water_pump_system_state)
+
+@app.route('/humidity_measuring_system/button', methods=["GET",'POST'])
+def humidity_measuring_system_button():
+    global humidity_measuring_system_command_state
+    if request.method == 'POST':
+        data = request.get_json()
+        print("humidity_measuring_system Button Pressed:", data)
+        humidity_measuring_system_command_state = data  # Save the command
+        return jsonify({"received": data})
+    else:
+        return jsonify(humidity_measuring_system_command_state)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
