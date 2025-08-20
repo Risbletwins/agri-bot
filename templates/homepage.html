@@ -4,17 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no"/>
   <meta name="google-site-verification" content="K2W_H_dAxqmGv_-WScJNvaREv2a-ABf5o9DNXFVCr6U" />
-  <title>কৃষি সহকারী</title>
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri&display=swap" rel="stylesheet">
+  <title>কৃষি সহকারী | Agri Servitor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root {
       --vh: 100%;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
     }
 
     html, body {
@@ -22,221 +17,141 @@
       overflow: hidden;
     }
 
-    body {
-      font-family: 'Hind Siliguri', sans-serif;
-      background: linear-gradient(to bottom right, #d8f3ff, #fffbe0);
-      color: #2b2b2b;
-      font-size: 16px;
-      line-height: 1.6;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .container {
-      flex: 1;
-      display: flex;
-      height: 100%;
-      overflow: hidden;
-    }
-
     .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 220px;
-      height: 100%;
-      background: linear-gradient(180deg, #ff9800, #ff6f00);
-      color: white;
-      padding: 1.5rem 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
       transform: translateX(-100%);
-      transition: transform 0.3s ease;
-      z-index: 1000;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .sidebar.open {
       transform: translateX(0);
     }
 
-    .sidebar h2 {
-      font-size: 1.3rem;
-      margin-bottom: 1rem;
-      text-align: center;
+    .gradient-bg {
+      background: linear-gradient(135deg, #1e40af, #3b82f6);
     }
 
-    .tab-btn {
+    .glass-effect {
       background: rgba(255, 255, 255, 0.15);
-      border: none;
-      padding: 0.8rem 1rem;
-      color: white;
-      font-size: 1rem;
-      border-radius: 8px;
-      text-align: left;
-      cursor: pointer;
-      transition: background 0.3s;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
-    .tab-btn:hover,
-    .tab-btn.active {
-      background: rgba(255, 255, 255, 0.3);
+    .lang-en [data-lang="bn"] {
+      display: none;
     }
 
-    .menu-btn {
-      position: fixed;
-      top: 1rem;
-      left: 1rem;
-      background: #ff9800;
-      border: none;
-      color: white;
-      font-size: 1.5rem;
-      padding: 0.4rem 1rem;
-      border-radius: 8px;
-      z-index: 1100;
-      cursor: pointer;
+    .lang-en [data-lang="en"] {
+      display: inline;
     }
 
-    .main-wrapper {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      margin-left: 0;
+    [data-lang="bn"] {
+      display: inline;
     }
 
-
-
-    header {
-      background: linear-gradient(45deg, #ff9800, #ff6f00);
-      color: white;
-      text-align: center;
-      padding: 1rem;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    header h1 {
-      font-size: 2.2rem;
-      letter-spacing: 1px;
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
-    }
-
-    main {
-      flex: 1;
-      overflow-y: auto;
-      padding: 1rem;
-      text-align: center;
-    }
-
-    .intro p {
-      font-size: 1.2rem;
-      margin: 0.8rem 0;
-      color: #3e3e3e;
-    }
-
-    .features {
-      margin-top: 1rem;
-      background: #ffffff;
-      border-radius: 12px;
-      padding: 1rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      max-width: 700px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .features h2 {
-      font-size: 1.4rem;
-      color: #ff6f00;
-      margin-bottom: 1rem;
-    }
-
-    .features ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    .features li {
-      font-size: 1.1rem;
-      margin: 0.8rem 0;
-      padding-left: 2rem;
-      position: relative;
-      color: #2b2b2b;
-    }
-
-    .features li::before {
-      content: "🔸";
-      position: absolute;
-      left: 0;
-      top: 0;
-      font-size: 1.3rem;
+    [data-lang="en"] {
+      display: none;
     }
 
     .cta-button {
-      display: inline-block;
-      padding: 1rem 2.2rem;
-      font-size: 1.1rem;
-      background-color: #2e7d32;
-      color: white;
-      text-decoration: none;
-      border-radius: 12px;
-      margin-top: 1.5rem;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      transition: all 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .cta-button:hover {
-      background-color: #1b5e20;
-      transform: scale(1.05);
-    }
-
-    footer {
-      background-color: #f9f9f9;
-      padding: 0.7rem;
-      text-align: center;
-      font-size: 0.95rem;
-      color: #444;
-      box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
+      transform: translateY(-2px);
     }
   </style>
 </head>
-<body>
-
+<body class="font-['Hind_Siliguri'] bg-gray-900 text-white antialiased">
   <!-- Sidebar -->
-  <div class="sidebar" id="sidebar">
-    <h2>অপশন</h2>
-        <a href="/"><button class="tab-btn">হোম</button></a>
-        <a href="/chat"><button class="tab-btn">কৃষি সহকারী</button></a>
+  <div id="sidebar" class="sidebar fixed top-0 left-0 w-64 h-full gradient-bg p-6 flex flex-col gap-4 shadow-2xl z-50">
+    <h2 class="text-2xl font-bold text-center text-white">
+      <span data-lang="bn">অপশন</span>
+      <span data-lang="en">Options</span>
+    </h2>
+    <a href="/">
+      <button class="w-full text-left py-3 px-4 rounded-lg glass-effect hover:bg-white/20 transition-all duration-300">
+        <span data-lang="bn">হোম</span>
+        <span data-lang="en">Home</span>
+      </button>
+    </a>
+    <a href="/chat">
+      <button class="w-full text-left py-3 px-4 rounded-lg glass-effect hover:bg-white/20 transition-all duration-300">
+        <span data-lang="bn">কৃষি সহকারী</span>
+        <span data-lang="en">Agri Servitor</span>
+      </button>
+    </a>
   </div>
 
   <!-- Menu Button -->
-  <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+  <button class="menu-btn fixed top-4 left-4 bg-blue-600 text-white p-3 rounded-full hover:bg-blue-700 transition-all duration-300 z-50 shadow-md" onclick="toggleSidebar()">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+    </svg>
+  </button>
 
   <!-- Main Content -->
-  <div class="container">
-    <div class="main-wrapper">
-      <header>
-        <h1>The Agri Servitor</h1>
+  <div class="flex flex-col h-full w-full">
+    <div class="flex flex-col flex-1 w-full">
+      <header class="gradient-bg p-6 shadow-lg relative flex items-center justify-center">
+        <h1 class="text-3xl font-bold tracking-tight text-center">
+          <span data-lang="bn">The Agri Servitor</span>
+          <span data-lang="en">The Agri Servitor</span>
+        </h1>
+        <select id="language-toggle" class="absolute top-6 right-6 bg-blue-600 text-white rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400 hover:bg-blue-700 transition-all duration-300">
+          <option value="bn">বাংলা</option>
+          <option value="en">English</option>
+        </select>
       </header>
-      <main>
-        <div class="intro">
-          <b><p>আর নয় ভোগান্তি, কৃষি পরিচারক এর সাথে কৃষক পাবে তৃপ্তি।</p>
-         <p>প্রযুক্তি নির্ভর কৃষিতেই গড়ব স্বনির্ভর বাংলাদেশ।</p></b>
+      <main class="flex-1 overflow-y-auto p-8 text-center">
+        <div class="intro max-w-3xl mx-auto mb-10">
+          <p class="text-xl font-semibold text-gray-200 leading-relaxed">
+            <span data-lang="bn">আর নয় ভোগান্তি, কৃষি পরিচারক এর সাথে কৃষক পাবে তৃপ্তি।</span>
+            <span data-lang="en">No more struggles, farmers find satisfaction with Agri Servitor.</span>
+          </p>
+          <p class="text-xl font-semibold text-gray-200 leading-relaxed mt-2">
+            <span data-lang="bn">প্রযুক্তি নির্ভর কৃষিতেই গড়ব স্বনির্ভর বাংলাদেশ।</span>
+            <span data-lang="en">Building a self-reliant Bangladesh through technology-driven agriculture.</span>
+          </p>
         </div>
-        <div class="features">
-          <h2>কি কি করতে পারে?</h2>
-          <ul>
-            <li>ভয়েসে প্রশ্ন করুন, উত্তর শুনুন।</li>
-            <li>ফসলের সমস্যা নির্ণয়ের পর তাৎক্ষনিক সমাধান।</li>
-            <li>কৃষি জগতের সকল তথ্য একসাথে।</li>
-            <li>সহজ ও বোঝার মতো উত্তর।</li>
+        <div class="features max-w-3xl mx-auto bg-white/10 rounded-2xl p-8 glass-effect shadow-xl">
+          <h2 class="text-2xl font-semibold text-blue-300 mb-6">
+            <span data-lang="bn">কি কি করতে পারে?</span>
+            <span data-lang="en">What can it do?</span>
+          </h2>
+          <ul class="text-left space-y-4">
+            <li class="flex items-center gap-4 text-gray-200 text-lg">
+              <span class="text-blue-400 text-2xl">🔸</span>
+              <span data-lang="bn">ভয়েসে প্রশ্ন করুন, উত্তর শুনুন।</span>
+              <span data-lang="en">Ask questions by voice, hear the answers.</span>
+            </li>
+            <li class="flex items-center gap-4 text-gray-200 text-lg">
+              <span class="text-blue-400 text-2xl">🔸</span>
+              <span data-lang="bn">ফসলের সমস্যা নির্ণয়ের পর তাৎক্ষনিক সমাধান।</span>
+              <span data-lang="en">Instant solutions after diagnosing crop issues.</span>
+            </li>
+            <li class="flex items-center gap-4 text-gray-200 text-lg">
+              <span class="text-blue-400 text-2xl">🔸</span>
+              <span data-lang="bn">কৃষি জগতের সকল তথ্য একসাথে।</span>
+              <span data-lang="en">All agricultural information in one place.</span>
+            </li>
+            <li class="flex items-center gap-4 text-gray-200 text-lg">
+              <span class="text-blue-400 text-2xl">🔸</span>
+              <span data-lang="bn">সহজ ও বোঝার মতো উত্তর।</span>
+              <span data-lang="en">Simple and understandable answers.</span>
+            </li>
           </ul>
         </div>
-        <a href="/chat" class="cta-button">এখনই প্রশ্ন করুন</a>
+        <a href="/chat" class="cta-button inline-block mt-8 px-10 py-4 bg-blue-600 text-white rounded-full hover:bg-blue-700 transform hover:scale-105 transition-all duration-300 shadow-lg text-lg font-semibold">
+          <span data-lang="bn">এখনই প্রশ্ন করুন</span>
+          <span data-lang="en">Ask Now</span>
+        </a>
       </main>
-      <footer>
-        <p>© ২০২৫ কৃষি সহকারী — কৃষকদের ক্ষমতায়ন এআই ও অটোমেশনের মাধ্যমে</p>
+      <footer class="bg-gray-800 p-4 text-center text-gray-400 text-sm shadow-inner">
+        <p>
+          <span data-lang="bn">© ২০২৫ কৃষি সহকারী — কৃষকদের ক্ষমতায়ন এআই ও অটোমেশনের মাধ্যমে</span>
+          <span data-lang="en">© 2025 Agri Servitor — Empowering farmers through AI and automation</span>
+        </p>
       </footer>
     </div>
   </div>
@@ -244,6 +159,7 @@
   <script>
     const sidebar = document.getElementById('sidebar');
     const menuBtn = document.querySelector('.menu-btn');
+    const languageToggle = document.getElementById('language-toggle');
 
     function toggleSidebar() {
       sidebar.classList.toggle('open');
@@ -257,6 +173,12 @@
       ) {
         sidebar.classList.remove('open');
       }
+    });
+
+    // Language toggle functionality
+    languageToggle.addEventListener('change', function () {
+      document.body.classList.remove('lang-bn', 'lang-en');
+      document.body.classList.add(`lang-${this.value}`);
     });
 
     // Set dynamic vh for mobile devices

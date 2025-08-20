@@ -3,271 +3,312 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no"/>
-  <title>কৃষি সহকারী</title>
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri&display=swap" rel="stylesheet">
+  <title>কৃষি সহকারী | Agri Servitor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root {
-      --vh: 100%;
+      --vh: 100vh;
+      --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      --secondary-gradient: linear-gradient(135deg, #ec4899 0%, #f43f5e 100%);
+      --success-gradient: linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%);
+      --accent-gradient: linear-gradient(135deg, #34d399 0%, #10b981 100%);
     }
 
     html, body {
-      height: calc(var(--vh, 1vh) * 100);
+      height: var(--vh);
       overflow: hidden;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
       font-family: 'Hind Siliguri', sans-serif;
-      background: linear-gradient(to bottom right, #d8f3ff, #fffbe0);
-      color: #2b2b2b;
-      font-size: 16px;
-    }
-
-    .container {
-      display: flex;
-      height: 100%;
-      overflow: hidden;
+      background: #111827;
     }
 
     .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 220px;
-      height: 100%;
-      background: linear-gradient(180deg, #ff9800, #ff6f00);
-      color: white;
-      padding: 1.2rem 0.8rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
       transform: translateX(-100%);
-      transition: transform 0.3s ease;
-      z-index: 1000;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     }
 
     .sidebar.open {
       transform: translateX(0);
     }
 
-    .sidebar h2 {
-      font-size: 1.1rem;
-      margin-bottom: 0.8rem;
-      text-align: center;
+    .primary-gradient { background: var(--primary-gradient); }
+    .secondary-gradient { background: var(--secondary-gradient); }
+    .success-gradient { background: var(---success-gradient); }
+    .accent-gradient { background: var(--accent-gradient); }
+
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
     }
 
-    .tab-btn {
-      background: rgba(255, 255, 255, 0.15);
-      border: none;
-      padding: 0.6rem 0.8rem;
-      color: white;
-      font-size: 0.9rem;
-      border-radius: 6px;
-      text-align: left;
-      cursor: pointer;
-      transition: background 0.3s;
+    .glass-dark {
+      background: rgba(0, 0, 0, 0.15);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    .tab-btn:hover,
-    .tab-btn.active {
-      background: rgba(255, 255, 255, 0.3);
+    .lang-en [data-lang="bn"] { display: none; }
+    .lang-en [data-lang="en"] { display: inline; }
+    [data-lang="bn"] { display: inline; }
+    [data-lang="en"] { display: none; }
+
+    .message-animation {
+      animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .main-content {
-      flex: 1;
+    @keyframes slideInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .typing-indicator {
       display: flex;
-      flex-direction: column;
-      height: 100%;
-      position: relative;
-      margin-left: 0;
-      overflow: hidden;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
     }
 
-    header {
-      background: linear-gradient(45deg, #ff9800, #ff6f00);
-      color: white;
-      text-align: center;
-      padding: 0.8rem;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-      position: relative;
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--primary-gradient);
+      animation: typingDot 1.4s infinite ease-in-out;
     }
 
-    header h1 {
-      font-size: 1.6rem;
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+    .typing-dot:nth-child(1) { animation-delay: -0.3s; }
+    .typing-dot:nth-child(2) { animation-delay: -0.15s; }
+    .typing-dot:nth-child(3) { animation-delay: 0s; }
+
+    @keyframes typingDot {
+      0%, 80%, 100% { transform: scale(0.5); opacity: 0.5; }
+      40% { transform: scale(1); opacity: 1; }
     }
 
-    #soundToggle {
-      position: absolute;
-      top: 0.8rem;
-      right: 1rem;
-      background: rgba(255, 255, 255, 0.15);
-      border: none;
-      color: white;
-      font-size: 1.3rem;
-      padding: 0.4rem 0.8rem;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.3s;
+    .floating-button {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    #soundToggle:hover {
-      background: rgba(255, 255, 255, 0.3);
+    .floating-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
     }
 
-    #chat {
-      flex: 1;
+    .floating-button:active {
+      transform: translateY(0);
+    }
+
+    .recording-pulse {
+      animation: recordPulse 1s infinite;
+    }
+
+    @keyframes recordPulse {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      50% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+
+    .custom-scrollbar {
       overflow-y: auto;
-      padding: 0.6rem;
-      background-color: rgba(255,255,255,0.9);
-      margin: 0.6rem auto;
-      width: 94%;
-      max-width: 100%;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
       border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
-    .msg {
-      margin: 0.4rem 0;
-      padding: 0.6rem 0.8rem;
-      border-radius: 12px;
-      max-width: 85%;
-      font-size: 0.95rem;
-      line-height: 1.5;
-      word-wrap: break-word;
-    }
-
-    .me {
-      background-color: #d1e7ff;
-      color: #004085;
-      margin-left: auto;
-      text-align: right;
-      border-top-right-radius: 0;
-    }
-
-    .bot {
-      background-color: #e0f7e0;
-      color: #1a661a;
-      border-top-left-radius: 0;
-    }
-
-    #inputArea {
-      display: flex;
-      gap: 0.4rem;
-      padding: 0.6rem;
-      background-color: #fff;
-      box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    input[type="text"] {
-      flex: 1;
-      padding: 0.6rem 0.8rem;
-      font-size: 0.95rem;
-      border: 1px solid #ccc;
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.5));
       border-radius: 10px;
-      outline: none;
     }
 
-    button {
-      padding: 0.6rem 0.8rem;
-      font-size: 0.95rem;
-      background-color: #2e7d32;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.8));
     }
 
-    button:hover {
-      background-color: #1b5e20;
+    .input-glow:focus {
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3), 0 6px 20px rgba(0, 0, 0, 0.15);
+      border-color: #4f46e5;
     }
 
-    #voiceBtn {
-      background-color: #007bff;
+    .fade-in {
+      animation: fadeIn 0.6s ease-in;
     }
 
-    #voiceBtn:hover {
-      background-color: #0056c9;
-    }
-
-    #voiceBtn.recording::after {
-      content: ' 🎙️';
-      animation: pulse 1s infinite;
-    }
-
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.5; }
-      100% { opacity: 1; }
-    }
-
-    .menu-btn {
-      position: absolute;
-      top: 1rem;
-      left: 1rem;
-      background: #ff9800;
-      border: none;
-      color: white;
-      font-size: 1.3rem;
-      padding: 0.3rem 0.8rem;
-      border-radius: 8px;
-      z-index: 2000;
-      display: block;
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
     @media (max-width: 768px) {
-      body, html {
-        overflow: hidden;
-        max-width: 100vw;
-      }
+      .sidebar { width: 260px; }
+      .menu-btn { top: 0.75rem; left: 0.75rem; padding: 0.5rem; }
+      header h1 { font-size: 1.75rem; }
+      .controls-mobile { top: 0.75rem; right: 0.75rem; gap: 0.5rem; }
+      .chat-container { padding-top: 4.5rem; padding-bottom: 5rem; }
+      .input-container { padding: 0.75rem; }
+    }
+
+    @media (max-width: 480px) {
+      header h1 { font-size: 1.25rem; }
+      .controls-mobile { flex-direction: row; gap: 0.5rem; }
+      .chat-container { padding-top: 5rem; }
+      .input-container { padding: 0.5rem; }
     }
   </style>
 </head>
-<body>
-
-  <div class="container">
-    <div class="sidebar" id="sidebar">d
-      <h2>অপশন</h2>
-      <a href="/"><button class="tab-btn">হোম</button></a>
-      <a href="/chat"><button class="tab-btn active">কৃষি সহকারী</button></a>
+<body class="bg-gray-900 text-white antialiased lang-bn">
+  <!-- Sidebar -->
+  <div id="sidebar" class="sidebar fixed top-0 left-0 w-64 h-full primary-gradient p-6 flex flex-col gap-5 shadow-2xl z-50">
+    <div class="text-center mb-3">
+      <h2 class="text-2xl font-bold text-white mb-2">
+        <span data-lang="bn">অপশন</span>
+        <span data-lang="en">Options</span>
+      </h2>
+      <div class="w-12 h-1 bg-white/30 mx-auto rounded-full"></div>
     </div>
+    
+    <div class="space-y-3 flex-1">
+      <a href="/" class="block">
+        <button class="w-full text-left py-3 px-5 rounded-xl glass-effect hover:bg-white/20 transition-all duration-300 font-medium text-sm">
+          <span data-lang="bn">🏠 হোম</span>
+          <span data-lang="en">🏠 Home</span>
+        </button>
+      </a>
+      <a href="/chat" class="block">
+        <button class="w-full text-left py-3 px-5 rounded-xl glass-effect bg-white/20 font-medium text-sm">
+          <span data-lang="bn">🤖 কৃষি সহকারী</span>
+          <span data-lang="en">🤖 Agri Servitor</span>
+        </button>
+      </a>
+    </div>
+  </div>
 
-    <div class="main-content" id="mainContent">
-      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-      <header>
-        <h1>কৃষি পরিচারক</h1>
-        <button id="soundToggle" onclick="toggleSound()">🔊</button>
-      </header>
+  <!-- Menu Button -->
+  <button class="menu-btn fixed top-4 left-4 primary-gradient text-white p-3 rounded-xl hover:shadow-xl transition-all duration-300 z-50 floating-button" onclick="toggleSidebar()">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16m-7 6h7"></path>
+    </svg>
+  </button>
 
-      <div id="chat"></div>
-
-      <div id="inputArea">
-        <input type="text" id="msgInput" placeholder="আপনার প্রশ্ন লিখুন..." />
-        <button onclick="sendMsg()">পাঠান</button>
-        <button id="voiceBtn" onclick="startSpeechRecognition()">🎤</button>
+  <!-- Main Content -->
+  <div class="flex flex-col h-full w-full">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 primary-gradient shadow-xl z-40">
+      <div class="px-4 py-5 flex items-center justify-center relative">
+        <h1 class="text-2xl font-bold tracking-tight text-center text-white">
+          <span data-lang="bn">কৃষি পরিচারক</span>
+          <span data-lang="en">Agri Servitor</span>
+        </h1>
+        
+        <!-- Controls -->
+        <div class="absolute controls-mobile top-4 right-4 flex items-center gap-2">
+          <button id="soundToggle" class="success-gradient hover:shadow-lg text-white p-2 rounded-lg transition-all duration-300 floating-button" onclick="toggleSound()">
+            <svg id="soundIcon" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+            </svg>
+          </button>
+          <select id="language-toggle" class="secondary-gradient text-white rounded-lg px-3 py-2 focus:outline-none hover:shadow-lg transition-all duration-300 font-medium text-sm">
+            <option value="bn">বাংলা</option>
+            <option value="en">English</option>
+          </select>
+        </div>
       </div>
+    </header>
 
-      <audio id="ttsAudio" autoplay></audio>
+    <!-- Chat Area -->
+    <div class="flex-1 chat-container pt-24 pb-24 overflow-hidden">
+      <div class="h-full px-4 md:px-6">
+        <div id="chat" class="h-full custom-scrollbar pr-3 space-y-4">
+          <!-- Welcome Message -->
+          <div id="welcome-message" class="flex justify-center mb-6 fade-in transition-opacity duration-700">
+            <div class="glass-effect px-6 py-4 rounded-2xl text-center max-w-sm md:max-w-md shadow-xl">
+              <div class="text-3xl mb-2">🌱</div>
+              <div class="font-medium text-base">
+                <span data-lang="bn">স্বাগতম! আপনার কৃষি সংক্রান্ত যেকোনো প্রশ্ন করুন।</span>
+                <span data-lang="en">Welcome! Ask any agriculture-related questions.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- Input Area -->
+    <div class="fixed bottom-0 left-0 right-0 primary-gradient shadow-xl z-40">
+      <div class="input-container p-4 md:p-6">
+        <div class="max-w-3xl mx-auto glass-dark rounded-2xl p-3 md:p-4">
+          <div class="flex gap-3 items-center">
+            <input 
+              type="text" 
+              id="msgInput" 
+              class="flex-1 bg-white/90 text-gray-800 px-4 py-3 rounded-xl border-0 focus:outline-none input-glow transition-all duration-300 font-medium placeholder-gray-500 shadow-md" 
+              placeholder="আপনার প্রশ্ন লিখুন..."
+            />
+            <button 
+              id="sendBtn"
+              class="accent-gradient hover:shadow-lg text-white px-6 py-3 rounded-xl transition-all duration-300 floating-button font-medium flex items-center gap-2"
+              onclick="sendMsg()"
+            >
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+              </svg>
+              <span data-lang="bn">পাঠান</span>
+              <span data-lang="en">Send</span>
+            </button>
+            <button 
+              id="voiceBtn" 
+              class="secondary-gradient hover:shadow-lg text-white p-3 rounded-xl transition-all duration-300 floating-button"
+              onclick="startSpeechRecognition()"
+            >
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <audio id="ttsAudio" autoplay></audio>
   </div>
 
   <script>
     const sidebar = document.getElementById('sidebar');
     const menuBtn = document.querySelector('.menu-btn');
+    const languageToggle = document.getElementById('language-toggle');
+    const chat = document.getElementById('chat');
+    const msgInput = document.getElementById('msgInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const audioPlayer = document.getElementById('ttsAudio');
+    const voiceBtn = document.getElementById('voiceBtn');
+    const soundToggle = document.getElementById('soundToggle');
+    const soundIcon = document.getElementById('soundIcon');
+    
+    let audioQueue = [];
+    let isPlaying = false;
+    let isRecording = false;
+    let isSoundEnabled = true;
+    let messages = []; // Store messages with language data
 
+    // Sidebar functionality
     function toggleSidebar() {
       sidebar.classList.toggle('open');
     }
 
     document.addEventListener('click', (e) => {
-      const isMobile = window.innerWidth < 768;
-      if (!isMobile) return;
       if (
         sidebar.classList.contains('open') &&
         !sidebar.contains(e.target) &&
@@ -277,127 +318,263 @@
       }
     });
 
-    const chat = document.getElementById('chat');
-    const msgInput = document.getElementById('msgInput');
-    const audioPlayer = document.getElementById('ttsAudio');
-    const voiceBtn = document.getElementById('voiceBtn');
-    let audioQueue = [];
-    let isPlaying = false;
-    let isRecording = false;
-    let isSoundEnabled = true;
-
-   function toggleSound() {
-  isSoundEnabled = !isSoundEnabled;
-  document.getElementById('soundToggle').textContent = isSoundEnabled ? '🔊' : '🔇';
-
-  if (!isSoundEnabled) {
-    // Stop current audio but keep queue
-    audioPlayer.pause();
-    audioPlayer.currentTime = 0;
-    isPlaying = false;
-  } else {
-    // If audio left in queue and nothing playing, start again
-    if (audioQueue.length > 0 && !isPlaying) {
-      playNextAudio();
+    // Language toggle functionality
+    function updateLanguage(lang) {
+      document.body.classList.remove('lang-bn', 'lang-en');
+      document.body.classList.add(`lang-${lang}`);
+      msgInput.placeholder = lang === 'bn' ? 'আপনার প্রশ্ন লিখুন...' : 'Ask your question...';
+      refreshMessages();
     }
-  }
-}
 
-    function addMessage(text, cls) {
-      const div = document.createElement('div');
-      div.className = `msg ${cls}`;
-      div.textContent = text;
-      chat.appendChild(div);
-      chat.scrollTop = chat.scrollHeight;
-    }
-function playNextAudio() {
-  if (!isSoundEnabled || audioQueue.length === 0) {
-    isPlaying = false;
-    return;
-  }
-
-  isPlaying = true;
-  const nextSrc = audioQueue.shift();
-  if (nextSrc) {
-    audioPlayer.src = nextSrc;
-    audioPlayer.playbackRate = 1.3;
-    audioPlayer.play().catch(err => {
-      console.error('Audio playback error:', err);
-      addMessage('❌ অডিও চালাতে সমস্যা। আবার "পাঠান" ক্লিক করুন।', 'bot');
-      isPlaying = false;
+    languageToggle.addEventListener('change', function () {
+      updateLanguage(this.value);
     });
-  } else {
-    isPlaying = false;
-  }
-}
 
+    // Sound toggle functionality
+    function toggleSound() {
+      isSoundEnabled = !isSoundEnabled;
+      soundIcon.innerHTML = isSoundEnabled
+        ? `<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>`
+        : `<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>`;
+      soundToggle.className = soundToggle.className.replace(
+        isSoundEnabled ? 'bg-red-500' : 'success-gradient',
+        isSoundEnabled ? 'success-gradient' : 'bg-red-500'
+      );
 
+      if (!isSoundEnabled) {
+        audioPlayer.pause();
+        audioPlayer.currentTime = 0;
+        isPlaying = false;
+      } else if (audioQueue.length > 0 && !isPlaying) {
+        playNextAudio();
+      }
+    }
 
+    // Message handling
+    function addMessage(text, type, translations, animated = true) {
+      const message = { type, translations: translations || { bn: text, en: text }, id: Date.now() };
+      messages.push(message);
+      renderMessage(message, animated);
+      scrollToBottom();
+    }
+
+    function renderMessage(message, animated = true) {
+      const isUser = message.type === 'user';
+      const lang = document.body.classList.contains('lang-en') ? 'en' : 'bn';
+      const text = message.translations[lang] || message.translations.bn;
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `flex ${isUser ? 'justify-end' : 'justify-start'} ${animated ? 'message-animation' : ''}`;
+      messageDiv.dataset.messageId = message.id;
+      messageDiv.innerHTML = `
+        <div class="max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg px-4 py-3 rounded-xl shadow-md font-medium ${
+          isUser ? 'success-gradient text-white rounded-br-sm' : 'glass-effect text-white rounded-bl-sm'
+        }">
+          <div class="break-words leading-relaxed">${text}</div>
+        </div>
+      `;
+      chat.appendChild(messageDiv);
+    }
+
+    function refreshMessages() {
+      chat.innerHTML = '';
+      const welcomeMsg = document.getElementById('welcome-message');
+      if (welcomeMsg) chat.appendChild(welcomeMsg);
+      messages.forEach(message => renderMessage(message, false));
+      scrollToBottom();
+    }
+
+    function scrollToBottom() {
+      setTimeout(() => {
+        chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
+      }, 100);
+    }
+
+    // Typing indicator
+    function showTypingIndicator() {
+      const typingDiv = document.createElement('div');
+      typingDiv.id = 'typing-indicator';
+      typingDiv.className = 'flex justify-start message-animation';
+      typingDiv.innerHTML = `
+        <div class="glass-effect text-white rounded-xl rounded-bl-sm px-4 py-3 shadow-md max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg">
+          <div class="typing-indicator">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+      `;
+      chat.appendChild(typingDiv);
+      scrollToBottom();
+    }
+
+    function hideTypingIndicator() {
+      const typingIndicator = document.getElementById('typing-indicator');
+      if (typingIndicator) typingIndicator.remove();
+    }
+
+    // Audio handling
+    function playNextAudio() {
+      if (!isSoundEnabled || audioQueue.length === 0) {
+        isPlaying = false;
+        return;
+      }
+      isPlaying = true;
+      const nextSrc = audioQueue.shift();
+      if (nextSrc) {
+        audioPlayer.src = nextSrc;
+        audioPlayer.playbackRate = 1.2;
+        audioPlayer.play().catch(err => {
+          console.error('Audio playback error:', err);
+          const translations = {
+            bn: '❌ অডিও চালাতে সমস্যা। আবার চেষ্টা করুন।',
+            en: '❌ Audio playback error. Please try again.'
+          };
+          addMessage(null, 'bot', translations);
+          isPlaying = false;
+        });
+      } else {
+        isPlaying = false;
+      }
+    }
 
     audioPlayer.onended = () => playNextAudio();
 
+    // Send message
     async function sendMsg() {
       const msg = msgInput.value.trim();
       if (!msg) return;
-      addMessage(`🧑 ${msg}`, 'me');
+
+      msgInput.disabled = true;
+      sendBtn.disabled = true;
+
+      const welcomeMsg = document.getElementById('welcome-message');
+      if (welcomeMsg) {
+        welcomeMsg.style.opacity = '0';
+        setTimeout(() => welcomeMsg.remove(), 600);
+      }
+
+      // For now, assume user input is in the current language; backend will need to provide translations
+      const userTranslations = { bn: msg, en: msg }; // Placeholder: backend should provide translation
+      addMessage(msg, 'user', userTranslations);
       msgInput.value = '';
+      showTypingIndicator();
 
       try {
-        const res = await fetch(`/ask?q=${encodeURIComponent(msg)}`);
+        const res = await fetch(`/ask?q=${encodeURIComponent(msg)}`, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' }
+        });
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
+
+        hideTypingIndicator();
         if (data.error) {
-          addMessage(`❌ ত্রুটি: ${data.error}`, 'bot');
+          const translations = {
+            bn: `❌ ত্রুটি: ${data.error}`,
+            en: `❌ Error: ${data.error}`
+          };
+          addMessage(null, 'bot', translations);
           return;
         }
-        addMessage(`🤖 ${data.answer}`, 'bot');
-        audioQueue = data.audio_urls || [data.audio_url];
+
+        // Assume backend returns answer_bn and answer_en for bilingual support
+        const botTranslations = {
+          bn: data.answer_bn || data.answer,
+          en: data.answer_en || data.answer
+        };
+        addMessage(data.answer, 'bot', botTranslations);
+        audioQueue = Array.isArray(data.audio_urls) ? data.audio_urls : [data.audio_url].filter(Boolean);
         if (!isPlaying && audioQueue.length > 0) playNextAudio();
       } catch (err) {
-        addMessage(`❌ ত্রুটি: ${err}`, 'bot');
+        hideTypingIndicator();
+        const translations = {
+          bn: `❌ ত্রুটি: ${err.message}`,
+          en: `❌ Error: ${err.message}`
+        };
+        addMessage(null, 'bot', translations);
+      } finally {
+        msgInput.disabled = false;
+        sendBtn.disabled = false;
+        msgInput.focus();
       }
     }
 
+    // Speech recognition
     function startSpeechRecognition() {
       if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
-        addMessage('❌ এই ব্রাউজারে ভয়েস ইনপুট সমর্থিত নয়।', 'bot');
+        const translations = {
+          bn: '❌ এই ব্রাউজারে ভয়েস ইনপুট সমর্থিত নয়।',
+          en: '❌ Voice input is not supported in this browser.'
+        };
+        addMessage(null, 'bot', translations);
         return;
       }
+
       const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-      recognition.lang = 'bn-BD';
+      recognition.lang = document.body.classList.contains('lang-en') ? 'en-US' : 'bn-BD';
+
       if (isRecording) {
         recognition.stop();
         return;
       }
+
       isRecording = true;
-      voiceBtn.classList.add('recording');
+      voiceBtn.classList.add('recording-pulse');
+      voiceBtn.className = voiceBtn.className.replace('secondary-gradient', 'bg-red-500');
+      voiceBtn.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>`;
+
       recognition.onresult = event => {
         const transcript = event.results[0][0].transcript;
         msgInput.value = transcript;
         sendMsg();
       };
+
       recognition.onend = () => {
         isRecording = false;
-        voiceBtn.classList.remove('recording');
+        voiceBtn.classList.remove('recording-pulse');
+        voiceBtn.className = voiceBtn.className.replace('bg-red-500', 'secondary-gradient');
+        voiceBtn.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z"/></svg>`;
       };
+
       recognition.onerror = event => {
-        addMessage(`❌ ভয়েস ইনপুট ত্রুটি: ${event.error}`, 'bot');
+        const translations = {
+          bn: `❌ ভয়েস ইনপুট ত্রুটি: ${event.error}`,
+          en: `❌ Voice input error: ${event.error}`
+        };
+        addMessage(null, 'bot', translations);
         isRecording = false;
-        voiceBtn.classList.remove('recording');
+        voiceBtn.classList.remove('recording-pulse');
+        voiceBtn.className = voiceBtn.className.replace('bg-red-500', 'secondary-gradient');
+        voiceBtn.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z"/></svg>`;
       };
+
       recognition.start();
     }
 
+    // Enter key to send message
     msgInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter') sendMsg();
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMsg();
+      }
     });
 
+    // Send button click
+    sendBtn.addEventListener('click', sendMsg);
+
+    // Set dynamic vh for mobile
     function setVhUnit() {
       const vh = window.innerHeight * 0.01;
       document.documentElement.style.setProperty('--vh', `${vh}px`);
     }
-
     setVhUnit();
     window.addEventListener('resize', setVhUnit);
+
+    // Auto-focus input on load
+    window.addEventListener('load', () => {
+      document.body.classList.add('lang-bn');
+      msgInput.focus();
+    });
   </script>
 </body>
 </html>

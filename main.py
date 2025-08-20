@@ -23,6 +23,20 @@ os.makedirs("static/audio", exist_ok=True)
 # Store latest ESP32 command
 target_command = {"action": "stop"}
 
+# Predefined response translations
+RESPONSE_TRANSLATIONS = {
+    "লাইটটি চালু হয়েছে": "The light has been turned on",
+    "লাইটটি বন্ধ হয়েছে": "The light has been turned off",
+    "বীজ বপন ব্যবস্থা চালু হয়েছে": "The seed sowing system has been turned on",
+    "বীজ বপন ব্যবস্থা বন্ধ হয়েছে": "The seed sowing system has been turned off",
+    "কীটনাশক ব্যবস্থা চালু হয়েছে": "The fertilizer system has been turned on",
+    "কীটনাশক ব্যবস্থা বন্ধ হয়েছে": "The fertilizer system has been turned off",
+    "ওয়াটার পাম্প চালু হয়েছে": "The water pump has been turned on",
+    "ওয়াটার পাম্প বন্ধ হয়েছে": "The water pump has been turned off",
+    "ঘাস কাটার যন্ত্র চালু হয়েছে": "The grass cutter has been turned on",
+    "ঘাস কাটার যন্ত্র বন্ধ হয়েছে": "The grass cutter has been turned off"
+}
+
 SYSTEM_INSTRUCTION = """
 IF THE USER SAYS - 'TURN ON THE LIGHT' or something similar.
 THEN YOU MUST REPLY - 'লাইটটি চালু হয়েছে'
@@ -49,9 +63,6 @@ THEN YOU MUST REPLY - 'ঘাস কাটার যন্ত্র চালু
 IF THE USER SAYS - 'TURN OFF GRASS CUTTER' or something similar.
 THEN YOU MUST REPLY - 'ঘাস কাটার যন্ত্র বন্ধ হয়েছে'
 
-
-
-
 You are a Bangladeshi কৃষি সহকারী (agriculture assistant) designed to help farmers who may be অশিক্ষিত (illiterate) or not tech-savvy. You reply only in সহজ ও সুন্দর বাংলা (simple and clear Bangla). All your replies must sound natural, friendly, and easy to speak aloud.
 
 🔹 Your goal:
@@ -63,10 +74,10 @@ Give clear, practical advice that a farmer can follow **without needing to go to
 - Use real product names or methods if helpful (e.g. ইউরিয়া, ভার্টিমেক, ট্রাইসাইক্লাজোল).
 - Always make sure the solution is possible at home or with products from a local দোকান (shop).
 - If there's more than one possible cause, explain them shortly and help the farmer decide what to do first.
-- Don't ask farmars for photos.
+- Don't ask farmers for photos.
 - Never use any numbering or asterisk sign in the response.
 - Never use any symbols like * or - or _ in the response.
-- And also support links (sceured) if possible like, https://dae.gov.bd/ etc.
+- And also support links (secured) if possible like, https://dae.gov.bd/ etc.
 
 🔹 TTS Friendly Guidelines:
 - Use short sentences and also short answers.
@@ -112,11 +123,8 @@ Question:
 Expected answer:
 পাতা হলুদ হওয়ার কয়েকটা কারণ থাকতে পারে ভাই। গাছে যদি ইউরিয়া সার কম পড়ে, তাহলে এমন হয়। একটু ইউরিয়া আর পটাশ মিশিয়ে গাছের গোড়ায় দিন। যদি পাতার নিচে ছোট পোকা বা জাল মতো কিছু দেখেন, তাহলে মাকড় লেগেছে। দোকানে গিয়ে "ভার্টিমেক" নামে ঔষধ চাইলে পেয়ে যাবেন, তা মিশিয়ে স্প্রে করুন।  পানি যদি বেশি জমে থাকে বা একেবারে না থাকে, তাহলেও পাতা হলুদ হয়। মাটি যেন ভেজা থাকে, কিন্তু পানি না জমে — এটা ঠিক করে নেন। আগে সার আর পানির দিক দেখেন। সমস্যা না কমলে পরে কীটনাশক ব্যবহার করুন।'
 
-
 Remember: your job is to help — not redirect and also optimize the text for voice output.
-
-
-"""   # Omitted for brevity, unchanged
+"""
 
 def split_text(text, max_length=200):
     sentences = text.split('।')
@@ -136,8 +144,12 @@ def split_text(text, max_length=200):
         chunks.append(current_chunk.strip())
     return chunks
 
-
-answer = "yo"
+def get_english_translation(bn_text):
+    # For predefined responses, use the dictionary
+    if bn_text in RESPONSE_TRANSLATIONS:
+        return RESPONSE_TRANSLATIONS[bn_text]
+    # Fallback: return the same text with a note (to be replaced with actual translation API)
+    return f"{bn_text} (English translation not available)"
 
 @app.route('/')
 def serve_webpage():
@@ -151,41 +163,48 @@ def chat():
 def ask_bot():
     question = request.args.get('q')
     if not question:
-        return Response(json.dumps({'error': 'Missing question'}, ensure_ascii=False), content_type='application/json; charset=utf-8')
+        return Response(json.dumps({'error': 'Missing question'}, ensure_ascii=False), 
+                      content_type='application/json; charset=utf-8', status=400)
 
     try:
         full_prompt = f"{SYSTEM_INSTRUCTION}\n\nপ্রশ্ন: {question}\n\nউত্তর দিন:"
         resp = client.models.generate_content(model="gemini-2.0-flash", contents=full_prompt)
-        global answer 
-        answer = resp.text
+        answer_bn = resp.text.strip()
 
+        # Get English translation
+        answer_en = get_english_translation(answer_bn)
 
+        # Generate audio for Bengali
+        audio_urls_bn = []
+        answer_chunks_bn = split_text(answer_bn) if len(answer_bn) > 200 else [answer_bn]
+        for chunk in answer_chunks_bn:
+            chunk_mp3 = f"static/audio/{uuid.uuid4()}.mp3"
+            tts = gTTS(text=chunk, lang='bn', slow=False)
+            tts.save(chunk_mp3)
+            audio_urls_bn.append(request.url_root + chunk_mp3)
 
-        mp3_path = f"static/audio/{uuid.uuid4()}.mp3"
-        audio_urls = []
-        answer_chunks = split_text(answer) if len(answer) > 200 else [answer]
-
-        if len(answer_chunks) == 1:
-            tts = gTTS(text=answer, lang='bn', slow=False)
-            tts.save(mp3_path)
-            audio_urls.append(request.url_root + mp3_path)
-        else:
-            for chunk in answer_chunks:
-                chunk_mp3 = f"static/audio/{uuid.uuid4()}.mp3"
-                tts = gTTS(text=chunk, lang='bn', slow=False)
-                tts.save(chunk_mp3)
-                audio_urls.append(request.url_root + chunk_mp3)
+        # Generate audio for English
+        audio_urls_en = []
+        answer_chunks_en = split_text(answer_en) if len(answer_en) > 200 else [answer_en]
+        for chunk in answer_chunks_en:
+            chunk_mp3 = f"static/audio/{uuid.uuid4()}.mp3"
+            tts = gTTS(text=chunk, lang='en', slow=False)
+            tts.save(chunk_mp3)
+            audio_urls_en.append(request.url_root + chunk_mp3)
 
         cleanup_audio_files()
 
         return Response(json.dumps({
-            'answer': answer,
-            'audio_urls': audio_urls
+            'answer_bn': answer_bn,
+            'answer_en': answer_en,
+            'audio_urls_bn': audio_urls_bn,
+            'audio_urls_en': audio_urls_en
         }, ensure_ascii=False), content_type='application/json; charset=utf-8')
 
     except Exception as e:
         logger.error(f"Error: {str(e)}")
-        return Response(json.dumps({'error': str(e)}, ensure_ascii=False), content_type='application/json; charset=utf-8')
+        return Response(json.dumps({'error': str(e)}, ensure_ascii=False), 
+                       content_type='application/json; charset=utf-8', status=500)
 
 def cleanup_audio_files():
     max_age = 3600
@@ -196,39 +215,45 @@ def cleanup_audio_files():
 @app.route('/static/audio/<filename>')
 def get_audio(filename):
     return send_file(f'static/audio/{filename}', mimetype='audio/mpeg')
-@app.route("/esp32-receive/",methods=["GET"])
+
+@app.route("/esp32-receive/", methods=["GET"])
 def esp32_receive():
-    if "লাইটটি চালু হয়েছে" in answer:
-        return "light_on"
-        
-    if "লাইটটি বন্ধ হয়েছে" in answer:
-        return "light_off"
-    
-    if "বীজ বপন ব্যবস্থা চালু হয়েছে" in answer:
-        return "seed_sow_on"
-    if "বীজ বপন ব্যবস্থা বন্ধ হয়েছে" in answer:
-        return "seed_sow_off"
-    
-    if "কীটনাশক ব্যবস্থা চালু হয়েছে" in answer:
-        return "fertilzer_on"
-    if "কীটনাশক ব্যবস্থা বন্ধ হয়েছে" in answer:
-        return "fertilizer_off"
+    question = request.args.get('q')
+    if not question:
+        return Response(json.dumps({'error': 'Missing question'}, ensure_ascii=False), 
+                      content_type='application/json; charset=utf-8', status=400)
 
-    if "ওয়াটার পাম্প চালু হয়েছে" in answer:
-        return "water_pump_on"
-    if "ওয়াটার পাম্প বন্ধ হয়েছে" in answer:
-        return "water_pump_off"
+    try:
+        full_prompt = f"{SYSTEM_INSTRUCTION}\n\nপ্রশ্ন: {question}\n\nউত্তর দিন:"
+        resp = client.models.generate_content(model="gemini-2.0-flash", contents=full_prompt)
+        answer = resp.text.strip()
 
-    if "ঘাস কাটার যন্ত্র চালু হয়েছে" in answer:
-        return "grass_cutter_on"
-    if "ঘাস কাটার যন্ত্র বন্ধ হয়েছে" in answer:
-        return "grass_cutter_off"
-    return str(answer)
-    
+        if "লাইটটি চালু হয়েছে" in answer:
+            return "light_on"
+        if "লাইটটি বন্ধ হয়েছে" in answer:
+            return "light_off"
+        if "বীজ বপন ব্যবস্থা চালু হয়েছে" in answer:
+            return "seed_sow_on"
+        if "বীজ বপন ব্যবস্থা বন্ধ হয়েছে" in answer:
+            return "seed_sow_off"
+        if "কীটনাশক ব্যবস্থা চালু হয়েছে" in answer:
+            return "fertilizer_on"
+        if "কীটনাশক ব্যবস্থা বন্ধ হয়েছে" in answer:
+            return "fertilizer_off"
+        if "ওয়াটার পাম্প চালু হয়েছে" in answer:
+            return "water_pump_on"
+        if "ওয়াটার পাম্প বন্ধ হয়েছে" in answer:
+            return "water_pump_off"
+        if "ঘাস কাটার যন্ত্র চালু হয়েছে" in answer:
+            return "grass_cutter_on"
+        if "ঘাস কাটার যন্ত্র বন্ধ হয়েছে" in answer:
+            return "grass_cutter_off"
+        return str(answer)
 
-
-
-
+    except Exception as e:
+        logger.error(f"Error: {str(e)}")
+        return Response(json.dumps({'error': str(e)}, ensure_ascii=False), 
+                       content_type='application/json; charset=utf-8', status=500)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
