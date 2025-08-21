@@ -56,7 +56,6 @@ RESPONSE_TRANSLATIONS = {
     "কীটনাশক ব্যবস্থা বন্ধ হয়েছে": "The fertilizer system has been turned off",
     "ওয়াটার পাম্প চালু হয়েছে": "The water pump has been turned on",
     "ওয়াটার পাম্প বন্ধ হয়েছে": "The water pump has been turned off",
-
 }
 
 # Command mappings for ESP32 with fuzzy thresholds
@@ -69,7 +68,6 @@ COMMAND_MAPPINGS = {
     "turn off the fertilizer system": "কীটনাশক ব্যবস্থা বন্ধ হয়েছে",
     "turn on water pump": "ওয়াটার পাম্প চালু হয়েছে",
     "turn off water pump": "ওয়াটার পাম্প বন্ধ হয়েছে",
-
 }
 
 SYSTEM_INSTRUCTION_BN =  """
@@ -343,22 +341,22 @@ def esp32_receive():
             )
             answer = response.text.strip()
 
-        # Map to ESP32 commands
-        if( "লাইটটি চালু হয়েছে" or "The light has been turned on") in answer:
+        # Map to ESP32 commands (fixed the 'or' bug in conditions)
+        if "লাইটটি চালু হয়েছে" in answer or "The light has been turned on" in answer:
             return "light_on"
-        if( "লাইটটি বন্ধ হয়েছে" or "The light has been turned off") in answer:
+        if "লাইটটি বন্ধ হয়েছে" in answer or "The light has been turned off" in answer:
             return "light_off"
-        if( "বীজ বপন ব্যবস্থা চালু হয়েছে" or "The seed sowing system has been turned on") in answer:
+        if "বীজ বপন ব্যবস্থা চালু হয়েছে" in answer or "The seed sowing system has been turned on" in answer:
             return "seed_sow_on"
-        if( "বীজ বপন ব্যবস্থা বন্ধ হয়েছে" or "The seed sowing system has been turned off") in answer:
+        if "বীজ বপন ব্যবস্থা বন্ধ হয়েছে" in answer or "The seed sowing system has been turned off" in answer:
             return "seed_sow_off"
-        if( "কীটনাশক ব্যবস্থা চালু হয়েছে" or "The fertilizer system has been turned on") in answer:
+        if "কীটনাশক ব্যবস্থা চালু হয়েছে" in answer or "The fertilizer system has been turned on" in answer:
             return "fertilizer_on"
-        if( "কীটনাশক ব্যবস্থা বন্ধ হয়েছে" or "The fertilizer system has been turned off") in answer:
+        if "কীটনাশক ব্যবস্থা বন্ধ হয়েছে" in answer or "The fertilizer system has been turned off" in answer:
             return "fertilizer_off"
-        if( "ওয়াটার পাম্প চালু হয়েছে" or "The water pump has been turned on") in answer:
+        if "ওয়াটার পাম্প চালু হয়েছে" in answer or "The water pump has been turned on" in answer:
             return "water_pump_on"
-        if( "ওয়াটার পাম্প বন্ধ হয়েছে" or "The water pump has been turned off") in answer:
+        if "ওয়াটার পাম্প বন্ধ হয়েছে" in answer or "The water pump has been turned off" in answer:
             return "water_pump_off"
         return str(answer)
 
