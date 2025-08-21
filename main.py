@@ -101,7 +101,7 @@ SYSTEM_INSTRUCTION_BN =  """
 - উত্তর সংক্ষিপ্ত, সহজ আর বন্ধুত্বপূর্ণ হোক।  
 - জটিল শব্দ এড়িয়ে চলুন।  
 - ঘরে বসে বা স্থানীয় দোকান থেকে সমাধান করা যায় এমন পদ্ধতি বলুন।  
-- কৃষি অফিসে যেতে বলবেন না, একেবারে শেষ উপায় ছাড়া (যেমন মাটির টেস্ট)।  
+- কৃষি অফিসে যেতে বলবেন না, একেবারেই শেষ উপায় ছাড়া (যেমন মাটির টেস্ট)।  
 - লিস্ট, বুলেট, চিহ্ন (* - _ ইত্যাদি) ব্যবহার করবেন না। স্বাভাবিকভাবে লিখবেন।  
 - দরকার হলে লিঙ্ক দিতে পারেন (যেমন: https://dae.gov.bd/)।  
 
@@ -257,8 +257,13 @@ def ask_bot():
         context = "\n".join([f"প্রশ্ন: {q}\nউত্তর: {a}" for q, a in history]) if lang == 'bn' else "\n".join([f"Question: {q}\nAnswer: {a}" for q, a in history])
 
         full_prompt = f"{get_system_instruction(lang)}\n\n{context}\n\nপ্রশ্ন: {question}\n\nউত্তর দিন:" if lang == 'bn' else f"{get_system_instruction(lang)}\n\n{context}\n\nQuestion: {question}\n\nAnswer:"
-        response = genai.generate_content(full_prompt)
-        primary_answer = response.text.strip()
+
+        # FIXED HERE: replace generate_content with responses.create
+        response = genai.responses.create(
+            model="models/text-bison-001",
+            input=full_prompt
+        )
+        primary_answer = response.output_text.strip()
 
         # Get secondary translation
         secondary_answer = get_english_translation(primary_answer) if lang == 'bn' else get_bangla_translation(primary_answer)
@@ -334,8 +339,11 @@ def esp32_receive():
             answer = best_match
         else:
             full_prompt = f"{SYSTEM_INSTRUCTION_BN}\n\nপ্রশ্ন: {question}\n\nউত্তর দিন:"
-            response = genai.generate_content(full_prompt)
-            answer = response.text.strip()
+            response = genai.responses.create(
+                model="models/text-bison-001",
+                input=full_prompt
+            )
+            answer = response.output_text.strip()
 
         # Map to ESP32 commands
         if "লাইটটি চালু হয়েছে" in answer:
