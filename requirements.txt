@@ -1,21 +1,12 @@
-# Core framework
-Flask==2.3.3
-
-# Text-to-speech and translation
-gTTS==2.5.3
-google-generativeai==0.8.3
-python-dotenv==1.0.1
-googletrans==4.0.0-rc1
-
-# String similarity
-fuzzywuzzy==0.18.0
-python-Levenshtein==0.25.1
-
-# Flask extensions
-Flask-Caching==2.1.0
-Flask-Limiter==4.1.0
-Flask-Session==0.6.0
-
-# Security and logging
-bleach==6.1.0
-structlog==24.4.0
+Flask
+gTTS
+google-generativeai
+python-dotenv
+googletrans
+fuzzywuzzy
+python-Levenshtein
+Flask-Caching
+Flask-Limiter
+Flask-Session
+bleach
+structlog
