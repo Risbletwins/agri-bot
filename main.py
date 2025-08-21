@@ -6,7 +6,7 @@ import time
 import glob
 import logging
 from gtts import gTTS
-import google.generativeai as genai
+import google.genai as genai  # Updated import
 from dotenv import load_dotenv
 from googletrans import Translator
 from fuzzywuzzy import fuzz
@@ -25,11 +25,11 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Configure Gemini AI
-genai.configure(api_key=os.getenv("AIzaSyCAbZBgv8pzC7o-m0SoPlQerQvlQwZPH68"))
+# Configure Gemini AI (new SDK)
+genai.configure(api_key="AIzaSyCAbZBgv8pzC7o-m0SoPlQerQvlQwZPH68")  # Make sure your .env has GEMINI_API_KEY
 
 # Caching setup
-app.config['CACHE_TYPE'] = 'simple'  # Use simple in-memory cache
+app.config['CACHE_TYPE'] = 'simple'
 cache = Cache(app)
 
 # Rate limiting setup
@@ -37,16 +37,16 @@ limiter = Limiter(get_remote_address, app=app, default_limits=["200 per day", "5
 
 # Session setup
 app.config['SESSION_TYPE'] = 'filesystem'
-app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "supersecretkey")  # Set a secret key
+app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "supersecretkey")
 Session(app)
 
-# Create audio folder if not exist
+# Create audio folder
 os.makedirs("static/audio", exist_ok=True)
 
-# Translator for dynamic translations
+# Translator
 translator = Translator()
 
-# Predefined response translations (extended if needed)
+# Predefined response translations
 RESPONSE_TRANSLATIONS = {
     "লাইটটি চালু হয়েছে": "The light has been turned on",
     "লাইটটি বন্ধ হয়েছে": "The light has been turned off",
@@ -60,7 +60,7 @@ RESPONSE_TRANSLATIONS = {
     "ঘাস কাটার যন্ত্র বন্ধ হয়েছে": "The grass cutter has been turned off"
 }
 
-# Command mappings for ESP32 with fuzzy thresholds
+# Command mappings
 COMMAND_MAPPINGS = {
     "turn on the light": "লাইটটি চালু হয়েছে",
     "turn off the light": "লাইটটি বন্ধ হয়েছে",
@@ -74,6 +74,7 @@ COMMAND_MAPPINGS = {
     "turn off grass cutter": "ঘাস কাটার যন্ত্র বন্ধ হয়েছে"
 }
 
+# System instructions (shortened here for brevity, keep your full instruction text)
 SYSTEM_INSTRUCTION_BN =  """
 
 আপনি একজন কৃষি সহকারী।  
@@ -186,6 +187,7 @@ A: Yellow leaves can be due to lack of urea or potash. Add a little fertilizer a
 
 """
 
+
 def get_system_instruction(lang):
     return SYSTEM_INSTRUCTION_BN if lang == 'bn' else SYSTEM_INSTRUCTION_EN
 
@@ -258,19 +260,19 @@ def ask_bot():
 
         full_prompt = f"{get_system_instruction(lang)}\n\n{context}\n\nপ্রশ্ন: {question}\n\nউত্তর দিন:" if lang == 'bn' else f"{get_system_instruction(lang)}\n\n{context}\n\nQuestion: {question}\n\nAnswer:"
 
-        # FIXED HERE: replace generate_content with responses.create
+        # 🔹 Updated Gen AI call
         response = genai.responses.create(
-            model="models/text-bison-001",
+            model="gemini-2.0-flash",
             input=full_prompt
         )
         primary_answer = response.output_text.strip()
 
-        # Get secondary translation
+        # Secondary translation
         secondary_answer = get_english_translation(primary_answer) if lang == 'bn' else get_bangla_translation(primary_answer)
 
         # Update session history
         history.append((question, primary_answer))
-        if len(history) > 5:  # Keep last 5 for context
+        if len(history) > 5:
             history.pop(0)
         session['chat_history'] = history
 
@@ -291,8 +293,7 @@ def ask_bot():
         threading.Thread(target=generate_audio_async, args=(primary_chunks, lang, primary_callback)).start()
         threading.Thread(target=generate_audio_async, args=(secondary_chunks, 'en' if lang == 'bn' else 'bn', secondary_callback)).start()
 
-        # Wait briefly for threads (or make it fully async, but for simplicity wait max 5s)
-        time.sleep(5)  # Adjust as needed
+        time.sleep(5)  # Wait briefly
 
         cleanup_audio_files()
 
@@ -331,7 +332,7 @@ def esp32_receive():
         lower_question = question.lower()
         for cmd, bn_response in COMMAND_MAPPINGS.items():
             score = fuzz.token_sort_ratio(lower_question, cmd)
-            if score > best_score and score > 80:  # Threshold
+            if score > best_score and score > 80:
                 best_score = score
                 best_match = bn_response
 
@@ -340,7 +341,7 @@ def esp32_receive():
         else:
             full_prompt = f"{SYSTEM_INSTRUCTION_BN}\n\nপ্রশ্ন: {question}\n\nউত্তর দিন:"
             response = genai.responses.create(
-                model="models/text-bison-001",
+                model="gemini-2.0-flash",
                 input=full_prompt
             )
             answer = response.output_text.strip()
