@@ -26,7 +26,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Configure Gemini AI (new SDK)
-genai.configure(api_key="AIzaSyCAbZBgv8pzC7o-m0SoPlQerQvlQwZPH68")  # Make sure your .env has GEMINI_API_KEY
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))  # Make sure your .env has GEMINI_API_KEY
 
 # Caching setup
 app.config['CACHE_TYPE'] = 'simple'
