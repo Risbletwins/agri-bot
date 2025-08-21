@@ -207,14 +207,25 @@ def split_text(text, max_length=200):
         chunks.append(current_chunk.strip())
     return chunks
 
-def generate_audio_async(text_chunks, lang, callback):
+def generate_audio_sync(text_chunks, lang):
+    """
+    Synchronous TTS generation. Returns list of public URLs for saved mp3 files.
+    """
     audio_urls = []
     for chunk in text_chunks:
-        chunk_mp3 = f"static/audio/{uuid.uuid4()}.mp3"
-        tts = gTTS(text=chunk, lang=lang, slow=False)
-        tts.save(chunk_mp3)
-        audio_urls.append(request.url_root + chunk_mp3)
-    callback(audio_urls)
+        try:
+            # Save file in OS-safe way
+            chunk_mp3 = os.path.join("static", "audio", f"{uuid.uuid4()}.mp3")
+            tts = gTTS(text=chunk, lang=lang, slow=False)
+            tts.save(chunk_mp3)
+            # Build public URL using host_url (works better behind proxies)
+            base = request.host_url.rstrip('/')  # e.g. https://your-app.onrender.com
+            public_path = f"{base}/{chunk_mp3.replace(os.sep, '/')}"
+            audio_urls.append(public_path)
+            logger.info("TTS saved: %s -> %s", chunk_mp3, public_path)
+        except Exception as e:
+            logger.error("TTS error saving chunk: %s", e, exc_info=True)
+    return audio_urls
 
 def get_english_translation(bn_text):
     if bn_text in RESPONSE_TRANSLATIONS:
@@ -274,25 +285,15 @@ def ask_bot():
             history.pop(0)
         session['chat_history'] = history
 
-        # Generate audio asynchronously
-        audio_urls_primary = []
-        audio_urls_secondary = []
+        # Generate audio synchronously (reliable)
         primary_chunks = split_text(primary_answer)
         secondary_chunks = split_text(secondary_answer)
 
-        def primary_callback(urls):
-            nonlocal audio_urls_primary
-            audio_urls_primary = urls
+        audio_urls_primary = generate_audio_sync(primary_chunks, lang)
+        audio_urls_secondary = generate_audio_sync(secondary_chunks, 'en' if lang == 'bn' else 'bn')
 
-        def secondary_callback(urls):
-            nonlocal audio_urls_secondary
-            audio_urls_secondary = urls
-
-        threading.Thread(target=generate_audio_async, args=(primary_chunks, lang, primary_callback)).start()
-        threading.Thread(target=generate_audio_async, args=(secondary_chunks, 'en' if lang == 'bn' else 'bn', secondary_callback)).start()
-
-        # Wait briefly for threads (or make it fully async, but for simplicity wait max 5s)
-        time.sleep(5)  # Adjust as needed
+        logger.info("Audio URLs primary: %s", audio_urls_primary)
+        logger.info("Audio URLs secondary: %s", audio_urls_secondary)
 
         cleanup_audio_files()
 
@@ -304,14 +305,17 @@ def ask_bot():
         })
 
     except Exception as e:
-        logger.error(f"Error: {str(e)}")
+        logger.error(f"Error: {str(e)}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 def cleanup_audio_files():
     max_age = 3600
     for file in glob.glob("static/audio/*.mp3"):
         if os.path.getmtime(file) < time.time() - max_age:
-            os.remove(file)
+            try:
+                os.remove(file)
+            except Exception as e:
+                logger.error("Error removing old audio file %s: %s", file, e)
 
 @app.route('/static/audio/<filename>')
 def get_audio(filename):
@@ -369,7 +373,7 @@ def esp32_receive():
         return str(answer)
 
     except Exception as e:
-        logger.error(f"Error: {str(e)}")
+        logger.error(f"Error: {str(e)}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 if __name__ == "__main__":
