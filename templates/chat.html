@@ -1,580 +1,192 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no"/>
-  <title>কৃষি সহকারী | Agri Servitor</title>
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    :root {
-      --vh: 100vh;
-      --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-      --secondary-gradient: linear-gradient(135deg, #ec4899 0%, #f43f5e 100%);
-      --success-gradient: linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%);
-      --accent-gradient: linear-gradient(135deg, #34d399 0%, #10b981 100%);
-    }
-
-    html, body {
-      height: var(--vh);
-      overflow: hidden;
-      font-family: 'Hind Siliguri', sans-serif;
-      background: #111827;
-    }
-
-    .sidebar {
-      transform: translateX(-100%);
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    }
-
-    .sidebar.open {
-      transform: translateX(0);
-    }
-
-    .primary-gradient { background: var(--primary-gradient); }
-    .secondary-gradient { background: var(--secondary-gradient); }
-    .success-gradient { background: var(---success-gradient); }
-    .accent-gradient { background: var(--accent-gradient); }
-
-    .glass-effect {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-      transition: all 0.3s ease;
-    }
-
-    .glass-dark {
-      background: rgba(0, 0, 0, 0.15);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .lang-en [data-lang="bn"] { display: none; }
-    .lang-en [data-lang="en"] { display: inline; }
-    [data-lang="bn"] { display: inline; }
-    [data-lang="en"] { display: none; }
-
-    .message-animation {
-      animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    @keyframes slideInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .typing-indicator {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 16px;
-    }
-
-    .typing-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--primary-gradient);
-      animation: typingDot 1.4s infinite ease-in-out;
-    }
-
-    .typing-dot:nth-child(1) { animation-delay: -0.3s; }
-    .typing-dot:nth-child(2) { animation-delay: -0.15s; }
-    .typing-dot:nth-child(3) { animation-delay: 0s; }
-
-    @keyframes typingDot {
-      0%, 80%, 100% { transform: scale(0.5); opacity: 0.5; }
-      40% { transform: scale(1); opacity: 1; }
-    }
-
-    .floating-button {
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .floating-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-    }
-
-    .floating-button:active {
-      transform: translateY(0);
-    }
-
-    .recording-pulse {
-      animation: recordPulse 1s infinite;
-    }
-
-    @keyframes recordPulse {
-      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-      50% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
-      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-    }
-
-    .custom-scrollbar {
-      overflow-y: auto;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 5px;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: transparent;
-      border-radius: 10px;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.5));
-      border-radius: 10px;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.8));
-    }
-
-    .input-glow:focus {
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3), 0 6px 20px rgba(0, 0, 0, 0.15);
-      border-color: #4f46e5;
-    }
-
-    .fade-in {
-      animation: fadeIn 0.6s ease-in;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    @media (max-width: 768px) {
-      .sidebar { width: 260px; }
-      .menu-btn { top: 0.75rem; left: 0.75rem; padding: 0.5rem; }
-      header h1 { font-size: 1.75rem; }
-      .controls-mobile { top: 0.75rem; right: 0.75rem; gap: 0.5rem; }
-      .chat-container { padding-top: 4.5rem; padding-bottom: 5rem; }
-      .input-container { padding: 0.75rem; }
-    }
-
-    @media (max-width: 480px) {
-      header h1 { font-size: 1.25rem; }
-      .controls-mobile { flex-direction: row; gap: 0.5rem; }
-      .chat-container { padding-top: 5rem; }
-      .input-container { padding: 0.5rem; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>কৃষি সহকারী চ্যাট | Agri Servitor Chat</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        body { font-family: 'Noto Sans Bengali', sans-serif; background-color: #f8f9fa; color: #333; height: 100vh; display: flex; flex-direction: column; }
+        .chat-container { flex: 1; overflow-y: auto; padding: 20px; }
+        .chat-message { margin-bottom: 15px; padding: 10px 15px; border-radius: 10px; max-width: 80%; }
+        .user-message { background-color: #dcf8c6; align-self: flex-end; }
+        .bot-message { background-color: #ffffff; border: 1px solid #ddd; align-self: flex-start; }
+        .input-group { padding: 10px; background-color: #fff; border-top: 1px solid #ddd; }
+        .lang-toggle { position: absolute; top: 10px; right: 10px; z-index: 1000; }
+        .audio-player { margin-top: 10px; }
+        .spinner { display: none; }
+        .error-message { color: red; text-align: center; }
+        footer { background-color: #e9ecef; padding: 10px 0; text-align: center; font-size: 0.8rem; }
+    </style>
 </head>
-<body class="bg-gray-900 text-white antialiased lang-bn">
-  <!-- Sidebar -->
-  <div id="sidebar" class="sidebar fixed top-0 left-0 w-64 h-full primary-gradient p-6 flex flex-col gap-5 shadow-2xl z-50">
-    <div class="text-center mb-3">
-      <h2 class="text-2xl font-bold text-white mb-2">
-        <span data-lang="bn">অপশন</span>
-        <span data-lang="en">Options</span>
-      </h2>
-      <div class="w-12 h-1 bg-white/30 mx-auto rounded-full"></div>
+<body>
+    <!-- Language Toggle -->
+    <div class="lang-toggle">
+        <button id="lang-btn" class="btn btn-secondary">English</button>
     </div>
-    
-    <div class="space-y-3 flex-1">
-      <a href="/" class="block">
-        <button class="w-full text-left py-3 px-5 rounded-xl glass-effect hover:bg-white/20 transition-all duration-300 font-medium text-sm">
-          <span data-lang="bn">🏠 হোম</span>
-          <span data-lang="en">🏠 Home</span>
-        </button>
-      </a>
-      <a href="/chat" class="block">
-        <button class="w-full text-left py-3 px-5 rounded-xl glass-effect bg-white/20 font-medium text-sm">
-          <span data-lang="bn">🤖 কৃষি সহকারী</span>
-          <span data-lang="en">🤖 Agri Servitor</span>
-        </button>
-      </a>
-    </div>
-  </div>
 
-  <!-- Menu Button -->
-  <button class="menu-btn fixed top-4 left-4 primary-gradient text-white p-3 rounded-xl hover:shadow-xl transition-all duration-300 z-50 floating-button" onclick="toggleSidebar()">
-    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16m-7 6h7"></path>
-    </svg>
-  </button>
-
-  <!-- Main Content -->
-  <div class="flex flex-col h-full w-full">
-    <!-- Header -->
-    <header class="fixed top-0 left-0 right-0 primary-gradient shadow-xl z-40">
-      <div class="px-4 py-5 flex items-center justify-center relative">
-        <h1 class="text-2xl font-bold tracking-tight text-center text-white">
-          <span data-lang="bn">কৃষি পরিচারক</span>
-          <span data-lang="en">Agri Servitor</span>
-        </h1>
-        
-        <!-- Controls -->
-        <div class="absolute controls-mobile top-4 right-4 flex items-center gap-2">
-          <button id="soundToggle" class="success-gradient hover:shadow-lg text-white p-2 rounded-lg transition-all duration-300 floating-button" onclick="toggleSound()">
-            <svg id="soundIcon" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-            </svg>
-          </button>
-          <select id="language-toggle" class="secondary-gradient text-white rounded-lg px-3 py-2 focus:outline-none hover:shadow-lg transition-all duration-300 font-medium text-sm">
-            <option value="bn">বাংলা</option>
-            <option value="en">English</option>
-          </select>
-        </div>
-      </div>
-    </header>
-
-    <!-- Chat Area -->
-    <div class="flex-1 chat-container pt-24 pb-24 overflow-hidden">
-      <div class="h-full px-4 md:px-6">
-        <div id="chat" class="h-full custom-scrollbar pr-3 space-y-4">
-          <!-- Welcome Message -->
-          <div id="welcome-message" class="flex justify-center mb-6 fade-in transition-opacity duration-700">
-            <div class="glass-effect px-6 py-4 rounded-2xl text-center max-w-sm md:max-w-md shadow-xl">
-              <div class="text-3xl mb-2">🌱</div>
-              <div class="font-medium text-base">
-                <span data-lang="bn">স্বাগতম! আপনার কৃষি সংক্রান্ত যেকোনো প্রশ্ন করুন।</span>
-                <span data-lang="en">Welcome! Ask any agriculture-related questions.</span>
-              </div>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="/">কৃষি সহকারী</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">হোম</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/chat">কৃষি সহকারী</a></li>
+                </ul>
             </div>
-          </div>
         </div>
-      </div>
+    </nav>
+
+    <!-- Chat Container -->
+    <div class="chat-container d-flex flex-column" id="chat-history">
+        <!-- Welcome Message -->
+        <div class="chat-message bot-message">
+            <i class="fas fa-robot me-2"></i>
+            <span data-bn="স্বাগতম! আপনার কৃষি সংক্রান্ত যেকোনো প্রশ্ন করুন।" data-en="Welcome! Ask any agriculture-related questions.">স্বাগতম! আপনার কৃষি সংক্রান্ত যেকোনো প্রশ্ন করুন।</span>
+        </div>
     </div>
 
-    <!-- Input Area -->
-    <div class="fixed bottom-0 left-0 right-0 primary-gradient shadow-xl z-40">
-      <div class="input-container p-4 md:p-6">
-        <div class="max-w-3xl mx-auto glass-dark rounded-2xl p-3 md:p-4">
-          <div class="flex gap-3 items-center">
-            <input 
-              type="text" 
-              id="msgInput" 
-              class="flex-1 bg-white/90 text-gray-800 px-4 py-3 rounded-xl border-0 focus:outline-none input-glow transition-all duration-300 font-medium placeholder-gray-500 shadow-md" 
-              placeholder="আপনার প্রশ্ন লিখুন..."
-            />
-            <button 
-              id="sendBtn"
-              class="accent-gradient hover:shadow-lg text-white px-6 py-3 rounded-xl transition-all duration-300 floating-button font-medium flex items-center gap-2"
-              onclick="sendMsg()"
-            >
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-              </svg>
-              <span data-lang="bn">পাঠান</span>
-              <span data-lang="en">Send</span>
-            </button>
-            <button 
-              id="voiceBtn" 
-              class="secondary-gradient hover:shadow-lg text-white p-3 rounded-xl transition-all duration-300 floating-button"
-              onclick="startSpeechRecognition()"
-            >
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z"/>
-              </svg>
-            </button>
-          </div>
+    <!-- Input Group -->
+    <div class="input-group">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="input-group">
+                        <input type="text" id="question-input" class="form-control" placeholder="আপনার প্রশ্ন লিখুন..." aria-label="Question input">
+                        <button id="voice-btn" class="btn btn-outline-secondary"><i class="fas fa-microphone"></i></button>
+                        <button id="send-btn" class="btn btn-primary"><i class="fas fa-paper-plane"></i> <span data-bn="পাঠান" data-en="Send">পাঠান</span></button>
+                    </div>
+                    <div id="loading-spinner" class="spinner-border text-primary mt-2 spinner" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p id="error-message" class="error-message mt-2"></p>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
 
-    <audio id="ttsAudio" autoplay></audio>
-  </div>
-
-  <script>
-    const sidebar = document.getElementById('sidebar');
-    const menuBtn = document.querySelector('.menu-btn');
-    const languageToggle = document.getElementById('language-toggle');
-    const chat = document.getElementById('chat');
-    const msgInput = document.getElementById('msgInput');
-    const sendBtn = document.getElementById('sendBtn');
-    const audioPlayer = document.getElementById('ttsAudio');
-    const voiceBtn = document.getElementById('voiceBtn');
-    const soundToggle = document.getElementById('soundToggle');
-    const soundIcon = document.getElementById('soundIcon');
-    
-    let audioQueue = [];
-    let isPlaying = false;
-    let isRecording = false;
-    let isSoundEnabled = true;
-    let messages = []; // Store messages with language data
-
-    // Sidebar functionality
-    function toggleSidebar() {
-      sidebar.classList.toggle('open');
-    }
-
-    document.addEventListener('click', (e) => {
-      if (
-        sidebar.classList.contains('open') &&
-        !sidebar.contains(e.target) &&
-        !menuBtn.contains(e.target)
-      ) {
-        sidebar.classList.remove('open');
-      }
-    });
-
-    // Language toggle functionality
-    function updateLanguage(lang) {
-      document.body.classList.remove('lang-bn', 'lang-en');
-      document.body.classList.add(`lang-${lang}`);
-      msgInput.placeholder = lang === 'bn' ? 'আপনার প্রশ্ন লিখুন...' : 'Ask your question...';
-      refreshMessages();
-    }
-
-    languageToggle.addEventListener('change', function () {
-      updateLanguage(this.value);
-    });
-
-    // Sound toggle functionality
-    function toggleSound() {
-      isSoundEnabled = !isSoundEnabled;
-      soundIcon.innerHTML = isSoundEnabled
-        ? `<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>`
-        : `<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>`;
-      soundToggle.className = soundToggle.className.replace(
-        isSoundEnabled ? 'bg-red-500' : 'success-gradient',
-        isSoundEnabled ? 'success-gradient' : 'bg-red-500'
-      );
-
-      if (!isSoundEnabled) {
-        audioPlayer.pause();
-        audioPlayer.currentTime = 0;
-        isPlaying = false;
-      } else if (audioQueue.length > 0 && !isPlaying) {
-        playNextAudio();
-      }
-    }
-
-    // Message handling
-    function addMessage(text, type, translations, animated = true) {
-      const message = { type, translations: translations || { bn: text, en: text }, id: Date.now() };
-      messages.push(message);
-      renderMessage(message, animated);
-      scrollToBottom();
-    }
-
-    function renderMessage(message, animated = true) {
-      const isUser = message.type === 'user';
-      const lang = document.body.classList.contains('lang-en') ? 'en' : 'bn';
-      const text = message.translations[lang] || message.translations.bn;
-      const messageDiv = document.createElement('div');
-      messageDiv.className = `flex ${isUser ? 'justify-end' : 'justify-start'} ${animated ? 'message-animation' : ''}`;
-      messageDiv.dataset.messageId = message.id;
-      messageDiv.innerHTML = `
-        <div class="max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg px-4 py-3 rounded-xl shadow-md font-medium ${
-          isUser ? 'success-gradient text-white rounded-br-sm' : 'glass-effect text-white rounded-bl-sm'
-        }">
-          <div class="break-words leading-relaxed">${text}</div>
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p data-bn="© ২০২৫ কৃষি সহকারী — কৃষকদের ক্ষমতায়ন এআই ও অটোমেশনের মাধ্যমে" data-en="© 2025 Agri Servitor — Empowering farmers through AI and automation">© ২০২৫ কৃষি সহকারী — কৃষকদের ক্ষমতায়ন এআই ও অটোমেশনের মাধ্যমে</p>
         </div>
-      `;
-      chat.appendChild(messageDiv);
-    }
+    </footer>
 
-    function refreshMessages() {
-      chat.innerHTML = '';
-      const welcomeMsg = document.getElementById('welcome-message');
-      if (welcomeMsg) chat.appendChild(welcomeMsg);
-      messages.forEach(message => renderMessage(message, false));
-      scrollToBottom();
-    }
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Language Toggle and Chat Script -->
+    <script>
+        const langBtn = document.getElementById('lang-btn');
+        const elements = document.querySelectorAll('[data-bn], [data-en]');
+        const questionInput = document.getElementById('question-input');
+        const sendBtn = document.getElementById('send-btn');
+        const voiceBtn = document.getElementById('voice-btn');
+        const chatHistory = document.getElementById('chat-history');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const errorMessage = document.getElementById('error-message');
+        let currentLang = localStorage.getItem('lang') || 'bn';
+        let recognition;
 
-    function scrollToBottom() {
-      setTimeout(() => {
-        chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
-      }, 100);
-    }
-
-    // Typing indicator
-    function showTypingIndicator() {
-      const typingDiv = document.createElement('div');
-      typingDiv.id = 'typing-indicator';
-      typingDiv.className = 'flex justify-start message-animation';
-      typingDiv.innerHTML = `
-        <div class="glass-effect text-white rounded-xl rounded-bl-sm px-4 py-3 shadow-md max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg">
-          <div class="typing-indicator">
-            <div class="typing-dot"></div>
-            <div class="typing-dot"></div>
-            <div class="typing-dot"></div>
-          </div>
-        </div>
-      `;
-      chat.appendChild(typingDiv);
-      scrollToBottom();
-    }
-
-    function hideTypingIndicator() {
-      const typingIndicator = document.getElementById('typing-indicator');
-      if (typingIndicator) typingIndicator.remove();
-    }
-
-    // Audio handling
-    function playNextAudio() {
-      if (!isSoundEnabled || audioQueue.length === 0) {
-        isPlaying = false;
-        return;
-      }
-      isPlaying = true;
-      const nextSrc = audioQueue.shift();
-      if (nextSrc) {
-        audioPlayer.src = nextSrc;
-        audioPlayer.playbackRate = 1.2;
-        audioPlayer.play().catch(err => {
-          console.error('Audio playback error:', err);
-          const translations = {
-            bn: '❌ অডিও চালাতে সমস্যা। আবার চেষ্টা করুন।',
-            en: '❌ Audio playback error. Please try again.'
-          };
-          addMessage(null, 'bot', translations);
-          isPlaying = false;
-        });
-      } else {
-        isPlaying = false;
-      }
-    }
-
-    audioPlayer.onended = () => playNextAudio();
-
-    // Send message
-    async function sendMsg() {
-      const msg = msgInput.value.trim();
-      if (!msg) return;
-
-      msgInput.disabled = true;
-      sendBtn.disabled = true;
-
-      const welcomeMsg = document.getElementById('welcome-message');
-      if (welcomeMsg) {
-        welcomeMsg.style.opacity = '0';
-        setTimeout(() => welcomeMsg.remove(), 600);
-      }
-
-      // For now, assume user input is in the current language; backend will need to provide translations
-      const userTranslations = { bn: msg, en: msg }; // Placeholder: backend should provide translation
-      addMessage(msg, 'user', userTranslations);
-      msgInput.value = '';
-      showTypingIndicator();
-
-      try {
-        const res = await fetch(`/ask?q=${encodeURIComponent(msg)}`, {
-          method: 'GET',
-          headers: { 'Accept': 'application/json' }
-        });
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        const data = await res.json();
-
-        hideTypingIndicator();
-        if (data.error) {
-          const translations = {
-            bn: `❌ ত্রুটি: ${data.error}`,
-            en: `❌ Error: ${data.error}`
-          };
-          addMessage(null, 'bot', translations);
-          return;
+        function toggleLanguage() {
+            currentLang = currentLang === 'bn' ? 'en' : 'bn';
+            localStorage.setItem('lang', currentLang);
+            langBtn.textContent = currentLang === 'bn' ? 'English' : 'বাংলা';
+            elements.forEach(el => {
+                el.textContent = el.getAttribute(`data-${currentLang}`);
+            });
+            questionInput.placeholder = currentLang === 'bn' ? 'আপনার প্রশ্ন লিখুন...' : 'Type your question...';
+            document.documentElement.lang = currentLang;
         }
 
-        // Assume backend returns answer_bn and answer_en for bilingual support
-        const botTranslations = {
-          bn: data.answer_bn || data.answer,
-          en: data.answer_en || data.answer
-        };
-        addMessage(data.answer, 'bot', botTranslations);
-        audioQueue = Array.isArray(data.audio_urls) ? data.audio_urls : [data.audio_url].filter(Boolean);
-        if (!isPlaying && audioQueue.length > 0) playNextAudio();
-      } catch (err) {
-        hideTypingIndicator();
-        const translations = {
-          bn: `❌ ত্রুটি: ${err.message}`,
-          en: `❌ Error: ${err.message}`
-        };
-        addMessage(null, 'bot', translations);
-      } finally {
-        msgInput.disabled = false;
-        sendBtn.disabled = false;
-        msgInput.focus();
-      }
-    }
+        // Initial setup
+        if (currentLang === 'en') toggleLanguage();
+        langBtn.addEventListener('click', toggleLanguage);
 
-    // Speech recognition
-    function startSpeechRecognition() {
-      if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
-        const translations = {
-          bn: '❌ এই ব্রাউজারে ভয়েস ইনপুট সমর্থিত নয়।',
-          en: '❌ Voice input is not supported in this browser.'
-        };
-        addMessage(null, 'bot', translations);
-        return;
-      }
+        // Chat Submission
+        async function sendQuestion() {
+            const question = questionInput.value.trim();
+            if (!question) return;
 
-      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-      recognition.lang = document.body.classList.contains('lang-en') ? 'en-US' : 'bn-BD';
+            // Append user message
+            appendMessage('user', question);
+            questionInput.value = '';
+            loadingSpinner.style.display = 'block';
+            errorMessage.textContent = '';
 
-      if (isRecording) {
-        recognition.stop();
-        return;
-      }
+            try {
+                const response = await fetch(`/ask?q=${encodeURIComponent(question)}&lang=${currentLang}`);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const data = await response.json();
 
-      isRecording = true;
-      voiceBtn.classList.add('recording-pulse');
-      voiceBtn.className = voiceBtn.className.replace('secondary-gradient', 'bg-red-500');
-      voiceBtn.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>`;
+                // Append bot message
+                const answerKey = currentLang === 'bn' ? 'answer_bn' : 'answer_en';
+                const audioUrlsKey = currentLang === 'bn' ? 'audio_urls_bn' : 'audio_urls_en';
+                appendMessage('bot', data[answerKey], data[audioUrlsKey]);
+            } catch (error) {
+                errorMessage.textContent = currentLang === 'bn' ? 'কিছু ভুল হয়েছে। আবার চেষ্টা করুন।' : 'Something went wrong. Please try again.';
+            } finally {
+                loadingSpinner.style.display = 'none';
+            }
+        }
 
-      recognition.onresult = event => {
-        const transcript = event.results[0][0].transcript;
-        msgInput.value = transcript;
-        sendMsg();
-      };
+        function appendMessage(type, text, audioUrls = []) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('chat-message', type === 'user' ? 'user-message' : 'bot-message');
+            const icon = type === 'bot' ? '<i class="fas fa-robot me-2"></i>' : '<i class="fas fa-user me-2"></i>';
+            messageDiv.innerHTML = `${icon}${text}`;
 
-      recognition.onend = () => {
-        isRecording = false;
-        voiceBtn.classList.remove('recording-pulse');
-        voiceBtn.className = voiceBtn.className.replace('bg-red-500', 'secondary-gradient');
-        voiceBtn.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z"/></svg>`;
-      };
+            if (type === 'bot' && audioUrls.length > 0) {
+                const audioPlayer = document.createElement('div');
+                audioPlayer.classList.add('audio-player');
+                audioUrls.forEach(url => {
+                    const audio = document.createElement('audio');
+                    audio.controls = true;
+                    audio.autoplay = true;
+                    audio.src = url;
+                    audioPlayer.appendChild(audio);
+                });
+                messageDiv.appendChild(audioPlayer);
+            }
 
-      recognition.onerror = event => {
-        const translations = {
-          bn: `❌ ভয়েস ইনপুট ত্রুটি: ${event.error}`,
-          en: `❌ Voice input error: ${event.error}`
-        };
-        addMessage(null, 'bot', translations);
-        isRecording = false;
-        voiceBtn.classList.remove('recording-pulse');
-        voiceBtn.className = voiceBtn.className.replace('bg-red-500', 'secondary-gradient');
-        voiceBtn.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z"/></svg>`;
-      };
+            chatHistory.appendChild(messageDiv);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
 
-      recognition.start();
-    }
+        // Voice Input
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+            recognition.lang = currentLang === 'bn' ? 'bn-BD' : 'en-US';
+            recognition.continuous = false;
+            recognition.interimResults = false;
 
-    // Enter key to send message
-    msgInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMsg();
-      }
-    });
+            recognition.onresult = event => {
+                questionInput.value = event.results[0][0].transcript;
+                sendQuestion();
+            };
 
-    // Send button click
-    sendBtn.addEventListener('click', sendMsg);
+            recognition.onerror = event => {
+                errorMessage.textContent = currentLang === 'bn' ? 'ভয়েস ইনপুটে সমস্যা হয়েছে।' : 'Voice input error.';
+            };
 
-    // Set dynamic vh for mobile
-    function setVhUnit() {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
-    }
-    setVhUnit();
-    window.addEventListener('resize', setVhUnit);
+            voiceBtn.addEventListener('click', () => {
+                recognition.lang = currentLang === 'bn' ? 'bn-BD' : 'en-US';
+                recognition.start();
+            });
+        } else {
+            voiceBtn.style.display = 'none'; // Hide if not supported
+        }
 
-    // Auto-focus input on load
-    window.addEventListener('load', () => {
-      document.body.classList.add('lang-bn');
-      msgInput.focus();
-    });
-  </script>
+        // Event Listeners
+        sendBtn.addEventListener('click', sendQuestion);
+        questionInput.addEventListener('keypress', e => { if (e.key === 'Enter') sendQuestion(); });
+    </script>
 </body>
 </html>
