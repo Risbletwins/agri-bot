@@ -56,8 +56,7 @@ RESPONSE_TRANSLATIONS = {
     "কীটনাশক ব্যবস্থা বন্ধ হয়েছে": "The fertilizer system has been turned off",
     "ওয়াটার পাম্প চালু হয়েছে": "The water pump has been turned on",
     "ওয়াটার পাম্প বন্ধ হয়েছে": "The water pump has been turned off",
-    "ঘাস কাটার যন্ত্র চালু হয়েছে": "The grass cutter has been turned on",
-    "ঘাস কাটার যন্ত্র বন্ধ হয়েছে": "The grass cutter has been turned off"
+
 }
 
 # Command mappings for ESP32 with fuzzy thresholds
@@ -70,8 +69,7 @@ COMMAND_MAPPINGS = {
     "turn off the fertilizer system": "কীটনাশক ব্যবস্থা বন্ধ হয়েছে",
     "turn on water pump": "ওয়াটার পাম্প চালু হয়েছে",
     "turn off water pump": "ওয়াটার পাম্প বন্ধ হয়েছে",
-    "turn on the grass cutter": "ঘাস কাটার যন্ত্র চালু হয়েছে",
-    "turn off grass cutter": "ঘাস কাটার যন্ত্র বন্ধ হয়েছে"
+
 }
 
 SYSTEM_INSTRUCTION_BN =  """
@@ -93,8 +91,6 @@ SYSTEM_INSTRUCTION_BN =  """
 - যদি ইউজার বলে "TURN ON THE WATER PUMP" বা এরকম কিছু, উত্তর দিন: "ওয়াটার পাম্প চালু হয়েছে"।  
 - যদি ইউজার বলে "TURN OFF THE WATER PUMP" বা এরকম কিছু, উত্তর দিন: "ওয়াটার পাম্প বন্ধ হয়েছে"।  
 
-- যদি ইউজার বলে "TURN ON THE GRASS CUTTER" বা এরকম কিছু, উত্তর দিন: "ঘাস কাটার যন্ত্র চালু হয়েছে"।  
-- যদি ইউজার বলে "TURN OFF THE GRASS CUTTER" বা এরকম কিছু, উত্তর দিন: "ঘাস কাটার যন্ত্র বন্ধ হয়েছে"।  
 
 সাধারণ নির্দেশিকা:  
 - সবসময় বাংলায় উত্তর দিন।  
@@ -148,9 +144,7 @@ System Rules for Device Control:
 
 - If the user says "TURN ON THE WATER PUMP" or similar, reply: "Water pump has been turned ON".  
 - If the user says "TURN OFF THE WATER PUMP" or similar, reply: "Water pump has been turned OFF".  
-
-- If the user says "TURN ON THE GRASS CUTTER" or similar, reply: "Grass cutter has been turned ON".  
-- If the user says "TURN OFF THE GRASS CUTTER" or similar, reply: "Grass cutter has been turned OFF".  
+  
 
 General Guidelines:
 - Always answer in English.  
@@ -350,26 +344,22 @@ def esp32_receive():
             answer = response.text.strip()
 
         # Map to ESP32 commands
-        if "লাইটটি চালু হয়েছে" in answer:
+        if( "লাইটটি চালু হয়েছে" or "The light has been turned on") in answer:
             return "light_on"
-        if "লাইটটি বন্ধ হয়েছে" in answer:
+        if( "লাইটটি বন্ধ হয়েছে" or "The light has been turned off") in answer:
             return "light_off"
-        if "বীজ বপন ব্যবস্থা চালু হয়েছে" in answer:
+        if( "বীজ বপন ব্যবস্থা চালু হয়েছে" or "The seed sowing system has been turned on") in answer:
             return "seed_sow_on"
-        if "বীজ বপন ব্যবস্থা বন্ধ হয়েছে" in answer:
+        if( "বীজ বপন ব্যবস্থা বন্ধ হয়েছে" or "The seed sowing system has been turned off") in answer:
             return "seed_sow_off"
-        if "কীটনাশক ব্যবস্থা চালু হয়েছে" in answer:
+        if( "কীটনাশক ব্যবস্থা চালু হয়েছে" or "The fertilizer system has been turned on") in answer:
             return "fertilizer_on"
-        if "কীটনাশক ব্যবস্থা বন্ধ হয়েছে" in answer:
+        if( "কীটনাশক ব্যবস্থা বন্ধ হয়েছে" or "The fertilizer system has been turned off") in answer:
             return "fertilizer_off"
-        if "ওয়াটার পাম্প চালু হয়েছে" in answer:
+        if( "ওয়াটার পাম্প চালু হয়েছে" or "The water pump has been turned on") in answer:
             return "water_pump_on"
-        if "ওয়াটার পাম্প বন্ধ হয়েছে" in answer:
+        if( "ওয়াটার পাম্প বন্ধ হয়েছে" or "The water pump has been turned off") in answer:
             return "water_pump_off"
-        if "ঘাস কাটার যন্ত্র চালু হয়েছে" in answer:
-            return "grass_cutter_on"
-        if "ঘাস কাটার যন্ত্র বন্ধ হয়েছে" in answer:
-            return "grass_cutter_off"
         return str(answer)
 
     except Exception as e:
