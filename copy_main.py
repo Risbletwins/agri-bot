@@ -1,4 +1,4 @@
-from flask import Flask, request, Response, send_file, render_template, jsonify
+from flask import Flask, request, Response, send_file, render_template, jsonify, session
 import os
 import uuid
 import json
@@ -6,7 +6,18 @@ import time
 import glob
 import logging
 from gtts import gTTS
-from google import genai
+import google.generativeai as genai
+from dotenv import load_dotenv
+from googletrans import Translator
+from fuzzywuzzy import fuzz
+from flask_caching import Cache
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_session import Session
+import threading
+import bleach
+
+load_dotenv()
 
 app = Flask(__name__)
 
@@ -14,90 +25,172 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize Gemini AI client
-client = genai.Client(api_key="AIzaSyCAbZBgv8pzC7o-m0SoPlQerQvlQwZPH68")
+# Configure Gemini AI
+genai.configure(api_key=os.getenv("AIzaSyCAbZBgv8pzC7o-m0SoPlQerQvlQwZPH68"))
+
+# Caching setup
+app.config['CACHE_TYPE'] = 'simple'  # Use simple in-memory cache
+cache = Cache(app)
+
+# Rate limiting setup
+limiter = Limiter(get_remote_address, app=app, default_limits=["200 per day", "50 per hour"])
+
+# Session setup
+app.config['SESSION_TYPE'] = 'filesystem'
+app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "supersecretkey")  # Set a secret key
+Session(app)
 
 # Create audio folder if not exist
 os.makedirs("static/audio", exist_ok=True)
 
-# Store latest ESP32 command
-target_command = {"action": "stop"}
+# Translator for dynamic translations
+translator = Translator()
 
-SYSTEM_INSTRUCTION = """
-IF THE USER SAYS - 'TURN ON THE LIGHT' or something similar.
-THEN YOU MUST REPLY - 'লাইটটি চালু হয়েছে'
-IF THE USER SAYS - 'TURN OFF THE LIGHT' or something similar.
-THEN YOU MUST REPLY - 'লাইটটি বন্ধ হয়েছে'
+# Predefined response translations (extended if needed)
+RESPONSE_TRANSLATIONS = {
+    "লাইটটি চালু হয়েছে": "The light has been turned on",
+    "লাইটটি বন্ধ হয়েছে": "The light has been turned off",
+    "বীজ বপন ব্যবস্থা চালু হয়েছে": "The seed sowing system has been turned on",
+    "বীজ বপন ব্যবস্থা বন্ধ হয়েছে": "The seed sowing system has been turned off",
+    "কীটনাশক ব্যবস্থা চালু হয়েছে": "The fertilizer system has been turned on",
+    "কীটনাশক ব্যবস্থা বন্ধ হয়েছে": "The fertilizer system has been turned off",
+    "ওয়াটার পাম্প চালু হয়েছে": "The water pump has been turned on",
+    "ওয়াটার পাম্প বন্ধ হয়েছে": "The water pump has been turned off",
+    "ঘাস কাটার যন্ত্র চালু হয়েছে": "The grass cutter has been turned on",
+    "ঘাস কাটার যন্ত্র বন্ধ হয়েছে": "The grass cutter has been turned off"
+}
 
+# Command mappings for ESP32 with fuzzy thresholds
+COMMAND_MAPPINGS = {
+    "turn on the light": "লাইটটি চালু হয়েছে",
+    "turn off the light": "লাইটটি বন্ধ হয়েছে",
+    "turn on the seed sow": "বীজ বপন ব্যবস্থা চালু হয়েছে",
+    "turn off the seed sow": "বীজ বপন ব্যবস্থা বন্ধ হয়েছে",
+    "turn on the fertilizer system": "কীটনাশক ব্যবস্থা চালু হয়েছে",
+    "turn off the fertilizer system": "কীটনাশক ব্যবস্থা বন্ধ হয়েছে",
+    "turn on water pump": "ওয়াটার পাম্প চালু হয়েছে",
+    "turn off water pump": "ওয়াটার পাম্প বন্ধ হয়েছে",
+    "turn on the grass cutter": "ঘাস কাটার যন্ত্র চালু হয়েছে",
+    "turn off grass cutter": "ঘাস কাটার যন্ত্র বন্ধ হয়েছে"
+}
 
-You are a Bangladeshi কৃষি সহকারী (agriculture assistant) designed to help farmers who may be অশিক্ষিত (illiterate) or not tech-savvy. You reply only in সহজ ও সুন্দর বাংলা (simple and clear Bangla). All your replies must sound natural, friendly, and easy to speak aloud.
+SYSTEM_INSTRUCTION_BN =  """
 
-🔹 Your goal:
-Give clear, practical advice that a farmer can follow **without needing to go to any কৃষি অফিস**.
+আপনি একজন কৃষি সহকারী।  
+আপনি সবসময় শুধু বাংলাতেই উত্তর দেবেন, যেকোনো ভাষায় প্রশ্ন এলেও।  
+অন্য ভাষা বুঝতে পারবেন, কিন্তু আউটপুট সর্বদা বাংলায় হবে।  
 
-🔸 Strict rules:
-- Never say “কৃষি অফিসে যান” unless it's the **last and only option** (e.g. soil testing lab).
-- You are the *main problem solver*, like a smart, trusted village কৃষি উপদেষ্টা (agriculture advisor).
-- Use real product names or methods if helpful (e.g. ইউরিয়া, ভার্টিমেক, ট্রাইসাইক্লাজোল).
-- Always make sure the solution is possible at home or with products from a local দোকান (shop).
-- If there's more than one possible cause, explain them shortly and help the farmer decide what to do first.
-- Don't ask farmars for photos.
-- Never use any numbering or asterisk sign in the response.
-- Never use any symbols like * or - or _ in the response.
-- And also support links (sceured) if possible like, https://dae.gov.bd/ etc.
+সিস্টেম রুলস (ডিভাইস কন্ট্রোল):  
+- যদি ইউজার বলে "TURN ON THE LIGHT" বা এরকম কিছু, উত্তর দিন: "লাইটটি চালু হয়েছে"।  
+- যদি ইউজার বলে "TURN OFF THE LIGHT" বা এরকম কিছু, উত্তর দিন: "লাইটটি বন্ধ হয়েছে"।  
 
-🔹 TTS Friendly Guidelines:
-- Use short sentences and also short answers.
-- Keep tone friendly, not robotic.
-- Avoid hard words and English completely.
-- Examples help — use small, real-world examples where needed.
+- যদি ইউজার বলে "TURN ON THE SEED SOW" বা এরকম কিছু, উত্তর দিন: "বীজ বপন ব্যবস্থা চালু হয়েছে"।  
+- যদি ইউজার বলে "TURN OFF THE SEED SOW" বা এরকম কিছু, উত্তর দিন: "বীজ বপন ব্যবস্থা বন্ধ হয়েছে"।  
 
-🔸 Sample QA:
+- যদি ইউজার বলে "TURN ON THE FERTILIZER SYSTEM" বা এরকম কিছু, উত্তর দিন: "কীটনাশক ব্যবস্থা চালু হয়েছে"।  
+- যদি ইউজার বলে "TURN OFF THE FERTILIZER SYSTEM" বা এরকম কিছু, উত্তর দিন: "কীটনাশক ব্যবস্থা বন্ধ হয়েছে"।  
 
-Question:  
-'ধান গাছে কালচে দাগ পড়তেছে, এটা কেন?'  
+- যদি ইউজার বলে "TURN ON THE WATER PUMP" বা এরকম কিছু, উত্তর দিন: "ওয়াটার পাম্প চালু হয়েছে"।  
+- যদি ইউজার বলে "TURN OFF THE WATER PUMP" বা এরকম কিছু, উত্তর দিন: "ওয়াটার পাম্প বন্ধ হয়েছে"।  
 
-Expected answer:  
-'এই দাগ যদি পাতার মাঝখানে হয় আর ধীরে ধীরে ছড়ায়, তাহলে এটা "ব্লাস্ট" রোগ। বাজারে "টিল্ট" বা "নাটিভো" নামের ঔষধ পাওয়া যায়। সেটা ১০ লিটার পানিতে ৫–৬ মিলি মিশিয়ে স্প্রে দেন।  সার যদি বেশি দিয়ে থাকেন, একটু কমান।  রোদের সময় স্প্রে করবেন — বিকেলে নয়।  ২–৩ দিন পর আবার দেখেন। ভালো না হলে আবার স্প্রে করতে হবে।'  
+- যদি ইউজার বলে "TURN ON THE GRASS CUTTER" বা এরকম কিছু, উত্তর দিন: "ঘাস কাটার যন্ত্র চালু হয়েছে"।  
+- যদি ইউজার বলে "TURN OFF THE GRASS CUTTER" বা এরকম কিছু, উত্তর দিন: "ঘাস কাটার যন্ত্র বন্ধ হয়েছে"।  
 
-Question:  
-'পেঁয়াজ গাছে পচা ধরেছে, কী করব?'  
+সাধারণ নির্দেশিকা:  
+- সবসময় বাংলায় উত্তর দিন।  
+- উত্তর সংক্ষিপ্ত, সহজ আর বন্ধুত্বপূর্ণ হোক।  
+- জটিল শব্দ এড়িয়ে চলুন।  
+- ঘরে বসে বা স্থানীয় দোকান থেকে সমাধান করা যায় এমন পদ্ধতি বলুন।  
+- কৃষি অফিসে যেতে বলবেন না, একেবারে শেষ উপায় ছাড়া (যেমন মাটির টেস্ট)।  
+- লিস্ট, বুলেট, চিহ্ন (* - _ ইত্যাদি) ব্যবহার করবেন না। স্বাভাবিকভাবে লিখবেন।  
+- দরকার হলে লিঙ্ক দিতে পারেন (যেমন: https://dae.gov.bd/)।  
 
-Expected answer:  
-'পেঁয়াজ পচা ধরলে সেটা ছত্রাক (ফাঙ্গাস) জনিত সমস্যা হতে পারে। গাছের গোড়ায় পানি জমে থাকলে সঙ্গে সঙ্গে বের করে দিন। "ডাইথেন এম-৪৫" বা "রিডোমিল" স্প্রে করলে পচা কমে যায়। গাছের আশপাশে আগাছা না রাখবেন — ছত্রাক ছড়ায়। এই কাজগুলো করলে সমস্যা অনেকটাই কমে যাবে।'  
+TTS ফ্রেন্ডলি রুলস:  
+- ছোট বাক্য ব্যবহার করুন।  
+- কথা যেন স্বাভাবিক ও সহজ হয়।  
 
-Question:  
-'গাছ বেশি বড় হচ্ছে কিন্তু ফল ধরতেছে না, এটা কেন?'  
+উদাহরণ প্রশ্নোত্তর:  
+প্রশ্ন: ধান গাছে কালচে দাগ পড়তেছে, এটা কেন?  
+উত্তর: এই দাগ যদি পাতার মাঝখানে হয় আর ধীরে ছড়ায়, তাহলে এটা ব্লাস্ট রোগ। বাজারে টিল্ট বা নাটিভো নামের ঔষধ পাওয়া যায়। সেটা ১০ লিটার পানিতে ৫–৬ মিলি মিশিয়ে স্প্রে দিন। রোদের সময় স্প্রে করলে ভালো কাজ হয়।
 
-Expected answer:  
-'গাছ শুধু বড় হচ্ছে, কিন্তু ফল নাই এইটা সাধারণত বেশি ইউরিয়া দেয়ার কারণে হয়। ইউরিয়া কমিয়ে একটু “পটাশ” আর “ফসফরাস” দিন। গাছ কেটে বা ছেঁটে দিলে অনেক সময় ফল ধরা শুরু করে।  দিনে কমপক্ষে ৫–৬ ঘণ্টা রোদ লাগে। এই ৩টা কাজ একসাথে করলে ফল ধরা শুরু করবে ইনশাল্লাহ।'  
+প্রশ্ন: পেঁয়াজ গাছে পচা ধরেছে, কী করব?  
+উত্তর: পেঁয়াজ পচা সাধারণত ছত্রাকের কারণে হয়। প্রথমে গোড়ায় জমে থাকা পানি বের করে দিন। বাজারে ডাইথেন এম-৪৫ বা রিডোমিল নামের ঔষধ পাওয়া যায়, এগুলো স্প্রে করলে পচা কমে যায়। মাঠে আগাছা থাকলে পরিষ্কার করুন।  
 
-Question:  
-'বেগুনের পাতায় গর্ত হয়ে যাচ্ছে, কী করব?'  
+প্রশ্ন: গাছ বড় হচ্ছে কিন্তু ফল ধরছে না কেন?  
+উত্তর: সাধারণত বেশি ইউরিয়া দিলে গাছ শুধু বড় হয়, কিন্তু ফল হয় না। ইউরিয়া কমিয়ে কিছুটা পটাশ আর ফসফরাস দিন। ডালপালা কেটে ছাঁটাই করলে অনেক সময় ফল আসে। প্রতিদিন অন্তত ৫–৬ ঘণ্টা রোদ লাগবে।  
 
-Expected answer:  
-'এইটা "বেগুন পাতা খেকো পোকা"র কামড়। পাতা গর্ত হলে বুঝবেন পোকা পাতার ভেতরে বা নিচে লুকিয়ে আছে। বাজারে "সাইপারমেথ্রিন" বা "কারাটে" নামে ঔষধ কিনে, ১০ লিটার পানিতে ৫ মিলি মিশিয়ে স্প্রে দিন। সকাল বা বিকালে স্প্রে করলে ভালো কাজ দেয়। পোকা না কমলে ৩ দিন পর আবার স্প্রে করতে হবে।'  
+প্রশ্ন: বেগুনের পাতায় গর্ত হয়ে যাচ্ছে, কী করব?  
+উত্তর: এটা বেগুন পাতা খেকো পোকা। এরা সাধারণত পাতার নিচে লুকায়। বাজারে সাইপারমেথ্রিন বা কারাটে নামে ঔষধ কিনে, ১০ লিটার পানিতে ৫ মিলি মিশিয়ে সকালে বা বিকালে স্প্রে দিন। প্রয়োজনে ৩ দিন পর আবার দিন।  
 
-Question:  
-'টমেটো গাছে ফল হয় না, ফুল ঝরে পড়ে। কী করব?'  
+প্রশ্ন: টমেটোর ফুল ঝরে যাচ্ছে, কী করব?  
+উত্তর: ফুল ঝরে গেলে ফল কম হয়। বেশি ইউরিয়া দিলে বা পানি অনিয়ম করলে এই সমস্যা হয়। ইউরিয়া কমান আর পানি নিয়মিত দিন। আবহাওয়া ঠান্ডা হলেও ফুল ঝরে যায়। সপ্তাহে একবার বোরন মিশিয়ে স্প্রে করলে অনেকটা কমে যায়।  
 
-Expected answer:  
-ফুল ঝরে গেলে ফল কম হয়। এই সমস্যা হয়, গাছে যদি অতিরিক্ত ইউরিয়া দেওয়া হয়, তাই ইউরিয়া কমান। পানি যদি অনিয়মিত দেন, গাছ টান সহ্য করতে পারে না। আবহাওয়া যদি ঠান্ডা হয়, তাও ফুল ঝরে। সপ্তাহে একবার “বোরন” নামে তরল সার মিশিয়ে স্প্রে দিন। আর পানি নিয়ম করে দিন। কিছুদিন পর ফল আসতে শুরু করবে।'  
+প্রশ্ন: পাতাগুলো হলুদ হয়ে যাচ্ছে কেন?  
+উত্তর: পাতার হলুদ হওয়ার কয়েকটা কারণ আছে। সার কম পেলে এমন হয়, তাই ইউরিয়া আর পটাশ সামান্য দিন। পাতার নিচে ছোট পোকা বা জালের মতো কিছু দেখলে বুঝবেন মাকড় লেগেছে। দোকান থেকে ভার্টিমেক কিনে স্প্রে দিন। বেশি পানি জমে থাকলেও বা একেবারেই না থাকলেও হলুদ হয়। মাটি ভেজা রাখবেন, কিন্তু জমাট পানি নয়।  
 
-Question:
-'আমার গাছের পাতা হলুদ হয়ে যাচ্ছে কেন?'
+""" 
 
-Expected answer:
-পাতা হলুদ হওয়ার কয়েকটা কারণ থাকতে পারে ভাই। গাছে যদি ইউরিয়া সার কম পড়ে, তাহলে এমন হয়। একটু ইউরিয়া আর পটাশ মিশিয়ে গাছের গোড়ায় দিন। যদি পাতার নিচে ছোট পোকা বা জাল মতো কিছু দেখেন, তাহলে মাকড় লেগেছে। দোকানে গিয়ে "ভার্টিমেক" নামে ঔষধ চাইলে পেয়ে যাবেন, তা মিশিয়ে স্প্রে করুন।  পানি যদি বেশি জমে থাকে বা একেবারে না থাকে, তাহলেও পাতা হলুদ হয়। মাটি যেন ভেজা থাকে, কিন্তু পানি না জমে — এটা ঠিক করে নেন। আগে সার আর পানির দিক দেখেন। সমস্যা না কমলে পরে কীটনাশক ব্যবহার করুন।'
+SYSTEM_INSTRUCTION_EN = """
 
+You are an agriculture assistant for Bangladeshi farmers.  
+You must ALWAYS reply only in ENGLISH, no matter what language the user uses.  
+You can understand Bangla or other languages, but your output must stay in English only.  
 
-Remember: your job is to help — not redirect and also optimize the text for voice output.
+System Rules for Device Control:
+- If the user says "TURN ON THE LIGHT" or similar, reply: "Light has been turned ON".  
+- If the user says "TURN OFF THE LIGHT" or similar, reply: "Light has been turned OFF".  
 
+- If the user says "TURN ON THE SEED SOW" or similar, reply: "Seed sowing system has been turned ON".  
+- If the user says "TURN OFF THE SEED SOW" or similar, reply: "Seed sowing system has been turned OFF".  
 
-"""   # Omitted for brevity, unchanged
+- If the user says "TURN ON THE FERTILIZER SYSTEM" or similar, reply: "Fertilizer system has been turned ON".  
+- If the user says "TURN OFF THE FERTILIZER SYSTEM" or similar, reply: "Fertilizer system has been turned OFF".  
+
+- If the user says "TURN ON THE WATER PUMP" or similar, reply: "Water pump has been turned ON".  
+- If the user says "TURN OFF THE WATER PUMP" or similar, reply: "Water pump has been turned OFF".  
+
+- If the user says "TURN ON THE GRASS CUTTER" or similar, reply: "Grass cutter has been turned ON".  
+- If the user says "TURN OFF THE GRASS CUTTER" or similar, reply: "Grass cutter has been turned OFF".  
+
+General Guidelines:
+- Always answer in English.  
+- Keep tone short, friendly, and practical.  
+- Avoid technical jargon.  
+- Suggest home-based or shop-based solutions whenever possible.  
+- Do not redirect to agriculture offices unless it is the very last option (like soil testing).  
+- Do not use lists, bullet points, or symbols (* - _ etc). Write naturally.  
+- Include useful support links if available (example: https://dae.gov.bd/).  
+
+TTS-Friendly Rules:
+- Use short, clear sentences.  
+- Keep it natural and easy to read aloud.  
+
+Example Q&A:
+Q: Why are my rice plants getting black spots on leaves?  
+A: If the spots are in the middle of the leaves and spreading slowly, it may be blast disease. You can buy Tilt or Nativo fungicide from the market. Mix 5–6 ml in 10 liters of water and spray during the daytime, not evening. Reduce excess fertilizer if used.  
+
+Q: My onion plants are rotting, what should I do?  
+A: Onion rot usually happens because of fungus. First, remove excess water from the base. You can spray Dithane M-45 or Ridomil, both are available in local shops. Also, keep the area clean from weeds, as fungus spreads faster if the field is dirty.  
+
+Q: My plants are growing big but no fruits are coming, why?  
+A: This happens mostly if too much urea fertilizer is used. Reduce urea, and add some potash and phosphorus. Pruning branches can also help the plant focus on fruits. Make sure the plants get at least 5–6 hours of sunlight daily.  
+
+Q: Brinjal leaves are full of holes, what should I do?  
+A: That is the brinjal leaf-eating pest. The insects usually hide under the leaves. You can buy Cypermethrin or Karate insecticide, mix 5 ml in 10 liters of water, and spray in the morning or evening. Repeat after 3 days if needed.  
+
+Q: My tomato flowers are falling before fruits come, what can I do?  
+A: Flower drop can happen if too much urea is used, or if water supply is irregular. Reduce urea and water regularly. If the weather is too cold, flowers may also drop. Spraying liquid boron once a week helps prevent flower drop.  
+
+Q: My leaves are turning yellow, what’s the reason?  
+A: Yellow leaves can be due to lack of urea or potash. Add a little fertilizer around the root. If you see small insects or webbing under the leaf, it’s mites. In that case, use Vertimec insecticide. If water is too much or too little, leaves also turn yellow. Keep the soil moist but not flooded. 
+
+"""
+
+def get_system_instruction(lang):
+    return SYSTEM_INSTRUCTION_BN if lang == 'bn' else SYSTEM_INSTRUCTION_EN
 
 def split_text(text, max_length=200):
-    sentences = text.split('।')
+    sentences = text.split('।' if '.' not in text else '.')
     chunks = []
     current_chunk = ""
     for sentence in sentences:
@@ -105,14 +198,39 @@ def split_text(text, max_length=200):
         if not sentence:
             continue
         if len(current_chunk) + len(sentence) <= max_length:
-            current_chunk += sentence + "। "
+            current_chunk += sentence + ("। " if '.' not in text else ". ")
         else:
             if current_chunk:
                 chunks.append(current_chunk.strip())
-            current_chunk = sentence + "। "
+            current_chunk = sentence + ("। " if '.' not in text else ". ")
     if current_chunk:
         chunks.append(current_chunk.strip())
     return chunks
+
+def generate_audio_async(text_chunks, lang, callback):
+    audio_urls = []
+    for chunk in text_chunks:
+        chunk_mp3 = f"static/audio/{uuid.uuid4()}.mp3"
+        tts = gTTS(text=chunk, lang=lang, slow=False)
+        tts.save(chunk_mp3)
+        audio_urls.append(request.url_root + chunk_mp3)
+    callback(audio_urls)
+
+def get_english_translation(bn_text):
+    if bn_text in RESPONSE_TRANSLATIONS:
+        return RESPONSE_TRANSLATIONS[bn_text]
+    try:
+        return translator.translate(bn_text, src='bn', dest='en').text
+    except Exception as e:
+        logger.error(f"Translation error: {e}")
+        return bn_text + " (Translation unavailable)"
+
+def get_bangla_translation(en_text):
+    try:
+        return translator.translate(en_text, src='en', dest='bn').text
+    except Exception as e:
+        logger.error(f"Translation error: {e}")
+        return en_text + " (অনুবাদ অনুপলব্ধ)"
 
 @app.route('/')
 def serve_webpage():
@@ -122,42 +240,67 @@ def serve_webpage():
 def chat():
     return render_template('chat.html')
 
+@cache.cached(timeout=300, query_string=True)
+@limiter.limit("10 per minute")
 @app.route('/ask', methods=['GET'])
 def ask_bot():
-    question = request.args.get('q')
+    question = bleach.clean(request.args.get('q', ''))
+    lang = request.args.get('lang', 'bn')
     if not question:
-        return Response(json.dumps({'error': 'Missing question'}, ensure_ascii=False), content_type='application/json; charset=utf-8')
+        return jsonify({'error': 'Missing question'}), 400
 
     try:
-        full_prompt = f"{SYSTEM_INSTRUCTION}\n\nপ্রশ্ন: {question}\n\nউত্তর দিন:"
-        resp = client.models.generate_content(model="gemini-2.0-flash", contents=full_prompt)
-        answer = resp.text
-        print(answer)
-        mp3_path = f"static/audio/{uuid.uuid4()}.mp3"
-        audio_urls = []
-        answer_chunks = split_text(answer) if len(answer) > 200 else [answer]
+        # Session-based context
+        if 'chat_history' not in session:
+            session['chat_history'] = []
+        history = session['chat_history']
+        context = "\n".join([f"প্রশ্ন: {q}\nউত্তর: {a}" for q, a in history]) if lang == 'bn' else "\n".join([f"Question: {q}\nAnswer: {a}" for q, a in history])
 
-        if len(answer_chunks) == 1:
-            tts = gTTS(text=answer, lang='bn', slow=False)
-            tts.save(mp3_path)
-            audio_urls.append(request.url_root + mp3_path)
-        else:
-            for chunk in answer_chunks:
-                chunk_mp3 = f"static/audio/{uuid.uuid4()}.mp3"
-                tts = gTTS(text=chunk, lang='bn', slow=False)
-                tts.save(chunk_mp3)
-                audio_urls.append(request.url_root + chunk_mp3)
+        full_prompt = f"{get_system_instruction(lang)}\n\n{context}\n\nপ্রশ্ন: {question}\n\nউত্তর দিন:" if lang == 'bn' else f"{get_system_instruction(lang)}\n\n{context}\n\nQuestion: {question}\n\nAnswer:"
+        response = genai.generate_content(full_prompt)
+        primary_answer = response.text.strip()
+
+        # Get secondary translation
+        secondary_answer = get_english_translation(primary_answer) if lang == 'bn' else get_bangla_translation(primary_answer)
+
+        # Update session history
+        history.append((question, primary_answer))
+        if len(history) > 5:  # Keep last 5 for context
+            history.pop(0)
+        session['chat_history'] = history
+
+        # Generate audio asynchronously
+        audio_urls_primary = []
+        audio_urls_secondary = []
+        primary_chunks = split_text(primary_answer)
+        secondary_chunks = split_text(secondary_answer)
+
+        def primary_callback(urls):
+            nonlocal audio_urls_primary
+            audio_urls_primary = urls
+
+        def secondary_callback(urls):
+            nonlocal audio_urls_secondary
+            audio_urls_secondary = urls
+
+        threading.Thread(target=generate_audio_async, args=(primary_chunks, lang, primary_callback)).start()
+        threading.Thread(target=generate_audio_async, args=(secondary_chunks, 'en' if lang == 'bn' else 'bn', secondary_callback)).start()
+
+        # Wait briefly for threads (or make it fully async, but for simplicity wait max 5s)
+        time.sleep(5)  # Adjust as needed
 
         cleanup_audio_files()
 
-        return Response(json.dumps({
-            'answer': answer,
-            'audio_urls': audio_urls
-        }, ensure_ascii=False), content_type='application/json; charset=utf-8')
+        return jsonify({
+            'answer_bn': primary_answer if lang == 'bn' else secondary_answer,
+            'answer_en': secondary_answer if lang == 'bn' else primary_answer,
+            'audio_urls_bn': audio_urls_primary if lang == 'bn' else audio_urls_secondary,
+            'audio_urls_en': audio_urls_secondary if lang == 'bn' else audio_urls_primary
+        })
 
     except Exception as e:
         logger.error(f"Error: {str(e)}")
-        return Response(json.dumps({'error': str(e)}, ensure_ascii=False), content_type='application/json; charset=utf-8')
+        return jsonify({'error': str(e)}), 500
 
 def cleanup_audio_files():
     max_age = 3600
@@ -169,93 +312,57 @@ def cleanup_audio_files():
 def get_audio(filename):
     return send_file(f'static/audio/{filename}', mimetype='audio/mpeg')
 
-@app.route("/seed_sowing_system", methods=["GET","POST"])
-def get_seed_sowing_system_page():
-    return render_template("seed_sowing_system.html")
+@limiter.limit("10 per minute")
+@app.route("/esp32-receive/", methods=["GET"])
+def esp32_receive():
+    question = bleach.clean(request.args.get('q', ''))
+    if not question:
+        return jsonify({'error': 'Missing question'}), 400
 
-@app.route("/water_pump_system", methods=["GET","POST"])
-def get_water_pump_system_page():
-    return render_template("water_pump_system.html")
+    try:
+        # Fuzzy matching for commands
+        best_match = None
+        best_score = 0
+        lower_question = question.lower()
+        for cmd, bn_response in COMMAND_MAPPINGS.items():
+            score = fuzz.token_sort_ratio(lower_question, cmd)
+            if score > best_score and score > 80:  # Threshold
+                best_score = score
+                best_match = bn_response
 
-@app.route("/humidity_measuring_system", methods=["GET","POST"])
-def get_humidity_measuring_system_page():
-    return render_template("humidity_measuring_system.html")
+        if best_match:
+            answer = best_match
+        else:
+            full_prompt = f"{SYSTEM_INSTRUCTION_BN}\n\nপ্রশ্ন: {question}\n\nউত্তর দিন:"
+            response = genai.generate_content(full_prompt)
+            answer = response.text.strip()
 
-@app.route("/soil_moisture_measuring_system", methods=["GET","POST"])
-def get_soil_moisture_measuring_system_page():
-    return render_template("soil_moisture_measuring_system.html")
+        # Map to ESP32 commands
+        if "লাইটটি চালু হয়েছে" in answer:
+            return "light_on"
+        if "লাইটটি বন্ধ হয়েছে" in answer:
+            return "light_off"
+        if "বীজ বপন ব্যবস্থা চালু হয়েছে" in answer:
+            return "seed_sow_on"
+        if "বীজ বপন ব্যবস্থা বন্ধ হয়েছে" in answer:
+            return "seed_sow_off"
+        if "কীটনাশক ব্যবস্থা চালু হয়েছে" in answer:
+            return "fertilizer_on"
+        if "কীটনাশক ব্যবস্থা বন্ধ হয়েছে" in answer:
+            return "fertilizer_off"
+        if "ওয়াটার পাম্প চালু হয়েছে" in answer:
+            return "water_pump_on"
+        if "ওয়াটার পাম্প বন্ধ হয়েছে" in answer:
+            return "water_pump_off"
+        if "ঘাস কাটার যন্ত্র চালু হয়েছে" in answer:
+            return "grass_cutter_on"
+        if "ঘাস কাটার যন্ত্র বন্ধ হয়েছে" in answer:
+            return "grass_cutter_off"
+        return str(answer)
 
-@app.route("/controller", methods=["GET","POST"])
-def get_controller_page():
-    return render_template("controller.html")
-
-# Update command state from button presses
-@app.route('/controller/moveup', methods=["GET",'POST'])
-def handle_button_up():
-    return "ControllerMoveUp"
-
-@app.route('/controller/movedown', methods=["GET",'POST'])
-def handle_button_down():
-    return "ControllerMoveDown"
-
-@app.route('/controller/moveright', methods=['GET','POST'])
-def handle_button_right():
-    return "ControllerMoveRight"
-
-@app.route('/controller/moveleft', methods=['GET','POST'])
-def handle_button_left():
-    return "ControllerMoveLeft"
-
-
-target_command = {"action": "stop"}
-seed_command_state = {"msg": "seed_sowing_off"}
-soil_moisture_measuring_system_command_state = {"msg": "soil_mos_off"}
-water_pump_system_state = {"msg": "water_pump_off"}
-humidity_measuring_system_command_state = {"msg": "humidity_off"}
-
-@app.route('/seed_sowing_system/button', methods=['GET', 'POST'])
-def seed_sowing_button():
-    global seed_command_state
-    if request.method == 'POST':
-        data = request.get_json()
-        print("Seed Sowing Button Pressed:", data)
-        seed_command_state = data  # Save the command
-        return jsonify({"received": data})
-    else:
-        return jsonify(seed_command_state)
-
-@app.route('/soil_moisture_measuring_system/button', methods=["GET",'POST'])
-def soil_moisture_measuring_system_button():
-    global soil_moisture_measuring_system_command_state
-    if request.method == 'POST':
-        data = request.get_json()
-        print("soil_moisture_measuring_system Button Pressed:", data)
-        soil_moisture_measuring_system_command_state = data  # Save the command
-        return jsonify({"received": data})
-    else:
-        return jsonify(soil_moisture_measuring_system_command_state)
-
-@app.route('/water_pump_system/button', methods=["GET",'POST'])
-def water_pump_system_button():
-    global water_pump_system_state
-    if request.method == 'POST':
-        data = request.get_json()
-        print("water_pump_system Button Pressed:", data)
-        water_pump_system_state = data  # Save the command
-        return jsonify({"received": data})
-    else:
-        return jsonify( water_pump_system_state)
-
-@app.route('/humidity_measuring_system/button', methods=["GET",'POST'])
-def humidity_measuring_system_button():
-    global humidity_measuring_system_command_state
-    if request.method == 'POST':
-        data = request.get_json()
-        print("humidity_measuring_system Button Pressed:", data)
-        humidity_measuring_system_command_state = data  # Save the command
-        return jsonify({"received": data})
-    else:
-        return jsonify(humidity_measuring_system_command_state)
+    except Exception as e:
+        logger.error(f"Error: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)

@@ -1,4 +1,12 @@
-flask
-google-genai
-requests
-gTTS
+Flask==2.3.3
+gTTS==2.5.3
+google-generativeai==0.8.3
+python-dotenv==1.0.1
+googletrans==4.0.0-rc1
+fuzzywuzzy==0.18.0
+python-Levenshtein==0.25.1
+Flask-Caching==2.1.0
+Flask-Limiter==4.1.0
+Flask-Session==0.6.0
+bleach==6.1.0
+structlog==24.4.0
