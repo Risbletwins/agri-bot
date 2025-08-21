@@ -1,6 +1,6 @@
 Flask
 gTTS
-google-generativeai
+google-genai
 python-dotenv
 googletrans
 fuzzywuzzy
@@ -9,4 +9,3 @@ Flask-Caching
 Flask-Limiter
 Flask-Session
 bleach
-structlog
