@@ -295,7 +295,7 @@ def get_audio(filename):
 
 @app.route("/esp32-receive/", methods=["GET"])
 def esp32_receive():
-    
+    return "ok"
 
     # Map to ESP32 commands
     if "লাইটটি চালু হয়েছে" in primary_answer or "The light has been turned on" in primary_answer:
