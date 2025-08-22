@@ -237,6 +237,8 @@ def chat():
 @cache.cached(timeout=300, query_string=True)
 @app.route('/ask', methods=['GET'])
 def ask_bot():
+    global primary_answer
+    primary_answer = "none_for_now"
     question = bleach.clean(request.args.get('q', ''))
     lang = request.args.get('lang', 'bn')
     if not question:
@@ -250,7 +252,6 @@ def ask_bot():
             model="gemini-2.0-flash",
             contents=full_prompt
         )
-        global primary_answer
         primary_answer = response.text.strip()
 
         # Get secondary translation
