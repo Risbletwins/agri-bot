@@ -11,8 +11,6 @@ from dotenv import load_dotenv
 from googletrans import Translator
 from fuzzywuzzy import fuzz
 from flask_caching import Cache
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 import threading
 import bleach
 
@@ -30,9 +28,6 @@ client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))  # ensure GEMINI_API_
 # Caching setup
 app.config['CACHE_TYPE'] = 'simple'  # Use simple in-memory cache
 cache = Cache(app)
-
-# Rate limiting setup
-limiter = Limiter(get_remote_address, app=app, default_limits=["200 per day", "50 per hour"])
 
 # Create audio folder if not exist
 os.makedirs("static/audio", exist_ok=True)
@@ -320,7 +315,7 @@ def esp32_receive():
         return "water_pump_on"
     if "ওয়াটার পাম্প বন্ধ হয়েছে" in primary_answer or "The water pump has been turned off" in primary_answer:
         return "water_pump_off"
-    return str(primary_answer)
+    return 0
 
 
 if __name__ == "__main__":
