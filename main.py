@@ -347,21 +347,37 @@ def get_audio(filename):
 @app.route("/esp32-receive/", methods=["GET"])
 def esp32_receive():
 
-    if "লাইটটি চালু হয়েছে" in primary_answer or "The light has been turned on" in primary_answer:
+    if "লাইটটি চালু হয়েছে" in primary_answer:
         return "light_on"
-    if "লাইটটি বন্ধ হয়েছে" in primary_answer or "The light has been turned off" in primary_answer:
+    if "লাইটটি বন্ধ হয়েছে" in primary_answer:
         return "light_off"
-    if "বীজ বপন ব্যবস্থা চালু হয়েছে" in primary_answer or "The seed sowing system has been turned on" in primary_answer:
+    if "বীজ বপন ব্যবস্থা চালু হয়েছে" in primary_answer:
         return "seed_sow_on"
-    if "বীজ বপন ব্যবস্থা বন্ধ হয়েছে" in primary_answer or "The seed sowing system has been turned off" in primary_answer:
+    if "বীজ বপন ব্যবস্থা বন্ধ হয়েছে" in primary_answer:
         return "seed_sow_off"
-    if "কীটনাশক ব্যবস্থা চালু হয়েছে" in primary_answer or "The fertilizer system has been turned on" in primary_answer:
+    if "কীটনাশক ব্যবস্থা চালু হয়েছে" in primary_answer:
         return "fertilizer_on"
-    if "কীটনাশক ব্যবস্থা বন্ধ হয়েছে" in primary_answer or "The fertilizer system has been turned off" in primary_answer:
+    if "কীটনাশক ব্যবস্থা বন্ধ হয়েছে" in primary_answer:
         return "fertilizer_off"
-    if "ওয়াটার পাম্প চালু হয়েছে" in primary_answer or "The water pump has been turned on" in primary_answer:
+    if "ওয়াটার পাম্প চালু হয়েছে" in primary_answer:
         return "water_pump_on"
-    if "ওয়াটার পাম্প বন্ধ হয়েছে" in primary_answer or "The water pump has been turned off" in primary_answer:
+    if "ওয়াটার পাম্প বন্ধ হয়েছে" in primary_answer:
+        return "water_pump_off"
+    if "The light has been turned on" in secondary_answer:
+        return "light_on"
+    if "The light has been turned off" in secondary_answer:
+        return "light_off"
+    if "The seed sowing system has been turned on" in secondary_answer:
+        return "seed_sow_on"
+    if "The seed sowing system has been turned off" in secondary_answer:
+        return "seed_sow_off"
+    if "The fertilizer system has been turned on" in secondary_answer:
+        return "fertilizer_on"
+    if "The fertilizer system has been turned off" in secondary_answer:
+        return "fertilizer_off"
+    if "The water pump has been turned on" in secondary_answer:
+        return "water_pump_on"
+    if "The water pump has been turned off" in secondary_answer:
         return "water_pump_off"
     return "none_for_now"
 
