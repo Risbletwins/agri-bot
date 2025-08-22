@@ -95,23 +95,50 @@ TTS ফ্রেন্ডলি রুলস:
 - কথা যেন স্বাভাবিক ও সহজ হয়।  
 
 উদাহরণ প্রশ্নোত্তর:  
-প্রশ্ন: ধান গাছে কালচে দাগ পড়তেছে, এটা কেন?  
-উত্তর: এই দাগ যদি পাতার মাঝখানে হয় আর ধীরে ছড়ায়, তাহলে এটা ব্লাস্ট রোগ। বাজারে টিল্ট বা নাটিভো নামের ঔষধ পাওয়া যায়। সেটা ১০ লিটার পানিতে ৫–৬ মিলি মিশিয়ে স্প্রে দিন। রোদের সময় স্প্রে করলে ভালো কাজ হয়।
+Q: ধানের পাতায় কালো দাগ কেন?
+A: এটা ব্লাস্ট রোগ। বাজার থেকে টিল্ট বা নাটিভো ঔষধ কিনে ১০ লিটার পানিতে ৫–৬ মিলি মিশিয়ে রোদে স্প্রে দিন।
 
-প্রশ্ন: পেঁয়াজ গাছে পচা ধরেছে, কী করব?  
-উত্তর: পেঁয়াজ পচা সাধারণত ছত্রাকের কারণে হয়। প্রথমে গোড়ায় জমে থাকা পানি বের করে দিন। বাজারে ডাইথেন এম-৪৫ বা রিডোমিল নামের ঔষধ পাওয়া যায়, এগুলো স্প্রে করলে পচা কমে যায়। মাঠে আগাছা থাকলে পরিষ্কার করুন।  
+Q: পেঁয়াজ পচে যাচ্ছে, কী করব?
+A: পানি জমে গেলে পেঁয়াজ পচে। পানি বের করে দিন। তারপর ডাইথেন এম-৪৫ বা রিডোমিল ঔষধ ১০ লিটার পানিতে মিশিয়ে স্প্রে দিন।
 
-প্রশ্ন: গাছ বড় হচ্ছে কিন্তু ফল ধরছে না কেন?  
-উত্তর: সাধারণত বেশি ইউরিয়া দিলে গাছ শুধু বড় হয়, কিন্তু ফল হয় না। ইউরিয়া কমিয়ে কিছুটা পটাশ আর ফসফরাস দিন। ডালপালা কেটে ছাঁটাই করলে অনেক সময় ফল আসে। প্রতিদিন অন্তত ৫–৬ ঘণ্টা রোদ লাগবে।  
+Q: গাছ বড় হচ্ছে কিন্তু ফল আসছে না কেন?
+A: বেশি ইউরিয়া দিলে শুধু গাছ বাড়ে, ফল আসে না। ইউরিয়া কমান। পটাশ আর ফসফরাস দিন। ডালপালা ছাঁটাই করুন, আর রোদে রাখুন।
 
-প্রশ্ন: বেগুনের পাতায় গর্ত হয়ে যাচ্ছে, কী করব?  
-উত্তর: এটা বেগুন পাতা খেকো পোকা। এরা সাধারণত পাতার নিচে লুকায়। বাজারে সাইপারমেথ্রিন বা কারাটে নামে ঔষধ কিনে, ১০ লিটার পানিতে ৫ মিলি মিশিয়ে সকালে বা বিকালে স্প্রে দিন। প্রয়োজনে ৩ দিন পর আবার দিন।  
+Q: বেগুনের পাতায় গর্ত হচ্ছে কেন?
+A: এটা পাতা খেকো পোকার কাজ। সাইপারমেথ্রিন বা কারাটে ঔষধ ১০ লিটার পানিতে ৫ মিলি মিশিয়ে সকালে বা বিকালে স্প্রে দিন। দরকার হলে ৩ দিন পর আবার দিন।
 
-প্রশ্ন: টমেটোর ফুল ঝরে যাচ্ছে, কী করব?  
-উত্তর: ফুল ঝরে গেলে ফল কম হয়। বেশি ইউরিয়া দিলে বা পানি অনিয়ম করলে এই সমস্যা হয়। ইউরিয়া কমান আর পানি নিয়মিত দিন। আবহাওয়া ঠান্ডা হলেও ফুল ঝরে যায়। সপ্তাহে একবার বোরন মিশিয়ে স্প্রে করলে অনেকটা কমে যায়।  
+Q: টমেটোর ফুল ঝরে যাচ্ছে কেন?
+A: বেশি ইউরিয়া দিলে বা পানি অনিয়ম হলে ফুল ঝরে। ইউরিয়া কমান, পানি নিয়মিত দিন। সপ্তাহে একবার বোরন স্প্রে করলে ভালো হবে।
 
-প্রশ্ন: পাতাগুলো হলুদ হয়ে যাচ্ছে কেন?  
-উত্তর: পাতার হলুদ হওয়ার কয়েকটা কারণ আছে। সার কম পেলে এমন হয়, তাই ইউরিয়া আর পটাশ সামান্য দিন। পাতার নিচে ছোট পোকা বা জালের মতো কিছু দেখলে বুঝবেন মাকড় লেগেছে। দোকান থেকে ভার্টিমেক কিনে স্প্রে দিন। বেশি পানি জমে থাকলেও বা একেবারেই না থাকলেও হলুদ হয়। মাটি ভেজা রাখবেন, কিন্তু জমাট পানি নয়।  
+Q: পাতাগুলো হলুদ হয়ে যাচ্ছে কেন?
+A: সার কম থাকলে বা পানি বেশি/কম হলে এমন হয়। অল্প ইউরিয়া ও পটাশ দিন। যদি পাতার নিচে পোকা থাকে, তাহলে ভার্টিমেক স্প্রে করুন।
+
+Q: আমি পেঁয়াজ কখন রোপণ করব?
+A: অক্টোবর থেকে ডিসেম্বর মাসে পেঁয়াজ রোপণ করুন।
+
+Q: আমি ধান কখন রোপণ করব?
+A: জুন জুলাই মাসে আমন ধান রোপণ করুন। ডিসেম্বর জানুয়ারি মাসে বোরো ধান রোপণ করুন।
+
+Q: আমি গম কখন বপন করব?
+A: নভেম্বর মাসের মাঝামাঝি সময়ে গম বপন করুন।
+
+Q: আমি ভুট্টা কখন রোপণ করব?
+A: নভেম্বর ডিসেম্বর মাসে অথবা এপ্রিল মে মাসে ভুট্টা রোপণ করতে পারেন।
+
+Q: আমি আলু কখন রোপণ করব?
+A: নভেম্বর ডিসেম্বর মাসে আলু রোপণ করুন।
+
+Q: আমি টমেটো কখন রোপণ করব?
+A: নভেম্বর ডিসেম্বর মাসে টমেটো রোপণ করুন।
+
+Q: আমি শসা কখন বপন করব?
+A: জানুয়ারি ফেব্রুয়ারি মাসে শসা বপন করুন।
+
+Q: আমি বেগুন কখন রোপণ করব?
+A: বেগুন শীত অথবা গরম দুই সময়েই চাষ করা যায়।
+
+Q: আমি শাক সবজি কখন বপন করব?
+A: অক্টোবর নভেম্বর মাসে শাক সবজি বপন করুন।
 
 """ 
 
@@ -149,23 +176,50 @@ TTS-Friendly Rules:
 - Keep it natural and easy to read aloud.  
 
 Example Q&A:
-Q: Why are my rice plants getting black spots on leaves?  
-A: If the spots are in the middle of the leaves and spreading slowly, it may be blast disease. You can buy Tilt or Nativo fungicide from the market. Mix 5–6 ml in 10 liters of water and spray during the daytime, not evening. Reduce excess fertilizer if used.  
+Q: Why are there black spots on rice leaves?
+A: It's blast disease. Buy Tilt or Nativo, mix 5-6 ml in 10 liters of water, and spray in the sun.
 
-Q: My onion plants are rotting, what should I do?  
-A: Onion rot usually happens because of fungus. First, remove excess water from the base. You can spray Dithane M-45 or Ridomil, both are available in local shops. Also, keep the area clean from weeds, as fungus spreads faster if the field is dirty.  
+Q: My onions are rotting, what should I do?
+A: Onions rot if water stays. Remove water. Then spray Dithane M-45 or Ridomil mixed in 10 liters of water.
 
-Q: My plants are growing big but no fruits are coming, why?  
-A: This happens mostly if too much urea fertilizer is used. Reduce urea, and add some potash and phosphorus. Pruning branches can also help the plant focus on fruits. Make sure the plants get at least 5–6 hours of sunlight daily.  
+Q: The plant is growing big but no fruits, why?
+A: Too much urea makes only leaves. Reduce urea, add potash and phosphorus. Prune branches and keep in sunlight.
 
-Q: Brinjal leaves are full of holes, what should I do?  
-A: That is the brinjal leaf-eating pest. The insects usually hide under the leaves. You can buy Cypermethrin or Karate insecticide, mix 5 ml in 10 liters of water, and spray in the morning or evening. Repeat after 3 days if needed.  
+Q: Holes are appearing in eggplant leaves, what to do?
+A: This is leaf-eating insects. Spray Cypermethrin or Karate (5 ml in 10 liters water) in morning or evening. Repeat after 3 days if needed.
 
-Q: My tomato flowers are falling before fruits come, what can I do?  
-A: Flower drop can happen if too much urea is used, or if water supply is irregular. Reduce urea and water regularly. If the weather is too cold, flowers may also drop. Spraying liquid boron once a week helps prevent flower drop.  
+Q: Tomato flowers are falling, what to do?
+A: Too much urea or irregular watering causes flower drop. Reduce urea, water regularly. Spray boron once a week.
 
-Q: My leaves are turning yellow, what’s the reason?  
-A: Yellow leaves can be due to lack of urea or potash. Add a little fertilizer around the root. If you see small insects or webbing under the leaf, it’s mites. In that case, use Vertimec insecticide. If water is too much or too little, leaves also turn yellow. Keep the soil moist but not flooded. 
+Q: Leaves are turning yellow, why?
+A: Lack of fertilizer or too much/less water. Add little urea & potash. If insects are under leaves, spray Vertimec.
+
+Q: When should I plant onion?
+A: Plant onion in October to December.
+
+Q: When should I plant rice?
+A: Plant aman rice in June and July. Plant boro rice in December and January.
+
+Q: When should I sow wheat?
+A: Sow wheat in mid November.
+
+Q: When should I plant maize?
+A: Plant maize in November or December. You can also plant in April or May.
+
+Q: When should I plant potatoes?
+A: Plant potatoes in November or December.
+
+Q: When should I plant tomato?
+A: Plant tomato in November or December.
+
+Q: When should I plant cucumber?
+A: Sow cucumber in January or February.
+
+Q: When should I plant brinjal?
+A: You can plant brinjal in winter or in summer.
+
+Q: When should I plant leafy vegetables?
+A: Plant leafy vegetables in October or November.
 
 """
 
@@ -191,9 +245,6 @@ def split_text(text, max_length=200):
     return chunks
 
 def generate_audio_sync(text_chunks, lang):
-    """
-    Synchronous TTS generation. Returns list of public URLs for saved mp3 files.
-    """
     audio_urls = []
     for chunk in text_chunks:
         try:
@@ -202,7 +253,7 @@ def generate_audio_sync(text_chunks, lang):
             tts = gTTS(text=chunk, lang=lang, slow=False)
             tts.save(chunk_mp3)
             # Build public URL using host_url (works better behind proxies)
-            base = request.host_url.rstrip('/')  # e.g. https://your-app.onrender.com
+            base = request.host_url.rstrip('/') 
             public_path = f"{base}/{chunk_mp3.replace(os.sep, '/')}"
             audio_urls.append(public_path)
             logger.info("TTS saved: %s -> %s", chunk_mp3, public_path)
@@ -247,7 +298,6 @@ def ask_bot():
     try:
         full_prompt = f"{get_system_instruction(lang)}\n\nপ্রশ্ন: {question}\n\nউত্তর দিন:" if lang == 'bn' else f"{get_system_instruction(lang)}\n\nQuestion: {question}\n\nAnswer:"
 
-        # FIXED: use client.models.generate_content (google-genai SDK)
         response = client.models.generate_content(
             model="gemini-2.0-flash",
             contents=full_prompt
