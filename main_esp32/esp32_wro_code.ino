@@ -7,12 +7,12 @@
 
 
 
-#define solar_panel_servo 33 //o
+#define solar_panel_servo 26 //o
 
-#define soil_moisture_servo_big 25 //o
-#define soil_moisture_servo_small 26 //o
+#define soil_moisture_servo_big 33 //o
+#define soil_moisture_servo_small 25 //o
 
-#define soil_moisture_sensor 36 //i
+#define soil_moisture_sensor 35 //i
 
 #define esp32cam_x_axis 27 //o
 #define esp32cam_y_axis 14 //o
@@ -23,7 +23,7 @@
 #define voltage_sensor_battery 34 //i
 
 #define water_pump 2 //o
-#define ldr_sensor 35 //i
+#define ldr_sensor 36 //i
 #define light 0//o
 
 #define humidity_sensor 32 //i
@@ -51,7 +51,9 @@ const char* ssid = "Proteek Mesh";
 const char* password = "passwordnaisorry";
 const char* serverName = "https://agri-bot-kwis.onrender.com/esp32-receive/"; 
 
-//infinte defining ends here 
+unsigned long previousMillis = 0;
+const long interval = 1000;
+
 
 void setup() {
   
@@ -78,7 +80,7 @@ void setup() {
   soilMoistureServoSmall.write(0);
   esp32CamXServo.write(0);
   esp32camYServo.write(0);
-  seedSowServo.write(0);
+  seedSowServo.write(90);
 
   pinMode(voltage_sensor_solar_panel, INPUT);
   pinMode(voltage_sensor_battery, INPUT);
@@ -95,11 +97,16 @@ void setup() {
 
 }
 
+
+String response = "";
+String previous_response = response;
+
+
 void loop() {
 
   //getting the responses from web
 
-  String response = "";
+  
   if (WiFi.status() == WL_CONNECTED) {
     HTTPClient http;
 
@@ -110,7 +117,7 @@ void loop() {
       Serial.print("Response code: ");
       Serial.println(httpResponseCode);
 
-      
+      previous_response = response;
       response = http.getString(); 
       Serial.println("Server response:");
       Serial.println(response); 
@@ -147,6 +154,19 @@ void loop() {
     if (response == "seed_sow_off"){
       seed_sow_state = 0;
     }
+    if (response == "measure_soil_moisture" && previous_response != "measure_soil_moisture"){
+      // soil_mos_servo_big.write(40);
+      // delay(1000);
+      // soil_mos_servo_small.write(140);
+      // delay(1000);
+      // int soil_moisture_read = analogRead(soil_moisture_sensor);
+      // Serial.println(soil_moisture_read);
+      // soil_mos_servo_big.write(90);
+      // delay(1000);
+      // soil_mos_servo_small.write(90);
+      // delay(1000);
+
+    }
 
     if(light_state == 0){
 
@@ -164,18 +184,18 @@ void loop() {
 
       digitalWrite(water_pump,HIGH);
     }
-    if(fertilizer_state == 0){
-      
+    if(fertilizer_state == 0 || seed_sow_state == 0){
+
+      seedSowServo.write(180);
+      delay(400);
+      seedSowServo.write(90);
+      delay(400);
     }
-    if(fertilizer_state == 1){
-      
+    if(fertilizer_state == 1 || seed_sow_state == 1){
+      seedSowServo.write(180);
     }
-    if(seed_sow_state == 0){
-      
-    }
-    if(seed_sow_state == 1){
-      
-    }
+
+
       
 
     
