@@ -1,4 +1,4 @@
-from flask import Flask, request, Response, send_file, render_template, jsonify, session
+from flask import Flask, request, Response, send_file, render_template, jsonify
 import os
 import uuid
 import json
@@ -6,14 +6,13 @@ import time
 import glob
 import logging
 from gtts import gTTS
-from google import genai  # <-- use this
+from google import genai  
 from dotenv import load_dotenv
 from googletrans import Translator
 from fuzzywuzzy import fuzz
 from flask_caching import Cache
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from flask_session import Session
 import threading
 import bleach
 
@@ -35,11 +34,6 @@ cache = Cache(app)
 # Rate limiting setup
 limiter = Limiter(get_remote_address, app=app, default_limits=["200 per day", "50 per hour"])
 
-# Session setup
-app.config['SESSION_TYPE'] = 'filesystem'
-app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "supersecretkey")  # Set a secret key
-Session(app)
-
 # Create audio folder if not exist
 os.makedirs("static/audio", exist_ok=True)
 
@@ -56,6 +50,7 @@ RESPONSE_TRANSLATIONS = {
     "কীটনাশক ব্যবস্থা বন্ধ হয়েছে": "The fertilizer system has been turned off",
     "ওয়াটার পাম্প চালু হয়েছে": "The water pump has been turned on",
     "ওয়াটার পাম্প বন্ধ হয়েছে": "The water pump has been turned off",
+
 }
 
 # Command mappings for ESP32 with fuzzy thresholds
@@ -68,6 +63,7 @@ COMMAND_MAPPINGS = {
     "turn off the fertilizer system": "কীটনাশক ব্যবস্থা বন্ধ হয়েছে",
     "turn on water pump": "ওয়াটার পাম্প চালু হয়েছে",
     "turn off water pump": "ওয়াটার পাম্প বন্ধ হয়েছে",
+
 }
 
 SYSTEM_INSTRUCTION_BN =  """
@@ -253,29 +249,19 @@ def ask_bot():
         return jsonify({'error': 'Missing question'}), 400
 
     try:
-        # Session-based context
-        if 'chat_history' not in session:
-            session['chat_history'] = []
-        history = session['chat_history']
-        context = "\n".join([f"প্রশ্ন: {q}\nউত্তর: {a}" for q, a in history]) if lang == 'bn' else "\n".join([f"Question: {q}\nAnswer: {a}" for q, a in history])
-
-        full_prompt = f"{get_system_instruction(lang)}\n\n{context}\n\nপ্রশ্ন: {question}\n\nউত্তর দিন:" if lang == 'bn' else f"{get_system_instruction(lang)}\n\n{context}\n\nQuestion: {question}\n\nAnswer:"
+        full_prompt = f"{get_system_instruction(lang)}\n\nপ্রশ্ন: {question}\n\nউত্তর দিন:" if lang == 'bn' else f"{get_system_instruction(lang)}\n\nQuestion: {question}\n\nAnswer:"
 
         # FIXED: use client.models.generate_content (google-genai SDK)
         response = client.models.generate_content(
             model="gemini-2.0-flash",
             contents=full_prompt
         )
+        global primary_answer
         primary_answer = response.text.strip()
 
         # Get secondary translation
+        global secondary_answer
         secondary_answer = get_english_translation(primary_answer) if lang == 'bn' else get_bangla_translation(primary_answer)
-
-        # Update session history
-        history.append((question, primary_answer))
-        if len(history) > 5:  # Keep last 5 for context
-            history.pop(0)
-        session['chat_history'] = history
 
         # Generate audio synchronously (reliable)
         primary_chunks = split_text(primary_answer)
@@ -313,56 +299,29 @@ def cleanup_audio_files():
 def get_audio(filename):
     return send_file(f'static/audio/{filename}', mimetype='audio/mpeg')
 
-@limiter.limit("10 per minute")
 @app.route("/esp32-receive/", methods=["GET"])
 def esp32_receive():
-    question = bleach.clean(request.args.get('q', ''))
-    if not question:
-        return jsonify({'error': 'Missing question'}), 400
+    
 
-    try:
-        # Fuzzy matching for commands
-        best_match = None
-        best_score = 0
-        lower_question = question.lower()
-        for cmd, bn_response in COMMAND_MAPPINGS.items():
-            score = fuzz.token_sort_ratio(lower_question, cmd)
-            if score > best_score and score > 80:  # Threshold
-                best_score = score
-                best_match = bn_response
+    # Map to ESP32 commands
+    if "লাইটটি চালু হয়েছে" in primary_answer or "The light has been turned on" in primary_answer:
+        return "light_on"
+    if "লাইটটি বন্ধ হয়েছে" in primary_answer or "The light has been turned off" in primary_answer:
+        return "light_off"
+    if "বীজ বপন ব্যবস্থা চালু হয়েছে" in primary_answer or "The seed sowing system has been turned on" in primary_answer:
+        return "seed_sow_on"
+    if "বীজ বপন ব্যবস্থা বন্ধ হয়েছে" in primary_answer or "The seed sowing system has been turned off" in primary_answer:
+        return "seed_sow_off"
+    if "কীটনাশক ব্যবস্থা চালু হয়েছে" in primary_answer or "The fertilizer system has been turned on" in primary_answer:
+        return "fertilizer_on"
+    if "কীটনাশক ব্যবস্থা বন্ধ হয়েছে" in primary_answer or "The fertilizer system has been turned off" in primary_answer:
+        return "fertilizer_off"
+    if "ওয়াটার পাম্প চালু হয়েছে" in primary_answer or "The water pump has been turned on" in primary_answer:
+        return "water_pump_on"
+    if "ওয়াটার পাম্প বন্ধ হয়েছে" in primary_answer or "The water pump has been turned off" in primary_answer:
+        return "water_pump_off"
+    return str(primary_answer)
 
-        if best_match:
-            answer = best_match
-        else:
-            full_prompt = f"{SYSTEM_INSTRUCTION_BN}\n\nপ্রশ্ন: {question}\n\nউত্তর দিন:"
-            response = client.models.generate_content(
-                model="gemini-2.0-flash",
-                contents=full_prompt
-            )
-            answer = response.text.strip()
-
-        # Map to ESP32 commands (fixed the 'or' bug in conditions)
-        if "লাইটটি চালু হয়েছে" in answer or "The light has been turned on" in answer:
-            return "light_on"
-        if "লাইটটি বন্ধ হয়েছে" in answer or "The light has been turned off" in answer:
-            return "light_off"
-        if "বীজ বপন ব্যবস্থা চালু হয়েছে" in answer or "The seed sowing system has been turned on" in answer:
-            return "seed_sow_on"
-        if "বীজ বপন ব্যবস্থা বন্ধ হয়েছে" in answer or "The seed sowing system has been turned off" in answer:
-            return "seed_sow_off"
-        if "কীটনাশক ব্যবস্থা চালু হয়েছে" in answer or "The fertilizer system has been turned on" in answer:
-            return "fertilizer_on"
-        if "কীটনাশক ব্যবস্থা বন্ধ হয়েছে" in answer or "The fertilizer system has been turned off" in answer:
-            return "fertilizer_off"
-        if "ওয়াটার পাম্প চালু হয়েছে" in answer or "The water pump has been turned on" in answer:
-            return "water_pump_on"
-        if "ওয়াটার পাম্প বন্ধ হয়েছে" in answer or "The water pump has been turned off" in answer:
-            return "water_pump_off"
-        return str(answer)
-
-    except Exception as e:
-        logger.error(f"Error: {str(e)}", exc_info=True)
-        return jsonify({'error': str(e)}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
