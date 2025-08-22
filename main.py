@@ -79,6 +79,7 @@ SYSTEM_INSTRUCTION_BN =  """
 
 - যদি ইউজার বলে "TURN ON THE WATER PUMP" বা এরকম কিছু, উত্তর দিন: "ওয়াটার পাম্প চালু হয়েছে"।  
 - যদি ইউজার বলে "TURN OFF THE WATER PUMP" বা এরকম কিছু, উত্তর দিন: "ওয়াটার পাম্প বন্ধ হয়েছে"।  
+- যদি ইউজার বলে "MEASURE THE SOIL MOISTURE" বা এরকম কিছু, উত্তর দিন: "পরিমাপ করা হচ্ছে... LCD প্যানেল দেখুন"।
 
 
 সাধারণ নির্দেশিকা:  
@@ -160,6 +161,8 @@ System Rules for Device Control:
 
 - If the user says "TURN ON THE WATER PUMP" or similar, reply: "Water pump has been turned ON".  
 - If the user says "TURN OFF THE WATER PUMP" or similar, reply: "Water pump has been turned OFF".  
+
+- If the user says "MEASURE THE SOIL MOISTURE" or similar, reply: "MEASURING.... LOOK AT THE LCD PANEL". 
   
 
 General Guidelines:
@@ -363,6 +366,9 @@ def esp32_receive():
         return "water_pump_on"
     if "ওয়াটার পাম্প বন্ধ হয়েছে" in primary_answer:
         return "water_pump_off"
+    if "পরিমাপ করা হচ্ছে... LCD প্যানেল দেখুন" in primary_answer:
+        return "measure_soil_moisture"
+    
     if "The light has been turned on" in secondary_answer:
         return "light_on"
     if "The light has been turned off" in secondary_answer:
@@ -379,6 +385,9 @@ def esp32_receive():
         return "water_pump_on"
     if "The water pump has been turned off" in secondary_answer:
         return "water_pump_off"
+    if "MEASURING.... LOOK AT THE LCD PANEL" in secondary_answer:
+        return "measure_soil_moisture"
+    
     return "none_for_now"
 
 
