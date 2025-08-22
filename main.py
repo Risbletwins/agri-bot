@@ -235,7 +235,6 @@ def chat():
     return render_template('chat.html')
 
 @cache.cached(timeout=300, query_string=True)
-@limiter.limit("10 per minute")
 @app.route('/ask', methods=['GET'])
 def ask_bot():
     question = bleach.clean(request.args.get('q', ''))
