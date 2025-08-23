@@ -9,7 +9,7 @@ from gtts import gTTS
 from google import genai  
 from dotenv import load_dotenv
 from googletrans import Translator
-from fuzzywuzzy import fuzz
+from fuzzywuzzy import fuzz  # We'll use this for optional fuzzy matching
 from flask_caching import Cache
 import threading
 import bleach
@@ -35,7 +35,7 @@ os.makedirs("static/audio", exist_ok=True)
 # Translator for dynamic translations
 translator = Translator()
 
-# Predefined response translations (extended if needed)
+# Predefined response translations (extended with soil moisture)
 RESPONSE_TRANSLATIONS = {
     "লাইটটি চালু হয়েছে": "The light has been turned on",
     "লাইটটি বন্ধ হয়েছে": "The light has been turned off",
@@ -45,21 +45,10 @@ RESPONSE_TRANSLATIONS = {
     "কীটনাশক ব্যবস্থা বন্ধ হয়েছে": "The fertilizer system has been turned off",
     "ওয়াটার পাম্প চালু হয়েছে": "The water pump has been turned on",
     "ওয়াটার পাম্প বন্ধ হয়েছে": "The water pump has been turned off",
-
+    "পরিমাপ করা হচ্ছে... LCD প্যানেল দেখুন": "Measuring... Look at the LCD panel",  # Added for consistency
 }
 
-# Command mappings for ESP32 with fuzzy thresholds
-COMMAND_MAPPINGS = {
-    "turn on the light": "লাইটটি চালু হয়েছে",
-    "turn off the light": "লাইটটি বন্ধ হয়েছে",
-    "turn on the seed sow": "বীজ বপন ব্যবস্থা চালু হয়েছে",
-    "turn off the seed sow": "বীজ বপন ব্যবস্থা বন্ধ হয়েছে",
-    "turn on the fertilizer system": "কীটনাশক ব্যবস্থা চালু হয়েছে",
-    "turn off the fertilizer system": "কীটনাশক ব্যবস্থা বন্ধ হয়েছে",
-    "turn on water pump": "ওয়াটার পাম্প চালু হয়েছে",
-    "turn off water pump": "ওয়াটার পাম্প বন্ধ হয়েছে",
-
-}
+# Removed COMMAND_MAPPINGS since unused; if you want fuzzy on inputs, add it to prompt or /ask logic
 
 SYSTEM_INSTRUCTION_BN =  """
 
@@ -150,19 +139,19 @@ You must ALWAYS reply only in ENGLISH, no matter what language the user uses.
 You can understand Bangla or other languages, but your output must stay in English only.  
 
 System Rules for Device Control:
-- If the user says "TURN ON THE LIGHT" or similar, reply: "Light has been turned ON".  
-- If the user says "TURN OFF THE LIGHT" or similar, reply: "Light has been turned OFF".  
+- If the user says "TURN ON THE LIGHT" or similar, reply: "The light has been turned on".  
+- If the user says "TURN OFF THE LIGHT" or similar, reply: "The light has been turned off".  
 
-- If the user says "TURN ON THE SEED SOW" or similar, reply: "Seed sowing system has been turned ON".  
-- If the user says "TURN OFF THE SEED SOW" or similar, reply: "Seed sowing system has been turned OFF".  
+- If the user says "TURN ON THE SEED SOW" or similar, reply: "The seed sowing system has been turned on".  
+- If the user says "TURN OFF THE SEED SOW" or similar, reply: "The seed sowing system has been turned off".  
 
-- If the user says "TURN ON THE FERTILIZER SYSTEM" or similar, reply: "Fertilizer system has been turned ON".  
-- If the user says "TURN OFF THE FERTILIZER SYSTEM" or similar, reply: "Fertilizer system has been turned OFF".  
+- If the user says "TURN ON THE FERTILIZER SYSTEM" or similar, reply: "The fertilizer system has been turned on".  
+- If the user says "TURN OFF THE FERTILIZER SYSTEM" or similar, reply: "The fertilizer system has been turned off".  
 
-- If the user says "TURN ON THE WATER PUMP" or similar, reply: "Water pump has been turned ON".  
-- If the user says "TURN OFF THE WATER PUMP" or similar, reply: "Water pump has been turned OFF".  
+- If the user says "TURN ON THE WATER PUMP" or similar, reply: "The water pump has been turned on".  
+- If the user says "TURN OFF THE WATER PUMP" or similar, reply: "The water pump has been turned off".  
 
-- If the user says "MEASURE THE SOIL MOISTURE" or similar, reply: "MEASURING.... LOOK AT THE LCD PANEL". 
+- If the user says "MEASURE THE SOIL MOISTURE" or similar, reply: "Measuring... Look at the LCD panel". 
   
 
 General Guidelines:
@@ -274,6 +263,10 @@ def get_english_translation(bn_text):
         return bn_text + " (Translation unavailable)"
 
 def get_bangla_translation(en_text):
+    # Reverse lookup for exact matches; otherwise translate
+    for bn, en in RESPONSE_TRANSLATIONS.items():
+        if en == en_text:
+            return bn
     try:
         return translator.translate(en_text, src='en', dest='bn').text
     except Exception as e:
@@ -349,45 +342,30 @@ def get_audio(filename):
 
 @app.route("/esp32-receive/", methods=["GET"])
 def esp32_receive():
+    # Define command triggers with all variants (Bangla + English, including old ones for safety)
+    # Key: command, Value: list of phrases (case-sensitive, but we'll lower() in checks)
+    command_triggers = {
+        "light_on": ["লাইটটি চালু হয়েছে", "The light has been turned on", "Light has been turned ON"],
+        "light_off": ["লাইটটি বন্ধ হয়েছে", "The light has been turned off", "Light has been turned OFF"],
+        "seed_sow_on": ["বীজ বপন ব্যবস্থা চালু হয়েছে", "The seed sowing system has been turned on", "Seed sowing system has been turned ON"],
+        "seed_sow_off": ["বীজ বপন ব্যবস্থা বন্ধ হয়েছে", "The seed sowing system has been turned off", "Seed sowing system has been turned OFF"],
+        "fertilizer_on": ["কীটনাশক ব্যবস্থা চালু হয়েছে", "The fertilizer system has been turned on", "Fertilizer system has been turned ON"],
+        "fertilizer_off": ["কীটনাশক ব্যবস্থা বন্ধ হয়েছে", "The fertilizer system has been turned off", "Fertilizer system has been turned OFF"],
+        "water_pump_on": ["ওয়াটার পাম্প চালু হয়েছে", "The water pump has been turned on", "Water pump has been turned ON"],
+        "water_pump_off": ["ওয়াটার পাম্প বন্ধ হয়েছে", "The water pump has been turned off", "Water pump has been turned OFF"],
+        "measure_soil_moisture": ["পরিমাপ করা হচ্ছে... LCD প্যানেল দেখুন", "Measuring... Look at the LCD panel", "MEASURING.... LOOK AT THE LCD PANEL"],
+    }
 
-    if "লাইটটি চালু হয়েছে" in primary_answer:
-        return "light_on"
-    if "লাইটটি বন্ধ হয়েছে" in primary_answer:
-        return "light_off"
-    if "বীজ বপন ব্যবস্থা চালু হয়েছে" in primary_answer:
-        return "seed_sow_on"
-    if "বীজ বপন ব্যবস্থা বন্ধ হয়েছে" in primary_answer:
-        return "seed_sow_off"
-    if "কীটনাশক ব্যবস্থা চালু হয়েছে" in primary_answer:
-        return "fertilizer_on"
-    if "কীটনাশক ব্যবস্থা বন্ধ হয়েছে" in primary_answer:
-        return "fertilizer_off"
-    if "ওয়াটার পাম্প চালু হয়েছে" in primary_answer:
-        return "water_pump_on"
-    if "ওয়াটার পাম্প বন্ধ হয়েছে" in primary_answer:
-        return "water_pump_off"
-    if "পরিমাপ করা হচ্ছে... LCD প্যানেল দেখুন" in primary_answer:
-        return "measure_soil_moisture"
-    
-    if "The light has been turned on" in secondary_answer:
-        return "light_on"
-    if "The light has been turned off" in secondary_answer:
-        return "light_off"
-    if "The seed sowing system has been turned on" in secondary_answer:
-        return "seed_sow_on"
-    if "The seed sowing system has been turned off" in secondary_answer:
-        return "seed_sow_off"
-    if "The fertilizer system has been turned on" in secondary_answer:
-        return "fertilizer_on"
-    if "The fertilizer system has been turned off" in secondary_answer:
-        return "fertilizer_off"
-    if "The water pump has been turned on" in secondary_answer:
-        return "water_pump_on"
-    if "The water pump has been turned off" in secondary_answer:
-        return "water_pump_off"
-    if "MEASURING.... LOOK AT THE LCD PANEL" in secondary_answer:
-        return "measure_soil_moisture"
-    
+    # Check both primary and secondary answers for any matching phrase (case-insensitive)
+    answers = [primary_answer.lower(), secondary_answer.lower()]
+    for cmd, phrases in command_triggers.items():
+        for phrase in [p.lower() for p in phrases]:
+            for ans in answers:
+                if phrase in ans:
+                    # Optional: Add fuzzy check if you want more robustness (e.g., if AI paraphrases)
+                    # if fuzz.partial_ratio(phrase, ans) > 90:
+                    return cmd
+
     return "none_for_now"
 
 
