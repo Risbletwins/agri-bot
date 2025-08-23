@@ -1,3 +1,6 @@
+primary_answer = "none_for_now"
+secondary_answer = "none_for_now"
+
 from flask import Flask, request, Response, send_file, render_template, jsonify
 import os
 import uuid
@@ -47,8 +50,6 @@ RESPONSE_TRANSLATIONS = {
     "ওয়াটার পাম্প বন্ধ হয়েছে": "The water pump has been turned off",
     "পরিমাপ করা হচ্ছে... LCD প্যানেল দেখুন": "Measuring... Look at the LCD panel",  # Added for consistency
 }
-
-# Removed COMMAND_MAPPINGS since unused; if you want fuzzy on inputs, add it to prompt or /ask logic
 
 SYSTEM_INSTRUCTION_BN =  """
 
@@ -285,6 +286,7 @@ def chat():
 @app.route('/ask', methods=['GET'])
 def ask_bot():
     global primary_answer
+    global secondary_answer
     primary_answer = "none_for_now"
     question = bleach.clean(request.args.get('q', ''))
     lang = request.args.get('lang', 'bn')
@@ -301,7 +303,6 @@ def ask_bot():
         primary_answer = response.text.strip()
 
         # Get secondary translation
-        global secondary_answer
         secondary_answer = get_english_translation(primary_answer) if lang == 'bn' else get_bangla_translation(primary_answer)
 
         # Generate audio synchronously (reliable)
