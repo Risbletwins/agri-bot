@@ -34,6 +34,7 @@ int light_state = 0;
 int fertilizer_state = 0;
 int seed_sow_state = 0;
 int water_pump_state = 0;
+int soil_moisture_state = 0;
 
 const char* ssid = "Proteek Mesh";
 const char* password = "passwordnaisorry";
@@ -45,7 +46,6 @@ const long interval = 1000;
 void setup() {
   Serial.begin(115200);
 
-  // Initialize WiFi
   WiFi.begin(ssid, password);
   Serial.print("Connecting to WiFi");
   while (WiFi.status() != WL_CONNECTED) {
@@ -54,34 +54,33 @@ void setup() {
   }
   Serial.println("\nConnected to WiFi");
 
-  // Initialize servos with explicit PWM settings
-  ESP32PWM::allocateTimer(0); // Allocate timer for servos
+
+  ESP32PWM::allocateTimer(0); 
   ESP32PWM::allocateTimer(1);
-  solarPanelServo.setPeriodHertz(50); // Standard 50 Hz for servos
+  solarPanelServo.setPeriodHertz(50); 
   soilMoistureServoBig.setPeriodHertz(50);
   soilMoistureServoSmall.setPeriodHertz(50);
   esp32CamXServo.setPeriodHertz(50);
   esp32camYServo.setPeriodHertz(50);
   seedSowServo.setPeriodHertz(50);
 
-  // Attach servos and check if attachment is successful
   if (!solarPanelServo.attach(solar_panel_servo, 500, 2500)) {
-    Serial.println("Failed to attach solarPanelServo");
+    Serial.println("Failed to attach solarPanelServo... what a pain..");
   }
   if (!soilMoistureServoBig.attach(soil_moisture_servo_big, 500, 2500)) {
-    Serial.println("Failed to attach soilMoistureServoBig");
+    Serial.println("Failed to attach soilMoistureServoBig... what a pain..");
   }
   if (!soilMoistureServoSmall.attach(soil_moisture_servo_small, 500, 2500)) {
-    Serial.println("Failed to attach soilMoistureServoSmall");
+    Serial.println("Failed to attach soilMoistureServoSmall... what a pain..");
   }
   if (!esp32CamXServo.attach(esp32cam_x_axis, 500, 2500)) {
-    Serial.println("Failed to attach esp32CamXServo");
+    Serial.println("Failed to attach esp32CamXServo... what a pain..");
   }
   if (!esp32camYServo.attach(esp32cam_y_axis, 500, 2500)) {
-    Serial.println("Failed to attach esp32camYServo");
+    Serial.println("Failed to attach esp32camYServo... what a pain..");
   }
   if (!seedSowServo.attach(seed_sow_servo, 500, 2500)) {
-    Serial.println("Failed to attach seedSowServo");
+    Serial.println("Failed to attach seedSowServo... what a pain..");
   }
 
   // Set initial servo positions
@@ -139,46 +138,62 @@ void loop() {
 
   // Process server response
   if (response == "light_on") {
-    light_state = 1;
-  } else if (response == "light_off") {
-    light_state = 0;
-  } else if (response == "fertilizer_on") {
+    light_state = HIGH;
+  }if (response == "light_off") {
+    light_state = LOW;
+  }if (response == "fertilizer_on") {
     fertilizer_state = 1;
-  } else if (response == "fertilizer_off") {
+  }if (response == "fertilizer_off") {
     fertilizer_state = 0;
-  } else if (response == "water_pump_on") {
-    water_pump_state = 1;
-  } else if (response == "water_pump_off") {
-    water_pump_state = 0;
-  } else if (response == "seed_sow_on") {
+  }if (response == "water_pump_on") {
+    water_pump_state = HIGH;
+  }if (response == "water_pump_off") {
+    water_pump_state = LOW;
+  }if (response == "seed_sow_on") {
     seed_sow_state = 1;
-  } else if (response == "seed_sow_off") {
+  }if (response == "seed_sow_off") {
     seed_sow_state = 0;
-  } else if (response == "measure_soil_moisture" && previous_response != "measure_soil_moisture") {
-    soilMoistureServoBig.write(40);
-    delay(1000); // Consider replacing with non-blocking delay
-    soilMoistureServoSmall.write(140);
-    delay(1000);
-    int soil_moisture_read = analogRead(soil_moisture_sensor);
-    Serial.print("Soil Moisture: ");
-    Serial.println(soil_moisture_read);
-    soilMoistureServoBig.write(90);
-    delay(1000);
-    soilMoistureServoSmall.write(90);
-    delay(1000);
+  }if (response == "start_measuring_soil_moisture"){
+    soil_moisture_state = 1;
   }
+  if (response == "stop_measuring_soil_moisture"){
+    soil_moisture_state = 0;
+  }
+  
 
 
   digitalWrite(light, light_state);
   digitalWrite(water_pump, water_pump_state);
 
   if (fertilizer_state == 1 || seed_sow_state == 1) {
-    if (seedSowServo.read() != 180) { // Only move if not already at position
-      seedSowServo.write(180);
-    }
-  } else {
     if (seedSowServo.read() != 90) { // Only move if not already at position
       seedSowServo.write(90);
+      delay(500);
     }
+    if (seedSowServo.read() != 180) { // Only move if not already at position
+      seedSowServo.write(180);
+      delay(500);
+    }
+  } else {
+
+  }
+  if(soil_moisture_state == 1){
+    soilMoistureServoBig.write(40);
+    delay(1000);
+    soilMoistureServoSmall.write(140);
+    delay(1000);
+    int soil_moisture_read = analogRead(soil_moisture_sensor);
+    Serial.print("Soil Moisture: ");
+    Serial.println(soil_moisture_read);
+    lcd.setCursor(0,0);
+    lcd.print(soil_moisture_read);
+    lcd.setCursor(1,0);
+    lcd.print("ShahratbhaiGJ");
+
+  }else{
+    soilMoistureServoBig.write(90);
+    delay(1000);
+    soilMoistureServoSmall.write(90);
+    delay(1000);
   }
 }

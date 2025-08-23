@@ -49,6 +49,7 @@ RESPONSE_TRANSLATIONS = {
     "ওয়াটার পাম্প চালু হয়েছে": "The water pump has been turned on",
     "ওয়াটার পাম্প বন্ধ হয়েছে": "The water pump has been turned off",
     "পরিমাপ করা হচ্ছে... LCD প্যানেল দেখুন": "Measuring... Look at the LCD panel",  # Added for consistency
+    "বন্ধ করা হচ্ছে...":'Stopping....'
 }
 
 SYSTEM_INSTRUCTION_BN =  """
@@ -69,7 +70,8 @@ SYSTEM_INSTRUCTION_BN =  """
 
 - যদি ইউজার বলে "TURN ON THE WATER PUMP" বা এরকম কিছু, উত্তর দিন: "ওয়াটার পাম্প চালু হয়েছে"।  
 - যদি ইউজার বলে "TURN OFF THE WATER PUMP" বা এরকম কিছু, উত্তর দিন: "ওয়াটার পাম্প বন্ধ হয়েছে"।  
-- যদি ইউজার বলে "MEASURE THE SOIL MOISTURE" বা এরকম কিছু, উত্তর দিন: "পরিমাপ করা হচ্ছে... LCD প্যানেল দেখুন"।
+- যদি ইউজার বলে "START MEASURING THE SOIL MOISTURE" বা এরকম কিছু, উত্তর দিন: "পরিমাপ করা হচ্ছে... LCD প্যানেল দেখুন"।
+- যদি ইউজার বলে "STOP MEASURING THE SOIL MOISTURE" বা এরকম কিছু, উত্তর দিন: "বন্ধ করা হচ্ছে..."।
 
 
 সাধারণ নির্দেশিকা:  
@@ -152,7 +154,8 @@ System Rules for Device Control:
 - If the user says "TURN ON THE WATER PUMP" or similar, reply: "The water pump has been turned on".  
 - If the user says "TURN OFF THE WATER PUMP" or similar, reply: "The water pump has been turned off".  
 
-- If the user says "MEASURE THE SOIL MOISTURE" or similar, reply: "Measuring... Look at the LCD panel". 
+- If the user says "START MEASURING THE SOIL MOISTURE" or similar, reply: "Measuring... Look at the LCD panel". 
+- IF the user says "STOP MEASURING THE SOIL MOISTURE" or similar, reply: "Stopping....".
   
 
 General Guidelines:
@@ -354,7 +357,8 @@ def esp32_receive():
         "fertilizer_off": ["কীটনাশক ব্যবস্থা বন্ধ হয়েছে", "The fertilizer system has been turned off", "Fertilizer system has been turned OFF"],
         "water_pump_on": ["ওয়াটার পাম্প চালু হয়েছে", "The water pump has been turned on", "Water pump has been turned ON"],
         "water_pump_off": ["ওয়াটার পাম্প বন্ধ হয়েছে", "The water pump has been turned off", "Water pump has been turned OFF"],
-        "measure_soil_moisture": ["পরিমাপ করা হচ্ছে... LCD প্যানেল দেখুন", "Measuring... Look at the LCD panel", "MEASURING.... LOOK AT THE LCD PANEL"],
+        "start_measuring_soil_moisture": ["পরিমাপ করা হচ্ছে... LCD প্যানেল দেখুন", "Measuring... Look at the LCD panel", "MEASURING.... LOOK AT THE LCD PANEL"],
+        "stop_measuring_soil_moisture": ["বন্ধ করা হচ্ছে...","Stopping....","STOPPING...."]
     }
 
     # Check both primary and secondary answers for any matching phrase (case-insensitive)
