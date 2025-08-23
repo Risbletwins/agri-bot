@@ -111,7 +111,8 @@ void loop() {
     HTTPClient http;
 
     http.begin(serverName);          
-    int httpResponseCode = http.GET(); 
+    int httpResponseCode = http.GE
+T(); 
 
     if (httpResponseCode > 0) {
       Serial.print("Response code: ");
