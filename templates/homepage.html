@@ -3,39 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>কৃষি সহকারী | Agri Servitor</title>
+    <meta name="description" content="Agri Servitor provides AI-driven agricultural solutions for farmers in Bangladesh.">
+    <meta name="keywords" content="agriculture, AI, farming, Bangladesh, crop solutions">
+    <title data-bn="কৃষি সহকারী" data-en="Agri Servitor">কৃষি সহকারী</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome for Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- Custom CSS -->
     <style>
-        body { font-family: 'Noto Sans Bengali', sans-serif; background-color: #f8f9fa; color: #333; }
-        .hero { background-color: #28a745; color: white; padding: 60px 0; text-align: center; }
-        .feature-icon { font-size: 2rem; color: #28a745; }
-        .btn-primary { background-color: #28a745; border-color: #28a745; }
-        .btn-primary:hover { background-color: #218838; }
-        .lang-toggle { position: absolute; top: 10px; right: 10px; }
-        footer { background-color: #e9ecef; padding: 20px 0; text-align: center; }
+        :root {
+            --primary-color: #28a745; /* Green for light mode */
+            --secondary-color: #e9ecef; /* Light gray */
+            --bg-color: #ffffff; /* White */
+            --text-color: #000000; /* Black */
+            --icon-color: #333333;
+            --accent-color: #218838;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body.dark-mode {
+            --primary-color: #1a2a80; /* Dark blue */
+            --secondary-color: #343a40; /* Dark gray */
+            --bg-color: #212529; /* Darker gray */
+            --text-color: #ffffff; /* White */
+            --icon-color: #ecdfcc;
+            --accent-color: #7a85c1;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: 'Roboto', 'Noto Sans Bengali', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .hero {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            padding: 60px 0;
+            text-align: center;
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            color: var(--icon-color);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        .navbar {
+            background-color: var(--secondary-color);
+            box-shadow: var(--shadow);
+        }
+
+        .navbar-brand, .nav-link {
+            color: var(--text-color) !important;
+        }
+
+        .nav-link:hover {
+            color: var(--accent-color) !important;
+        }
+
+        .dropdown-menu {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            box-shadow: var(--shadow);
+        }
+
+        .dropdown-item {
+            color: var(--text-color);
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--accent-color);
+            color: var(--text-color);
+        }
+
+        .settings-icon {
+            color: var(--icon-color);
+        }
+
+        footer {
+            background-color: var(--secondary-color);
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        .how-it-works, .testimonials, .blog-preview {
+            padding: 60px 0;
+        }
+
+        .how-it-works { background-color: var(--bg-color); }
+        .testimonials { background-color: var(--secondary-color); }
+        .card-blog { margin-bottom: 20px; }
+
+        .btn:focus, .dropdown-toggle:focus {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
+        }
     </style>
 </head>
 <body>
-    <!-- Language Toggle -->
-    <div class="lang-toggle">
-        <button id="lang-btn" class="btn btn-secondary">English</button>
-    </div>
+    <noscript>
+        <div class="container text-center">
+            <p data-bn="জাভাস্ক্রিপ্ট সক্ষম করুন সেটিংস বৈশিষ্ট্য ব্যবহার করতে।" data-en="Please enable JavaScript to use the settings features.">জাভাস্ক্রিপ্ট সক্ষম করুন সেটিংস বৈশিষ্ট্য ব্যবহার করতে।</p>
+        </div>
+    </noscript>
 
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="/">কৃষি সহকারী</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <a class="navbar-brand" href="/" data-bn="কৃষি সহকারী" data-en="Agri Servitor">কৃষি সহকারী</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation menu">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link active" href="/">হোম</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/chat">কৃষি সহকারী</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/" data-bn="হোম" data-en="Home">হোম</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/chat" data-bn="কৃষি সহকারী" data-en="Agri Servitor">কৃষি সহকারী</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/about" data-bn="সম্পর্কে" data-en="About">সম্পর্কে</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/blog" data-bn="ব্লগ" data-en="Blog">ব্লগ</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/contact" data-bn="যোগাযোগ" data-en="Contact">যোগাযোগ</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="settingsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-cog settings-icon"></i> <span data-bn="সেটিংস" data-en="Settings">সেটিংস</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="settingsDropdown">
+                            <li>
+                                <button class="dropdown-item" id="lang-toggle" data-bn="ইংরেজি" data-en="Bengali">English</button>
+                            </li>
+                            <li>
+                                <button class="dropdown-item" id="theme-toggle">
+                                    <i class="fas fa-moon"></i> <span data-bn="ডার্ক মোড" data-en="Dark Mode">Dark Mode</span>
+                                </button>
+                            </li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -46,7 +162,7 @@
         <div class="container">
             <h1 data-bn="কৃষি সহকারী" data-en="Agri Servitor">কৃষি সহকারী</h1>
             <p data-bn="আর নয় ভোগান্তি, কৃষি পরিচারক এর সাথে কৃষক পাবে তৃপ্তি।" data-en="No more struggles, farmers find satisfaction with Agri Servitor.">আর নয় ভোগান্তি, কৃষি পরিচারক এর সাথে কৃষক পাবে তৃপ্তি।</p>
-            <p data-bn="প্রযুক্তি নির্ভর কৃষিতেই গড়ব স্বনির্ভর বাংলাদেশ।" data-en="Building a self-reliant Bangladesh through technology-driven agriculture.">প্রযুক্তি নির্ভর কৃষিতেই গড়ব স্বনির্ভর বাংলাদেশ।</p>
+            <p data-bn="প্রযুক্তি নির্ভর কৃষিতেই গড়ব স্বনির্ভর বাংলাদেশ।" data-en="Building a self-reliant Bangladesh through technology-driven agriculture.">প্রযুক্তি নির্ভর কৃষিতেই গ�ড়ব স্বনির্ভর বাংলাদেশ।</p>
             <a href="/chat" class="btn btn-light btn-lg" data-bn="এখনই প্রশ্ন করুন" data-en="Ask Now">এখনই প্রশ্ন করুন</a>
         </div>
     </section>
@@ -68,7 +184,7 @@
                     <div class="card h-100">
                         <div class="card-body text-center">
                             <i class="fas fa-seedling feature-icon mb-3"></i>
-                            <p data-bn="ফসলের সমস্যা নির্ণয়ের পর তাৎক্ষনিক সমাধান।" data-en="Instant solutions after diagnosing crop issues.">ফসলের সমস্যা নির্ণয়ের পর তাৎক্ষনিক সমাধান।</p>
+                            <p data-bn="ফসলের সমস্যা নির্ণয়ের পর তাৎক্ষণিক সমাধান।" data-en="Instant solutions after diagnosing crop issues.">ফসলের সমস্যা নির্ণয়ের পর তাৎক্ষণিক সমাধান।</p>
                         </div>
                     </div>
                 </div>
@@ -88,6 +204,127 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-cloud-sun feature-icon mb-3"></i>
+                            <p data-bn="স্থানীয় আবহাওয়া পূর্বাভাস এবং পরাবিশ।" data-en="Localized weather forecasting and suggestions.">স্থানীয় আবহাওয়া পূর্বাভাস এবং পরামর্শ।</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-chart-line feature-icon mb-3"></i>
+                            <p data-bn="বাজার মূল্য পূর্বাভাস এবং ফসল সুপারিশ।" data-en="Market price predictions and crop recommendations.">বাজার মূল্য পূর্বাভাস এবং ফসল সুপারিশ।</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works">
+        <div class="container">
+            <h2 class="text-center mb-4" data-bn="কীভাবে কাজ করে?" data-en="How It Works?">কীভাবে কাজ করে?</h2>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-question-circle feature-icon mb-3"></i>
+                            <h5 data-bn="প্রশ্ন করুন" data-en="Ask a Question">প্রশ্ন করুন</h5>
+                            <p data-bn="ভয়েস বা টেক্সটে আপনার কৃষি সংক্রান্ত প্রশ্ন করুন।" data-en="Ask your agriculture-related questions via voice or text.">ভয়েস বা টেক্সটে আপনার কৃষি সংক্রান্ত প্রশ্ন করুন।</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-brain feature-icon mb-3"></i>
+                            <h5 data-bn="এআই বিশ্লেষণ" data-en="AI Analysis">এআই বিশ্লেষণ</h5>
+                            <p data-bn="আমাদের এআই সিস্টেম আপনার প্রশ্ন বিশ্লেষণ করে সঠিক উত্তর প্রদান করে।" data-en="Our AI system analyzes your query and provides accurate responses.">আমাদের এআই সিস্টেম আপনার প্রশ্ন বিশ্লেষণ করে সঠিক উত্তর প্রদান করে।</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-check-circle feature-icon mb-3"></i>
+                            <h5 data-bn="সমাধান পান" data-en="Get Solutions">সমাধান পান</h5>
+                            <p data-bn="তাৎক্ষণিক সমাধান, পরামর্শ এবং তথ্য পান।" data-en="Receive instant solutions, advice, and information.">তাৎক্ষণিক সমাধান, পরামর্শ এবং তথ্য পান।</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials">
+        <div class="container">
+            <h2 class="text-center mb-4" data-bn="কৃষকদের মতামত" data-en="Farmer Testimonials">কৃষকদের মতামত</h2>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <p data-bn="এই অ্যাপটি আমার ফসলের সমস্যা সমাধানে সাহায্য করেছে।" data-en="This app helped me solve my crop issues quickly.">এই অ্যাপটি আমার ফসলের সমস্যা সমাধানে সাহায্য করেছে।</p>
+                            <h6 data-bn="- একজন কৃষক, ঢাকা" data-en="- A Farmer, Dhaka">- একজন কৃষক, ঢাকা</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <p data-bn="ভয়েস ফিচারটি খুব সুবিধাজনক।" data-en="The voice feature is very convenient.">ভয়েস ফিচারটি খুব সুবিধাজনক।</p>
+                            <h6 data-bn="- একজন কৃষক, চট্টগ্রাম" data-en="- A Farmer, Chittagong">- একজন কৃষক, চট্টগ্রাম</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <p data-bn="আবহাওয়া পূর্বাভাস সঠিক এবং সহায়ক।" data-en="The weather forecasts are accurate and helpful.">আবহাওয়া পূর্বাভাস সঠিক এবং সহায়ক।</p>
+                            <h6 data-bn="- একজন কৃষক, রাজশাহী" data-en="- A Farmer, Rajshahi">- একজন কৃষক, রাজশাহী</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Blog Preview Section -->
+    <section class="blog-preview">
+        <div class="container">
+            <h2 class="text-center mb-4" data-bn="সাম্প্রতিক ব্লগ" data-en="Recent Blog Posts">সাম্প্রতিক ব্লগ</h2>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="card card-blog h-100">
+                        <div class="card-body">
+                            <h5 data-bn="ফসল রোগ নির্ণয়ের টিপস" data-en="Tips for Crop Disease Diagnosis">ফসল রোগ নির্ণয়ের টিপস</h5>
+                            <p data-bn="আপনার ফসলের রোগ সনাক্ত করার সহজ উপায়।" data-en="Easy ways to identify diseases in your crops.">আপনার ফসলের রোগ সনাক্ত করার সহজ উপায়।</p>
+                            <a href="/blog/post1" class="btn btn-primary" data-bn="আরও পড়ুন" data-en="Read More">আরও পড়ুন</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card card-blog h-100">
+                        <div class="card-body">
+                            <h5 data-bn="কৃষিতে এআই এর ভূমিকা" data-en="Role of AI in Agriculture">কৃষিতে এআই এর ভূমিকা</h5>
+                            <p data-bn="এআই কীভাবে কৃষকদের সাহায্য করছে।" data-en="How AI is helping farmers.">এআই কীভাবে কৃষকদের সাহায্য করছে।</p>
+                            <a href="/blog/post2" class="btn btn-primary" data-bn="আরও পড়ুন" data-en="Read More">আরও পড়ুন</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md оказалась4 mb-3">
+                    <div class="card card-blog h-100">
+                        <div class="card-body">
+                            <h5 data-bn="বাজার মূল্য পূর্বাভাস" data-en="Market Price Forecasting">বাজার মূল্য পূর্বাভাস</h5>
+                            <p data-bn="ফসলের মূল্য কীভাবে অনুমান করবেন।" data-en="How to predict crop prices.">ফসলের মূল্য কীভাবে অনুমান করবেন।</p>
+                            <a href="/blog/post3" class="btn btn-primary" data-bn="আরও পড়ুন" data-en="Read More">আরও পড়ুন</a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -101,25 +338,45 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Language Toggle Script -->
+    <!-- Settings Script -->
     <script>
-        const langBtn = document.getElementById('lang-btn');
-        const elements = document.querySelectorAll('[data-bn], [data-en]');
+        const langToggle = document.getElementById('lang-toggle');
+        const themeToggle = document.getElementById('theme-toggle');
+        const langElements = document.querySelectorAll('[data-bn], [data-en]');
         let currentLang = localStorage.getItem('lang') || 'bn';
+        let currentTheme = localStorage.getItem('theme') || 'light';
 
         function toggleLanguage() {
             currentLang = currentLang === 'bn' ? 'en' : 'bn';
             localStorage.setItem('lang', currentLang);
-            langBtn.textContent = currentLang === 'bn' ? 'English' : 'বাংলা';
-            elements.forEach(el => {
-                el.textContent = el.getAttribute(`data-${currentLang}`);
+            langToggle.textContent = currentLang === 'bn' ? 'English' : 'বাংলা';
+            langElements.forEach(el => {
+                const text = el.getAttribute(`data-${currentLang}`);
+                if (text) el.textContent = text;
             });
             document.documentElement.lang = currentLang;
+            document.title = document.querySelector('title').getAttribute(`data-${currentLang}`);
+            // Update theme toggle text
+            const themeText = themeToggle.querySelector('span');
+            themeText.textContent = themeText.getAttribute(`data-${currentLang}`);
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            currentTheme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+            const themeIcon = themeToggle.querySelector('i');
+            themeIcon.className = `fas fa-${currentTheme === 'dark' ? 'sun' : 'moon'} settings-icon`;
+            themeToggle.querySelector('span').textContent = currentLang === 'bn' ? 
+                (currentTheme === 'dark' ? 'লাইট মোড' : 'ডার্ক মোড') : 
+                (currentTheme === 'dark' ? 'Light Mode' : 'Dark Mode');
+            localStorage.setItem('theme', currentTheme);
         }
 
         // Initial setup
         if (currentLang === 'en') toggleLanguage();
-        langBtn.addEventListener('click', toggleLanguage);
+        if (currentTheme === 'dark') toggleTheme();
+        langToggle.addEventListener('click', toggleLanguage);
+        themeToggle.addEventListener('click', toggleTheme);
     </script>
 </body>
 </html>
