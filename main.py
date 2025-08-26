@@ -285,6 +285,13 @@ def serve_webpage():
 def chat():
     return render_template('chat.html')
 
+@app.route('/chat')
+def chat():
+    return render_template('chat.html')
+
+@app.route('/chat')
+def chat():
+    return render_template('chat.html')
 
 @cache.cached(timeout=300, query_string=True)
 @app.route('/ask', methods=['GET'])
