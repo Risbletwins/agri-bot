@@ -286,12 +286,12 @@ def chat():
     return render_template('chat.html')
 
 @app.route('/moveauto')
-def chat():
-    return render_template('movement-auto.html')
+def moveauto():
+    return render_template('movement_auto.html')
 
 @app.route('/movemanual')
-def chat():
-    return render_template('movement-manual.html')
+def movemanual():
+    return render_template('movemen_manual.html')
 
 @cache.cached(timeout=300, query_string=True)
 @app.route('/ask', methods=['GET'])
