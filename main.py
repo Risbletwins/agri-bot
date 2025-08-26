@@ -285,11 +285,11 @@ def serve_webpage():
 def chat():
     return render_template('chat.html')
 
-@app.route('/move-auto')
+@app.route('/moveauto')
 def chat():
     return render_template('movement-auto.html')
 
-@app.route('/move-manual')
+@app.route('/movemanual')
 def chat():
     return render_template('movement-manual.html')
 
