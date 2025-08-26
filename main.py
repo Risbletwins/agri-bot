@@ -285,6 +285,7 @@ def serve_webpage():
 def chat():
     return render_template('chat.html')
 
+
 @cache.cached(timeout=300, query_string=True)
 @app.route('/ask', methods=['GET'])
 def ask_bot():

@@ -13,6 +13,7 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <!-- Custom CSS -->
     <style>
         :root {
@@ -23,6 +24,8 @@
             --icon-color: #333333;
             --accent-color: #218838;
             --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --navitemhover: #218838;
+            --navitemhovertext: black;
         }
 
         body.dark-mode {
@@ -33,6 +36,8 @@
             --icon-color: #ecdfcc;
             --accent-color: #7a85c1;
             --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --navitemhover: #1a2a80;
+            --navitemhovertext: #ffffff;
         }
 
         body {
@@ -114,6 +119,24 @@
             outline: 2px solid var(--accent-color);
             outline-offset: 2px;
         }
+        .nav-item{
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            padding: 5px;
+            margin: 10px;
+            border-radius: 10px;
+            width: 200px;
+            
+            
+        }
+        .nav-item:hover{
+            background-color: var(--navitemhover);
+            color: var(--navitemhovertext);
+        }
+        #navbarsettings{
+            color: var(--text-color);
+            border: none;
+        }
     </style>
 </head>
 <body>
@@ -126,20 +149,19 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="/" data-bn="কৃষোনিকস" data-en="Krishonyx">কৃষোনিকস</a>
+            <a class="navbar-brand fas" href="/" data-bn="কৃষোনিকস" data-en="Krishonyx">কৃষোনিকস</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation menu">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link active" href="/" data-bn="হোম" data-en="Home">হোম</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/chat" data-bn="কৃষি সহকারী" data-en="Agri Servitor">কৃষি সহকারী</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/about" data-bn="সম্পর্কে" data-en="About">সম্পর্কে</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/blog" data-bn="ব্লগ" data-en="Blog">ব্লগ</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/contact" data-bn="যোগাযোগ" data-en="Contact">যোগাযোগ</a></li>
+                    <li class="nav-item"><a class="nav-link active bi bi-house-fill fas" href="/"> Home</a></li>
+                    <li class="nav-item"><a class="nav-link bi bi-chat-fill fas" href="/chat"> Chat</a></li>
+                    <li class="nav-item"><a class="nav-link bi bi-chat-fill fas bi bi-ev-front-fill" href="/move-auto"> Control Auto</a></li>
+                    <li class="nav-item"><a class="nav-link active bi bi-arrows-move fas " href="/move-manual"> Control Manual</a></li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="settingsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-cog settings-icon"></i> <span data-bn="সেটিংস" data-en="Settings">সেটিংস</span>
+                            <i class="fas fa-cog settings-icon" id="navbarsettings"> Settings</i> 
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="settingsDropdown">
                             <li>
@@ -147,7 +169,7 @@
                             </li>
                             <li>
                                 <button class="dropdown-item" id="theme-toggle">
-                                    <i class="fas fa-moon"></i> <span data-bn="ডার্ক মোড" data-en="Dark Mode">Dark Mode</span>
+                                    <i class="fas fa-moon"></i> <span data-bn="Dark Mode" data-en="Dark Mode">Dark Mode</span>
                                 </button>
                             </li>
                         </ul>
