@@ -383,7 +383,31 @@ def esp32_receive():
 @app.route("/esp32-receive-movement/",methods=["POST","GET"])
 def esp32_receive_movement():
     data = request.get_json()
-    return data
+    
+    height = data.get('height')
+    width = data.get('width')
+    num_rows = data.get('num_rows')
+    orientation = data.get('orientation')
+    distance = data.get('distance')
+
+    print(f"Received data: Height = {height} ft, Width = {width} ft, Rows = {num_rows}, Orientation = {orientation}, Distance = {distance} ft")
+
+    total_area = height * width
+    print(f"Calculated total land area: {total_area} sq ft")
+
+    movement_plan = {
+        "rows": num_rows,
+        "distance_between_rows": distance,
+        "orientation": orientation,
+        "field_dimensions": {"height": height, "width": width}
+    }
+
+    return jsonify({
+        "message": "Data received successfully!",
+        "received_data": data,
+        "calculated_area": total_area,
+        "movement_plan": movement_plan
+    }), 200
 
 
 if __name__ == "__main__":
