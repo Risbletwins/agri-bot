@@ -416,6 +416,32 @@ def esp32_receive_movement():
     }), 200
 @app.route("/esp32-movement", methods=["get"])
 def esp32_movement():
-    return clever_way
+    row = clever_way["num_rows"]
+    orient = clever_way["orientation"]
+    width = clever_way["width"]
+    height = clever_way["height"]
+    distance = clever_way["distance"]
+    instruction_str = ""
+    if orient == "vertical":
+        for i in range(1,row):
+            if i % 2 == 0:
+                instruction_str += "FLL"
+            else:
+                instruction_str += "FRR"
+        instruction_str += "F"
+        final_str = str(height)+"-"+str(distance)+"_"+instruction_str
+        return final_str
+    else:
+        for i in range(1,row):
+            if i % 2 == 0:
+                instruction_str += "FRR"
+            else:
+                instruction_str += "FLL"
+        instruction_str = "R"+instruction_str+"F"
+        final_str = str(width)+"-"+str(distance)+"_"+instruction_str
+        return final_str
+
+
+    
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
