@@ -380,6 +380,10 @@ def esp32_receive():
                     return cmd
 
     return "none_for_now"
+@app.route("/esp32-receive-movement/",methods=["POST","GET"])
+def esp32_receive_movement():
+    data = request.get_json()
+    return data
 
 
 if __name__ == "__main__":

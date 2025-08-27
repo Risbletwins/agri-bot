@@ -23,6 +23,7 @@
             --sidebaroptionscolor: #E1EEBC;
             --sidebaroptionshovercolor: #e1eebccc;
             --inputboxcolor: #E1EEBC;
+            --diagrambackgroundcolor:#90C67C;
         }
 
         body.dark-mode {
@@ -36,6 +37,7 @@
             --sidebaroptionscolor: rgba(173, 216, 230, 0.548);
             --sidebaroptionshovercolor: rgb(58, 58, 214);
             --inputboxcolor: #ffffff;
+            --diagrambackgroundcolor:#3d57e9;
         }
 
         body {
@@ -158,6 +160,14 @@
         .sidebaroptions:hover{
             background-color: var(--sidebaroptionshovercolor);
         }
+        #land-diagram{
+            border:none;
+            background-color: var(--diagrambackgroundcolor);
+            position: relative;
+            border:none;
+            overflow: hidden;
+            display: none;
+        }
       
     </style>
 </head>
@@ -219,9 +229,37 @@
         </div>
     </div>
 
-    <!-- Main Content (Blank) -->
+    <!-- Main Content -->
     <div class="main-content">
-        <p>This is a blank page with menu and settings.</p>
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-3 mb-3">
+                    <label for="height-input">Height (ft)</label>
+                    <input type="number" id="height-input" class="form-control" min="1" step="1" value="10">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="width-input">Width (ft)</label>
+                    <input type="number" id="width-input" class="form-control" min="1" step="1" value="20">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="rows-input">Number of Rows</label>
+                    <input type="number" id="rows-input" class="form-control" min="1" step="1" value="5">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="orientation-select">Orientation</label>
+                    <select id="orientation-select" class="form-select">
+                        <option value="horizontal">Horizontal</option>
+                        <option value="vertical">Vertical</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-4">
+                    <button id="generate-btn" class="btn btn-primary w-100">Generate</button>
+                </div>
+            </div>
+            <div id="land-diagram" class="mt-4 mx-auto"></div>
+        </div>
     </div>
 
     <!-- Bootstrap JS -->
@@ -305,6 +343,84 @@
         if (!sidebarToggle.contains(e.target) && !sidebar.contains(e.target)) {
             sidebar.classList.remove('active');
         }
+    });
+
+    // Land diagram logic
+    const heightInput = document.getElementById('height-input');
+    const widthInput = document.getElementById('width-input');
+    const rowsInput = document.getElementById('rows-input');
+    const orientationSelect = document.getElementById('orientation-select');
+    const generateBtn = document.getElementById('generate-btn');
+    const landDiagram = document.getElementById('land-diagram');
+
+    generateBtn.addEventListener('click', () => {
+        const height = parseFloat(heightInput.value) || 10;
+        const width = parseFloat(widthInput.value) || 20;
+        const numRows = parseInt(rowsInput.value) || 5;
+        const orientation = orientationSelect.value;
+
+        let distance;
+        if (numRows > 1) {
+            if (orientation === 'horizontal') {
+                distance = height / (numRows - 1);
+            } else {
+                distance = width / (numRows - 1);
+            }
+        } else {
+            distance = 0;
+        }
+
+        const maxSize = 500;
+        const scale = Math.min(maxSize / width, maxSize / height);
+
+        landDiagram.style.width = `${width * scale}px`;
+        landDiagram.style.height = `${height * scale}px`;
+        landDiagram.innerHTML = '';
+        landDiagram.style.display = 'block';
+
+        for (let i = 0; i < numRows; i++) {
+            const pos = i * distance * scale;
+
+            const line = document.createElement('div');
+            line.style.position = 'absolute';
+            line.style.backgroundColor = 'black';
+
+            if (orientation === 'horizontal') {
+                if (pos >= height * scale) break;
+                line.style.top = `${pos}px`;
+                line.style.left = '0';
+                line.style.width = '100%';
+                line.style.height = '1px';
+            } else {
+                if (pos >= width * scale) break;
+                line.style.left = `${pos}px`;
+                line.style.top = '0';
+                line.style.height = '100%';
+                line.style.width = '1px';
+            }
+
+            landDiagram.appendChild(line);
+        }
+
+        // Send data to /esp32-receive-movement
+        const data = {
+            height: height,
+            width: width,
+            num_rows: numRows,
+            distance: distance.toFixed(2)
+        };
+
+        fetch('/esp32-receive-movement', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        }).then(response => {
+            console.log('Data sent successfully');
+        }).catch(error => {
+            console.error('Error sending data:', error);
+        });
     });
     </script>
 </body>
