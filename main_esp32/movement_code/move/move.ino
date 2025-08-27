@@ -17,13 +17,13 @@ String main_instruction = "";
 int feet = 1000;
 int left_right_move_time = 1000;
 
-const unsigned int EN_A = 19;
-const unsigned int IN1_A = 22;
-const unsigned int IN2_A = 21;
+const unsigned int EN_A = 32;
+const unsigned int IN1_A = 25;
+const unsigned int IN2_A = 26;
 
-const unsigned int IN1_B = 18;
-const unsigned int IN2_B = 17;
-const unsigned int EN_B = 16;
+const unsigned int IN1_B = 27;
+const unsigned int IN2_B = 14;
+const unsigned int EN_B = 33;
 
 unsigned int motorSpeedA = 255;
 unsigned int motorSpeedB = 255;
@@ -143,13 +143,13 @@ void loop(){
         move_right(left_right_move_time);
         Serial.println("Finished moving right");
         Serial.print("Duration:");
-        Serial.println(left_right_move_time)
+        Serial.println(left_right_move_time);
       }
       if(current_instruction == 'L'){
         move_left(left_right_move_time);
         Serial.println("Finished moving left");
         Serial.print("Duration:");
-        Serial.println(left_right_move_time)
+        Serial.println(left_right_move_time);
       }
       if(current_instruction == 'F'){
         move_forward(forDis);
@@ -164,7 +164,7 @@ void loop(){
         Serial.println(rowDis);
       }
       if(response2 == "stop_rover"){
-        Serial.println("Rover has been stopped.")
+        Serial.println("Rover has been stopped.");
         all_motors.stop();
         break;
       }
