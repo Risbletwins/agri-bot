@@ -36,8 +36,8 @@ int seed_sow_state = 0;
 int water_pump_state = 0;
 int soil_moisture_state = 0;
 
-const char* ssid = "Wifi abar ki jinis";
-const char* password = "passdemunah!";
+const char* ssid = "Ruslam";
+const char* password = "10867000";
 const char* serverName = "https://agri-bot-kwis.onrender.com/esp32-receive/";
 
 unsigned long previousMillis = 0;

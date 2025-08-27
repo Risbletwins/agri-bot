@@ -48,8 +48,10 @@ RESPONSE_TRANSLATIONS = {
     "কীটনাশক ব্যবস্থা বন্ধ হয়েছে": "The fertilizer system has been turned off",
     "ওয়াটার পাম্প চালু হয়েছে": "The water pump has been turned on",
     "ওয়াটার পাম্প বন্ধ হয়েছে": "The water pump has been turned off",
-    "পরিমাপ করা হচ্ছে... LCD প্যানেল দেখুন": "Measuring... Look at the LCD panel",  # Added for consistency
-    "বন্ধ করা হচ্ছে...":'Stopping....'
+    "পরিমাপ করা হচ্ছে... LCD প্যানেল দেখুন": "Measuring... Look at the LCD panel",
+    "বন্ধ করা হচ্ছে...":'Stopping....',
+    "রোভার শুরু হচ্ছে।":"Starting rover.",
+    "রোভার বন্ধ হচ্ছে।":"Stopping rover."
 }
 
 SYSTEM_INSTRUCTION_BN =  """
@@ -70,8 +72,12 @@ SYSTEM_INSTRUCTION_BN =  """
 
 - যদি ইউজার বলে "TURN ON THE WATER PUMP" বা এরকম কিছু, উত্তর দিন: "ওয়াটার পাম্প চালু হয়েছে"।  
 - যদি ইউজার বলে "TURN OFF THE WATER PUMP" বা এরকম কিছু, উত্তর দিন: "ওয়াটার পাম্প বন্ধ হয়েছে"।  
+
 - যদি ইউজার বলে "START MEASURING THE SOIL MOISTURE" বা এরকম কিছু, উত্তর দিন: "পরিমাপ করা হচ্ছে... LCD প্যানেল দেখুন"।
 - যদি ইউজার বলে "STOP MEASURING THE SOIL MOISTURE" বা এরকম কিছু, উত্তর দিন: "বন্ধ করা হচ্ছে..."।
+
+- যদি ইউজার বলে "রোভার চলাচল শুরু করো" বা এরকম কিছু, উত্তর দিন: "রোভার শুরু হচ্ছে।"
+- যদি ইউজার বলে "রোভার চলাচল বন্ধ করো" বা এরকম কিছু, উত্তর দিন: "রোভার বন্ধ হচ্ছে।"
 
 
 সাধারণ নির্দেশিকা:  
@@ -155,7 +161,10 @@ System Rules for Device Control:
 - If the user says "TURN OFF THE WATER PUMP" or similar, reply: "The water pump has been turned off".  
 
 - If the user says "START MEASURING THE SOIL MOISTURE" or similar, reply: "Measuring... Look at the LCD panel". 
-- IF the user says "STOP MEASURING THE SOIL MOISTURE" or similar, reply: "Stopping....".
+- If the user says "STOP MEASURING THE SOIL MOISTURE" or similar, reply: "Stopping....".
+
+- If the user says "START ROVER MOVEMENT" or similar, reply: "Starting rover."
+- If the user says "STOP ROVER MOVEMENT" or similar, reply: "Stopping rover."
   
 
 General Guidelines:
@@ -367,7 +376,9 @@ def esp32_receive():
         "water_pump_on": ["ওয়াটার পাম্প চালু হয়েছে", "The water pump has been turned on", "Water pump has been turned ON"],
         "water_pump_off": ["ওয়াটার পাম্প বন্ধ হয়েছে", "The water pump has been turned off", "Water pump has been turned OFF"],
         "start_measuring_soil_moisture": ["পরিমাপ করা হচ্ছে... LCD প্যানেল দেখুন", "Measuring... Look at the LCD panel", "MEASURING.... LOOK AT THE LCD PANEL"],
-        "stop_measuring_soil_moisture": ["বন্ধ করা হচ্ছে...","Stopping....","STOPPING...."]
+        "stop_measuring_soil_moisture": ["বন্ধ করা হচ্ছে...","Stopping....","STOPPING...."],
+        "start_rover.": ["রোভার শুরু হচ্ছে।","Starting rover.","STARTING ROVER."],
+        "stop_rover.": ["রোভার বন্ধ হচ্ছে।","Stopping rover.","STOPPING ROVER."]
     }
 
     # Check both primary and secondary answers for any matching phrase (case-insensitive)
