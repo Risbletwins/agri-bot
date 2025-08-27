@@ -383,7 +383,9 @@ def esp32_receive():
     return "none_for_now"
 @app.route("/esp32-receive-movement", methods=["POST"])
 def esp32_receive_movement():
+    global clever_way
     data = request.get_json()
+    clever_way = data
     content_type = request.content_type
     print(content_type)
     print(data)
@@ -412,7 +414,8 @@ def esp32_receive_movement():
         "calculated_area": total_area,
         "movement_plan": movement_plan
     }), 200
-
-
+@app.route("/esp32-movement", methods=["get"])
+def esp32_movement():
+    return clever_way
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
