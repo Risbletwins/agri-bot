@@ -13,31 +13,31 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #90C67C; /* Green for light mode */
-            --secondary-color: #90C67C; /* Light gray */
-            --bg-color: #328E6E; /* White */
-            --text-color: #000000; /* Black */
+            --primary-color: #90C67C;
+            --secondary-color: #90C67C;
+            --bg-color: #328E6E;
+            --text-color: #000000;
             --icon-color: #333333;
             --accent-color: #67AE6E;
             --shadow: 0 10px 6px rgba(0, 0, 0, 0.1);
             --sidebaroptionscolor: #E1EEBC;
             --sidebaroptionshovercolor: #e1eebccc;
             --inputboxcolor: #E1EEBC;
-            --diagrambackgroundcolor:#90C67C;
+            --diagrambackgroundcolor: #90C67C;
         }
 
         body.dark-mode {
-            --primary-color: #1A2A80; /* Dark gray */
-            --secondary-color: #1A2A80; /* Blackish */
+            --primary-color: #1A2A80;
+            --secondary-color: #1A2A80;
             --bg-color: #3B38A0;
-            --text-color: #ffffff; /* White */
+            --text-color: #ffffff;
             --icon-color: #ECDFCC;
             --accent-color: #3d57e9;
             --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
             --sidebaroptionscolor: rgba(173, 216, 230, 0.548);
             --sidebaroptionshovercolor: rgb(58, 58, 214);
             --inputboxcolor: #ffffff;
-            --diagrambackgroundcolor:#3d57e9;
+            --diagrambackgroundcolor: #3d57e9;
         }
 
         body {
@@ -72,7 +72,6 @@
             align-items: center;
         }
 
-        /* Sidebar */
         .sidebar {
             position: fixed;
             top: 0;
@@ -83,9 +82,7 @@
             transition: left 0.3s ease;
             box-shadow: var(--shadow);
             z-index: 1050;
-            
         }
-
 
         .sidebar.active {
             left: 0;
@@ -106,8 +103,6 @@
             font-weight: 500;
         }
 
-
-        /* Settings Dropdown */
         .settings-dropdown {
             position: absolute;
             top: 60px;
@@ -130,7 +125,6 @@
             color: var(--text-color);
         }
 
-        /* Premium touches */
         .form-control,
         .form-select {
             border-radius: 8px;
@@ -142,46 +136,53 @@
         .form-select:focus {
             box-shadow: 0 0 0 0.25rem rgba(40,167,69,0.25);
         }
-        #settings-btn{
-          border: None;
-          position: fixed;  right: 10px;
-          color: var(--icon-color);
+
+        #settings-btn {
+            border: none;
+            position: fixed;
+            right: 10px;
+            color: var(--icon-color);
         }
-        #sidebar-toggle{
-          border: None;
-          position: fixed;  left: 10px;
-          color: var(--icon-color);
+
+        #sidebar-toggle {
+            border: none;
+            position: fixed;
+            left: 10px;
+            color: var(--icon-color);
         }
-        .sidebaroptions{
+
+        .sidebaroptions {
             background-color: var(--sidebaroptionscolor);
             padding: 10px;
             border-radius: 10px;
         }
-        .sidebaroptions:hover{
+
+        .sidebaroptions:hover {
             background-color: var(--sidebaroptionshovercolor);
         }
-        #land-diagram{
-            border:none;
+
+        #land-diagram {
+            border: none;
             background-color: var(--diagrambackgroundcolor);
             position: relative;
-            border:none;
             overflow: hidden;
             display: none;
         }
-      
+
+        .alert {
+            margin-top: 10px;
+            max-width: 500px;
+        }
     </style>
 </head>
 <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg">
         <div class="container d-flex justify-content-between align-items-center">
-            <!-- Sidebar Toggle Button -->
             <button id="sidebar-toggle" class="btn btn-outline-secondary" aria-label="Toggle sidebar">
                 <i class="fas fa-bars"></i>
             </button>
-            <!-- Centered Header -->
             <a class="navbar-brand mx-auto" id="headertextmain" href="/">Krishonyx</a>
-            <!-- Settings Button -->
             <button id="settings-btn" class="btn btn-outline-secondary" aria-label="Settings">
                 <i class="fas fa-cog"></i>
             </button>
@@ -202,7 +203,6 @@
     <div class="settings-dropdown" id="settings-dropdown">
         <h6>Settings</h6>
         <hr>
-        <!-- Language Option -->
         <div class="mb-3">
             <label>Language</label>
             <select id="lang-select" class="form-select">
@@ -210,7 +210,6 @@
                 <option value="bn">বাংলা</option>
             </select>
         </div>
-        <!-- Theme Options -->
         <div class="mb-3">
             <label>Theme</label>
             <div class="form-check">
@@ -222,7 +221,6 @@
                 <label class="form-check-label" for="dark-mode">Dark Mode</label>
             </div>
         </div>
-        <!-- Voice Speed -->
         <div class="mb-3 speed-control">
             <label for="speed-range">Voice Speed: <span id="speed-label">1.25x</span></label>
             <input id="speed-range" type="range" min="0.6" max="2.0" step="0.05" value="1.25" class="form-range" />
@@ -258,6 +256,7 @@
                     <button id="generate-btn" class="btn btn-primary w-100">Generate</button>
                 </div>
             </div>
+            <div id="feedback" class="mt-2"></div>
             <div id="land-diagram" class="mt-4 mx-auto"></div>
         </div>
     </div>
@@ -277,6 +276,7 @@
     const langSelect = document.getElementById('lang-select');
     const lightModeRadio = document.getElementById('light-mode');
     const darkModeRadio = document.getElementById('dark-mode');
+    const feedback = document.getElementById('feedback');
 
     let currentLang = localStorage.getItem('lang') || 'en';
     let currentTheme = localStorage.getItem('theme') || 'light';
@@ -407,8 +407,8 @@
             height: height,
             width: width,
             num_rows: numRows,
-            distance: distance.toFixed(2),
-            orientation: orientation
+            orientation: orientation,
+            distance: distance.toFixed(2)
         };
 
         fetch('/esp32-receive-movement', {
@@ -417,9 +417,13 @@
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(data)
-        }).then(response => {
-            console.log('Data sent successfully');
-        }).catch(error => {
+        })
+        .then(response => response.json())
+        .then(data => {
+            feedback.innerHTML = `<div class="alert alert-success">Data sent successfully! Area: ${data.calculated_area} sq ft</div>`;
+        })
+        .catch(error => {
+            feedback.innerHTML = `<div class="alert alert-danger">Error sending data: ${error.message}</div>`;
             console.error('Error sending data:', error);
         });
     });

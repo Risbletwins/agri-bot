@@ -9,10 +9,10 @@ import time
 import glob
 import logging
 from gtts import gTTS
-from google import genai  
+from google import genai
 from dotenv import load_dotenv
 from googletrans import Translator
-from fuzzywuzzy import fuzz  # We'll use this for optional fuzzy matching
+from fuzzywuzzy import fuzz
 from flask_caching import Cache
 import threading
 import bleach
@@ -25,11 +25,11 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize Gemini AI client (new SDK usage)
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))  # ensure GEMINI_API_KEY set in env
+# Initialize Gemini AI client
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 # Caching setup
-app.config['CACHE_TYPE'] = 'simple'  # Use simple in-memory cache
+app.config['CACHE_TYPE'] = 'simple'
 cache = Cache(app)
 
 # Create audio folder if not exist
@@ -38,7 +38,7 @@ os.makedirs("static/audio", exist_ok=True)
 # Translator for dynamic translations
 translator = Translator()
 
-# Predefined response translations (extended with soil moisture)
+# Predefined response translations
 RESPONSE_TRANSLATIONS = {
     "লাইটটি চালু হয়েছে": "The light has been turned on",
     "লাইটটি বন্ধ হয়েছে": "The light has been turned off",
@@ -48,8 +48,8 @@ RESPONSE_TRANSLATIONS = {
     "কীটনাশক ব্যবস্থা বন্ধ হয়েছে": "The fertilizer system has been turned off",
     "ওয়াটার পাম্প চালু হয়েছে": "The water pump has been turned on",
     "ওয়াটার পাম্প বন্ধ হয়েছে": "The water pump has been turned off",
-    "পরিমাপ করা হচ্ছে... LCD প্যানেল দেখুন": "Measuring... Look at the LCD panel",  # Added for consistency
-    "বন্ধ করা হচ্ছে...":'Stopping....'
+    "পরিমাপ করা হচ্ছে... LCD প্যানেল দেখুন": "Measuring... Look at the LCD panel",
+    "বন্ধ করা হচ্ছে...": "Stopping...."
 }
 
 SYSTEM_INSTRUCTION_BN =  """
@@ -244,12 +244,10 @@ def generate_audio_sync(text_chunks, lang):
     audio_urls = []
     for chunk in text_chunks:
         try:
-            # Save file in OS-safe way
             chunk_mp3 = os.path.join("static", "audio", f"{uuid.uuid4()}.mp3")
             tts = gTTS(text=chunk, lang=lang, slow=False)
             tts.save(chunk_mp3)
-            # Build public URL using host_url (works better behind proxies)
-            base = request.host_url.rstrip('/') 
+            base = request.host_url.rstrip('/')
             public_path = f"{base}/{chunk_mp3.replace(os.sep, '/')}"
             audio_urls.append(public_path)
             logger.info("TTS saved: %s -> %s", chunk_mp3, public_path)
@@ -267,7 +265,6 @@ def get_english_translation(bn_text):
         return bn_text + " (Translation unavailable)"
 
 def get_bangla_translation(en_text):
-    # Reverse lookup for exact matches; otherwise translate
     for bn, en in RESPONSE_TRANSLATIONS.items():
         if en == en_text:
             return bn
@@ -306,35 +303,25 @@ def ask_bot():
 
     try:
         full_prompt = f"{get_system_instruction(lang)}\n\nপ্রশ্ন: {question}\n\nউত্তর দিন:" if lang == 'bn' else f"{get_system_instruction(lang)}\n\nQuestion: {question}\n\nAnswer:"
-
         response = client.models.generate_content(
             model="gemini-2.0-flash",
             contents=full_prompt
         )
         primary_answer = response.text.strip()
-
-        # Get secondary translation
         secondary_answer = get_english_translation(primary_answer) if lang == 'bn' else get_bangla_translation(primary_answer)
-
-        # Generate audio synchronously (reliable)
         primary_chunks = split_text(primary_answer)
         secondary_chunks = split_text(secondary_answer)
-
         audio_urls_primary = generate_audio_sync(primary_chunks, lang)
         audio_urls_secondary = generate_audio_sync(secondary_chunks, 'en' if lang == 'bn' else 'bn')
-
         logger.info("Audio URLs primary: %s", audio_urls_primary)
         logger.info("Audio URLs secondary: %s", audio_urls_secondary)
-
         cleanup_audio_files()
-
         return jsonify({
             'answer_bn': primary_answer if lang == 'bn' else secondary_answer,
             'answer_en': secondary_answer if lang == 'bn' else primary_answer,
             'audio_urls_bn': audio_urls_primary if lang == 'bn' else audio_urls_secondary,
             'audio_urls_en': audio_urls_secondary if lang == 'bn' else audio_urls_primary
         })
-
     except Exception as e:
         logger.error(f"Error: {str(e)}", exc_info=True)
         return jsonify({'error': str(e)}), 500
@@ -354,8 +341,6 @@ def get_audio(filename):
 
 @app.route("/esp32-receive/", methods=["GET"])
 def esp32_receive():
-    # Define command triggers with all variants (Bangla + English, including old ones for safety)
-    # Key: command, Value: list of phrases (case-sensitive, but we'll lower() in checks)
     command_triggers = {
         "light_on": ["লাইটটি চালু হয়েছে", "The light has been turned on", "Light has been turned ON"],
         "light_off": ["লাইটটি বন্ধ হয়েছে", "The light has been turned off", "Light has been turned OFF"],
@@ -366,49 +351,91 @@ def esp32_receive():
         "water_pump_on": ["ওয়াটার পাম্প চালু হয়েছে", "The water pump has been turned on", "Water pump has been turned ON"],
         "water_pump_off": ["ওয়াটার পাম্প বন্ধ হয়েছে", "The water pump has been turned off", "Water pump has been turned OFF"],
         "start_measuring_soil_moisture": ["পরিমাপ করা হচ্ছে... LCD প্যানেল দেখুন", "Measuring... Look at the LCD panel", "MEASURING.... LOOK AT THE LCD PANEL"],
-        "stop_measuring_soil_moisture": ["বন্ধ করা হচ্ছে...","Stopping....","STOPPING...."]
+        "stop_measuring_soil_moisture": ["বন্ধ করা হচ্ছে...", "Stopping....", "STOPPING...."]
     }
-
-    # Check both primary and secondary answers for any matching phrase (case-insensitive)
     answers = [primary_answer.lower(), secondary_answer.lower()]
     for cmd, phrases in command_triggers.items():
         for phrase in [p.lower() for p in phrases]:
             for ans in answers:
                 if phrase in ans:
-                    # Optional: Add fuzzy check if you want more robustness (e.g., if AI paraphrases)
-                    # if fuzz.partial_ratio(phrase, ans) > 90:
                     return cmd
-
     return "none_for_now"
-@app.route("/esp32-receive-movement/",methods=["POST","GET"])
+
+@app.route("/esp32-receive-movement", methods=["POST"])
 def esp32_receive_movement():
-    data = request.get_json()
-    
-    height = data.get('height')
-    width = data.get('width')
-    num_rows = data.get('num_rows')
-    orientation = data.get('orientation')
-    distance = data.get('distance')
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
 
-    print(f"Received data: Height = {height} ft, Width = {width} ft, Rows = {num_rows}, Orientation = {orientation}, Distance = {distance} ft")
+        # Extract and validate data
+        height = data.get('height')
+        width = data.get('width')
+        num_rows = data.get('num_rows')
+        orientation = data.get('orientation')
+        distance = data.get('distance')
 
-    total_area = height * width
-    print(f"Calculated total land area: {total_area} sq ft")
+        # Check for missing or invalid data
+        if not all([height, width, num_rows, orientation, distance]):
+            return jsonify({"error": "Missing required fields (height, width, num_rows, orientation, distance)"}), 400
+        if not isinstance(height, (int, float)) or not isinstance(width, (int, float)) or not isinstance(num_rows, int) or not isinstance(distance, (int, float)):
+            return jsonify({"error": "Invalid data types"}), 400
+        if height <= 0 or width <= 0 or num_rows <= 0 or distance < 0:
+            return jsonify({"error": "Values must be positive (height, width, num_rows) and non-negative (distance)"}), 400
+        if orientation not in ["horizontal", "vertical"]:
+            return jsonify({"error": "Invalid orientation (must be 'horizontal' or 'vertical')"}), 400
 
-    movement_plan = {
-        "rows": num_rows,
-        "distance_between_rows": distance,
-        "orientation": orientation,
-        "field_dimensions": {"height": height, "width": width}
-    }
+        # Log the received data
+        logger.info(f"Received data: Height = {height} ft, Width = {width} ft, Rows = {num_rows}, Orientation = {orientation}, Distance = {distance} ft")
 
-    return jsonify({
-        "message": "Data received successfully!",
-        "received_data": data,
-        "calculated_area": total_area,
-        "movement_plan": movement_plan
-    }), 200
+        # Calculate total area
+        total_area = height * width
+        logger.info(f"Calculated total land area: {total_area} sq ft")
 
+        # Generate movement plan for the bot
+        movement_plan = {
+            "rows": num_rows,
+            "distance_between_rows": float(distance),
+            "orientation": orientation,
+            "field_dimensions": {"height": height, "width": width}
+        }
+
+        # Example: Generate robot movement commands
+        commands = []
+        if orientation == "horizontal":
+            for i in range(num_rows):
+                y_pos = i * float(distance)
+                if y_pos >= height:
+                    break
+                commands.append(f"Move to y={y_pos} along x from 0 to {width}")
+        else:  # vertical
+            for i in range(num_rows):
+                x_pos = i * float(distance)
+                if x_pos >= width:
+                    break
+                commands.append(f"Move to x={x_pos} along y from 0 to {height}")
+
+        # Example: Save to a file or database (optional)
+        with open("movement_plan.json", "w") as f:
+            json.dump(movement_plan, f, indent=2)
+        logger.info("Movement plan saved to movement_plan.json")
+
+        # Example: Send to ESP32 (pseudo-code, replace with actual ESP32 communication)
+        # import requests
+        # esp32_url = "http://esp32-ip-address/move"
+        # requests.post(esp32_url, json=movement_plan)
+
+        return jsonify({
+            "message": "Data received successfully!",
+            "received_data": data,
+            "calculated_area": total_area,
+            "movement_plan": movement_plan,
+            "commands": commands
+        }), 200
+
+    except Exception as e:
+        logger.error(f"Error processing request: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
