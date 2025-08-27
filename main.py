@@ -356,6 +356,7 @@ def get_audio(filename):
 def esp32_receive():
     # Define command triggers with all variants (Bangla + English, including old ones for safety)
     # Key: command, Value: list of phrases (case-sensitive, but we'll lower() in checks)
+    print(request.content_type)
     command_triggers = {
         "light_on": ["লাইটটি চালু হয়েছে", "The light has been turned on", "Light has been turned ON"],
         "light_off": ["লাইটটি বন্ধ হয়েছে", "The light has been turned off", "Light has been turned OFF"],
@@ -380,9 +381,12 @@ def esp32_receive():
                     return cmd
 
     return "none_for_now"
-@app.route("/esp32-receive-movement",methods=["POST","GET"])
+@app.route("/esp32-receive-movement", methods=["POST"])
 def esp32_receive_movement():
     data = request.get_json()
+    content_type = request.content_type
+    print(content_type)
+    print(data)
     
     height = data.get('height')
     width = data.get('width')
