@@ -8,33 +8,34 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome for Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <!-- Google Fonts -->
+    <!-- Google Fonts for Premium Look -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;700&display=swap" rel="stylesheet">
-
     <style>
         :root {
-            --primary-color: #90C67C;
-            --secondary-color: #90C67C;
-            --bg-color: #328E6E;
-            --text-color: #000000;
+            --primary-color: #90C67C; /* Green for light mode */
+            --secondary-color: #90C67C; /* Light gray */
+            --bg-color: #328E6E; /* White */
+            --text-color: #000000; /* Black */
             --icon-color: #333333;
             --accent-color: #67AE6E;
             --shadow: 0 10px 6px rgba(0, 0, 0, 0.1);
             --sidebaroptionscolor: #E1EEBC;
             --sidebaroptionshovercolor: #e1eebccc;
+            --inputboxcolor: #E1EEBC;
         }
 
         body.dark-mode {
-            --primary-color: #1A2A80;
-            --secondary-color: #1A2A80;
+            --primary-color: #1A2A80; /* Dark gray */
+            --secondary-color: #1A2A80; /* Blackish */
             --bg-color: #3B38A0;
-            --text-color: #ffffff;
+            --text-color: #ffffff; /* White */
             --icon-color: #ECDFCC;
             --accent-color: #3d57e9;
             --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
             --sidebaroptionscolor: rgba(173, 216, 230, 0.548);
             --sidebaroptionshovercolor: rgb(58, 58, 214);
+            --inputboxcolor: #ffffff;
         }
 
         body {
@@ -42,6 +43,8 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             height: 100vh;
+            display: flex;
+            flex-direction: column;
             transition: all 0.3s ease;
         }
 
@@ -56,6 +59,17 @@
             color: var(--text-color);
         }
 
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+
         /* Sidebar */
         .sidebar {
             position: fixed;
@@ -67,7 +81,9 @@
             transition: left 0.3s ease;
             box-shadow: var(--shadow);
             z-index: 1050;
+            
         }
+
 
         .sidebar.active {
             left: 0;
@@ -88,15 +104,6 @@
             font-weight: 500;
         }
 
-        .sidebaroptions {
-            background-color: var(--sidebaroptionscolor);
-            padding: 10px;
-            border-radius: 10px;
-        }
-
-        .sidebaroptions:hover {
-            background-color: var(--sidebaroptionshovercolor);
-        }
 
         /* Settings Dropdown */
         .settings-dropdown {
@@ -121,18 +128,37 @@
             color: var(--text-color);
         }
 
+        /* Premium touches */
+        .form-control,
+        .form-select {
+            border-radius: 8px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+            background-color: var(--inputboxcolor);
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            box-shadow: 0 0 0 0.25rem rgba(40,167,69,0.25);
+        }
         #settings-btn{
-          border: none;
-          position: fixed;  
-          right: 10px;
+          border: None;
+          position: fixed;  right: 10px;
           color: var(--icon-color);
         }
         #sidebar-toggle{
-          border: none;
-          position: fixed;  
-          left: 10px;
+          border: None;
+          position: fixed;  left: 10px;
           color: var(--icon-color);
         }
+        .sidebaroptions{
+            background-color: var(--sidebaroptionscolor);
+            padding: 10px;
+            border-radius: 10px;
+        }
+        .sidebaroptions:hover{
+            background-color: var(--sidebaroptionshovercolor);
+        }
+      
     </style>
 </head>
 <body>
@@ -144,7 +170,7 @@
                 <i class="fas fa-bars"></i>
             </button>
             <!-- Centered Header -->
-            <a class="navbar-brand mx-auto" href="/">Krishonyx</a>
+            <a class="navbar-brand mx-auto" id="headertextmain" href="/">Krishonyx</a>
             <!-- Settings Button -->
             <button id="settings-btn" class="btn btn-outline-secondary" aria-label="Settings">
                 <i class="fas fa-cog"></i>
@@ -193,31 +219,93 @@
         </div>
     </div>
 
+    <!-- Main Content (Blank) -->
+    <div class="main-content">
+        <p>This is a blank page with menu and settings.</p>
+    </div>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        const sidebarToggle = document.getElementById('sidebar-toggle');
-        const sidebar = document.getElementById('sidebar');
-        const settingsBtn = document.getElementById('settings-btn');
-        const settingsDropdown = document.getElementById('settings-dropdown');
+    // UI elements & state
+    const elements = document.querySelectorAll('[data-en], [data-bn]');
+    const speedRange = document.getElementById('speed-range');
+    const speedLabel = document.getElementById('speed-label');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const sidebar = document.getElementById('sidebar');
+    const settingsBtn = document.getElementById('settings-btn');
+    const settingsDropdown = document.getElementById('settings-dropdown');
+    const langSelect = document.getElementById('lang-select');
+    const lightModeRadio = document.getElementById('light-mode');
+    const darkModeRadio = document.getElementById('dark-mode');
 
-        sidebarToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('active');
-        });
+    let currentLang = localStorage.getItem('lang') || 'en';
+    let currentTheme = localStorage.getItem('theme') || 'light';
 
-        settingsBtn.addEventListener('click', () => {
-            settingsDropdown.classList.toggle('active');
-        });
+    // Initialize
+    const savedSpeed = parseFloat(localStorage.getItem('playback_rate') || 1.25);
+    speedRange.value = savedSpeed;
+    speedLabel.textContent = `${savedSpeed.toFixed(2)}x`;
 
-        document.addEventListener('click', (e) => {
-            if (!settingsBtn.contains(e.target) && !settingsDropdown.contains(e.target)) {
-                settingsDropdown.classList.remove('active');
-            }
-            if (!sidebarToggle.contains(e.target) && !sidebar.contains(e.target)) {
-                sidebar.classList.remove('active');
-            }
+    langSelect.value = currentLang;
+    if (currentTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        darkModeRadio.checked = true;
+    }
+
+    // Update language
+    function updateLanguage() {
+        elements.forEach(el => {
+            const text = el.getAttribute(`data-${currentLang}`) || el.textContent;
+            el.textContent = text;
         });
+        document.documentElement.lang = currentLang;
+    }
+    updateLanguage();
+
+    // Event listeners
+    langSelect.addEventListener('change', () => {
+        currentLang = langSelect.value;
+        localStorage.setItem('lang', currentLang);
+        updateLanguage();
+    });
+
+    lightModeRadio.addEventListener('change', () => {
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem('theme', 'light');
+    });
+
+    darkModeRadio.addEventListener('change', () => {
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('theme', 'dark');
+    });
+
+    speedRange.addEventListener('input', () => {
+        const v = parseFloat(speedRange.value);
+        speedLabel.textContent = `${v.toFixed(2)}x`;
+        localStorage.setItem('playback_rate', v.toFixed(2));
+    });
+
+    // Toggle sidebar
+    sidebarToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+    });
+
+    // Toggle settings
+    settingsBtn.addEventListener('click', () => {
+        settingsDropdown.classList.toggle('active');
+    });
+
+    // Close dropdowns on outside click
+    document.addEventListener('click', (e) => {
+        if (!settingsBtn.contains(e.target) && !settingsDropdown.contains(e.target)) {
+            settingsDropdown.classList.remove('active');
+        }
+        if (!sidebarToggle.contains(e.target) && !sidebar.contains(e.target)) {
+            sidebar.classList.remove('active');
+        }
+    });
     </script>
 </body>
 </html>
