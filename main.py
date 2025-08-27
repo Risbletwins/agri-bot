@@ -361,7 +361,7 @@ def cleanup_audio_files():
 def get_audio(filename):
     return send_file(f'static/audio/{filename}', mimetype='audio/mpeg')
 
-@app.route("/esp32-receive", methods=["GET"])
+@app.route("/esp32-receive/", methods=["GET"])
 def esp32_receive():
     # Define command triggers with all variants (Bangla + English, including old ones for safety)
     # Key: command, Value: list of phrases (case-sensitive, but we'll lower() in checks)
@@ -425,7 +425,7 @@ def esp32_receive_movement():
         "calculated_area": total_area,
         "movement_plan": movement_plan
     }), 200
-@app.route("/esp32-movement", methods=["get"])
+@app.route("/esp32-movement/", methods=["GET"])
 def esp32_movement():
     row = clever_way["num_rows"]
     orient = clever_way["orientation"]
