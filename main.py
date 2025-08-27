@@ -392,7 +392,7 @@ def esp32_receive():
                     return cmd
 
     return "none_for_now"
-@app.route("/esp32-receive-movement", methods=["POST"])
+@app.route("/esp32-receive-movement/", methods=["POST"])
 def esp32_receive_movement():
     global clever_way
     data = request.get_json()

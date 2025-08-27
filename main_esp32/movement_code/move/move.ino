@@ -7,9 +7,10 @@
 const char* ssid = "Ruslam";
 const char* password = "10867000";
 
-String serverName = "https://agri-bot-kwis.onrender.com/esp32-movement";
-String serverName2 = "https://agri-bot-kwis.onrender.com/esp32-receive";
+String serverName = "https://agri-bot-kwis.onrender.com/esp32-movement/";
+String serverName2 = "https://agri-bot-kwis.onrender.com/esp32-receive/";
 String response;
+String response2;
 int forDis;
 int rowDis;
 String main_instruction = "";
@@ -77,8 +78,11 @@ void wifi_run(void* param) {
       }
     } else {
       HTTPClient http;
+      HTTPClient http2;
       http.begin(serverName);
+      http2.begin(serverName2);
       int httpResponseCode = http.GET();
+      int httpResponseCode2 = http2.GET();
       if (httpResponseCode > 0) {
         // Serial.print("Response code: ");
         // Serial.println(httpResponseCode);
@@ -98,6 +102,12 @@ void wifi_run(void* param) {
       } else {
         Serial.print("Error code: ");
         Serial.println(httpResponseCode);
+      }
+      if (httpResponseCode2 > 0) {
+        response2 = http2.getString();
+      } else {
+        Serial.print("Error code: ");
+        Serial.println(httpResponseCode2);
       }
       http.end();
       vTaskDelay(1000 / portTICK_PERIOD_MS);
@@ -123,19 +133,25 @@ void setup(){
 }
 
 void loop(){
-  for(int i = 0; main_instruction.length() > i; i++){
-    char current_instruction = main_instruction[i];
-    if(current_instruction == 'R'){
-      move_right(rowDis);
-      Serial.println("Finished moving right");
-    }
-    if(current_instruction == 'L'){
-      move_left(rowDis);
-      Serial.println("Finished moving left");
-    }
-    if(current_instruction == 'F'){
-      move_forward(forDis);
-      Serial.println("Finished moving forward");
+  if(response2 == "start_rover"){
+    for(int i = 0; main_instruction.length() > i; i++){
+      char current_instruction = main_instruction[i];
+      if(current_instruction == 'R'){
+        move_right(rowDis);
+        Serial.println("Finished moving right");
+      }
+      if(current_instruction == 'L'){
+        move_left(rowDis);
+        Serial.println("Finished moving left");
+      }
+      if(current_instruction == 'F'){
+        move_forward(forDis);
+        Serial.println("Finished moving forward");
+      }
+      if(response2 == "stop_rover"){
+        all_motors.stop();
+        break;
+      }
     }
   }
 }
