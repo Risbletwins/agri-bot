@@ -15,6 +15,7 @@ int forDis;
 int rowDis;
 String main_instruction = "";
 int feet = 1000;
+int left_right_move_time = 1000;
 
 const unsigned int EN_A = 19;
 const unsigned int IN1_A = 22;
@@ -130,28 +131,44 @@ void setup(){
     NULL,
     0
   );
+  
 }
 
 void loop(){
   if(response2 == "start_rover"){
+    Serial.println("Rover Started.");
     for(int i = 0; main_instruction.length() > i; i++){
       char current_instruction = main_instruction[i];
       if(current_instruction == 'R'){
-        move_right(rowDis);
+        move_right(left_right_move_time);
         Serial.println("Finished moving right");
+        Serial.print("Duration:");
+        Serial.println(left_right_move_time)
       }
       if(current_instruction == 'L'){
-        move_left(rowDis);
+        move_left(left_right_move_time);
         Serial.println("Finished moving left");
+        Serial.print("Duration:");
+        Serial.println(left_right_move_time)
       }
       if(current_instruction == 'F'){
         move_forward(forDis);
         Serial.println("Finished moving forward");
+        Serial.print("Duration:");
+        Serial.println(forDis);
+      }
+      if(current_instruction == 'f'){
+        move_forward(rowDis);
+        Serial.println("Finished moving forward small");
+        Serial.print("Duration:");
+        Serial.println(rowDis);
       }
       if(response2 == "stop_rover"){
+        Serial.println("Rover has been stopped.")
         all_motors.stop();
         break;
       }
     }
   }
+  main_instruction = "";
 }
