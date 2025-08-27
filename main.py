@@ -377,8 +377,8 @@ def esp32_receive():
         "water_pump_off": ["ওয়াটার পাম্প বন্ধ হয়েছে", "The water pump has been turned off", "Water pump has been turned OFF"],
         "start_measuring_soil_moisture": ["পরিমাপ করা হচ্ছে... LCD প্যানেল দেখুন", "Measuring... Look at the LCD panel", "MEASURING.... LOOK AT THE LCD PANEL"],
         "stop_measuring_soil_moisture": ["বন্ধ করা হচ্ছে...","Stopping....","STOPPING...."],
-        "start_rover.": ["রোভার শুরু হচ্ছে।","Starting rover.","STARTING ROVER."],
-        "stop_rover.": ["রোভার বন্ধ হচ্ছে।","Stopping rover.","STOPPING ROVER."]
+        "start_rover": ["রোভার শুরু হচ্ছে।","Starting rover.","STARTING ROVER."],
+        "stop_rover": ["রোভার বন্ধ হচ্ছে।","Stopping rover.","STOPPING ROVER."]
     }
 
     # Check both primary and secondary answers for any matching phrase (case-insensitive)
