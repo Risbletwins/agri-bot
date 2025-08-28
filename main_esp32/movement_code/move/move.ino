@@ -4,8 +4,8 @@
 #include <HTTPClient.h>
 #include <WiFi.h>
 
-const char* ssid = "Ruslam";
-const char* password = "10867000";
+const char* ssid = "SHAHRAT (2.4G)";
+const char* password = "66667777";
 
 String serverName = "https://agri-bot-kwis.onrender.com/esp32-movement/";
 String serverName2 = "https://agri-bot-kwis.onrender.com/esp32-receive/";
@@ -14,19 +14,19 @@ String response2;
 int forDis;
 int rowDis;
 String main_instruction = "";
-int feet = 1000;
+int feet = 100;
 int left_right_move_time = 1000;
 
-const unsigned int EN_A = 32;
-const unsigned int IN1_A = 25;
-const unsigned int IN2_A = 26;
+const unsigned int EN_A = 19;
+const unsigned int IN1_A = 22;
+const unsigned int IN2_A = 21;
 
-const unsigned int IN1_B = 27;
-const unsigned int IN2_B = 14;
-const unsigned int EN_B = 33;
+const unsigned int IN1_B = 18;
+const unsigned int IN2_B = 17;
+const unsigned int EN_B = 16;
 
-unsigned int motorSpeedA = 255;
-unsigned int motorSpeedB = 255;
+unsigned int motorSpeedA = 180;
+unsigned int motorSpeedB = 180;
 
 L298NX2 all_motors(EN_A, IN1_A, IN2_A, EN_B, IN1_B, IN2_B);
 

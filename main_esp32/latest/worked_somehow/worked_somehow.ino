@@ -36,8 +36,8 @@ int seed_sow_state = 0;
 int water_pump_state = 0;
 int soil_moisture_state = 0;
 
-const char* ssid = "Ruslam";
-const char* password = "10867000";
+const char* ssid = "SHAHRAT (2.4G)";
+const char* password = "66667777";
 const char* serverName = "https://agri-bot-kwis.onrender.com/esp32-receive/";
 
 unsigned long previousMillis = 0;
@@ -121,7 +121,7 @@ void soilMoistureTask(void *pvParameters) {
       Serial.println("The soil Moisture measuring has started.");
       soilMoistureServoBig.write(40);
       vTaskDelay(1000 / portTICK_PERIOD_MS);
-      soilMoistureServoSmall.write(140);
+      soilMoistureServoSmall.write(130);
       vTaskDelay(1000 / portTICK_PERIOD_MS);
       int soil_moisture_read = analogRead(soil_moisture_sensor);
       Serial.print("Soil Moisture: ");
@@ -144,7 +144,7 @@ void soilMoistureTask(void *pvParameters) {
       Serial.println("The soil Moisture measuring has stopped.");
       soilMoistureServoBig.write(90);
       vTaskDelay(1000 / portTICK_PERIOD_MS);
-      soilMoistureServoSmall.write(90);
+      soilMoistureServoSmall.write(0);
       vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
     vTaskDelay(100 / portTICK_PERIOD_MS);
@@ -228,7 +228,7 @@ void setup() {
     Serial.println("Failed to attach seedSowServo... what a pain..");
   }
 
-  soilMoistureServoBig.write(0);
+  soilMoistureServoBig.write(90);
   soilMoistureServoSmall.write(0);
   seedSowServo.write(90);
 
