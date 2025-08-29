@@ -59,7 +59,7 @@ void lcd_on(void* param) {
   for (;;) {
     int temperature = dht11.readTemperature();
     int humidity = dht11.readHumidity();
-    int voltage_sensor_battery_read = analogRead(voltage_sensor_battery);
+    int voltage_sensor_battery_read = analogRead(voltage_sensor_solar_panel);
     
     if (lcd_connected) {
       if (xSemaphoreTake(i2cMutex, pdMS_TO_TICKS(1000)) == pdTRUE) {
@@ -121,7 +121,7 @@ void soilMoistureTask(void *pvParameters) {
       Serial.println("The soil Moisture measuring has started.");
       soilMoistureServoBig.write(40);
       vTaskDelay(1000 / portTICK_PERIOD_MS);
-      soilMoistureServoSmall.write(130);
+      soilMoistureServoSmall.write(150);
       vTaskDelay(1000 / portTICK_PERIOD_MS);
       int soil_moisture_read = analogRead(soil_moisture_sensor);
       Serial.print("Soil Moisture: ");
@@ -144,7 +144,7 @@ void soilMoistureTask(void *pvParameters) {
       Serial.println("The soil Moisture measuring has stopped.");
       soilMoistureServoBig.write(90);
       vTaskDelay(1000 / portTICK_PERIOD_MS);
-      soilMoistureServoSmall.write(0);
+      soilMoistureServoSmall.write(180);
       vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
     vTaskDelay(100 / portTICK_PERIOD_MS);
@@ -229,7 +229,7 @@ void setup() {
   }
 
   soilMoistureServoBig.write(90);
-  soilMoistureServoSmall.write(0);
+  soilMoistureServoSmall.write(180);
   seedSowServo.write(90);
 
   pinMode(voltage_sensor_solar_panel, INPUT);

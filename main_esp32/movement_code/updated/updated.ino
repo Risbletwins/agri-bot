@@ -14,9 +14,9 @@ String response2;
 int forDis;
 int rowDis;
 String main_instruction = "";
-int feet = 1000;
-int left_right_move_time = 300;
-int stop_delay = 2000;
+int feet = 100;  // ms per foot - calibrate: measure distance traveled in 1000ms and adjust (e.g., if 0.5 feet, set to 2000)
+int left_right_move_time = 1500;  // ms for a 90-degree turn - calibrate by timing a full turn
+int stop_delay = 2000;  // ms pause after each move - reduce if movements feel too jerky/slow
 
 const unsigned int EN_A = 19;
 const unsigned int IN1_A = 22;
@@ -26,8 +26,8 @@ const unsigned int IN1_B = 18;
 const unsigned int IN2_B = 17;
 const unsigned int EN_B = 16;
 
-unsigned int motorSpeedA = 180;
-unsigned int motorSpeedB = 180;
+unsigned int motorSpeedA = 255;
+unsigned int motorSpeedB = 255;
 
 L298NX2 all_motors(EN_A, IN1_A, IN2_A, EN_B, IN1_B, IN2_B);
 
@@ -52,7 +52,6 @@ void move_right(int delaynow){
   delay(delaynow);
   all_motors.stop();
   delay(stop_delay);
-
 }
 void move_left(int delaynow){
   Serial.println("Left");
@@ -83,43 +82,52 @@ void wifi_run(void* param) {
     } else {
       HTTPClient http;
       HTTPClient http2;
+      http.setTimeout(3000);  // Set timeout to avoid hangs
+      http2.setTimeout(3000);
       http.begin(serverName);
       http2.begin(serverName2);
       int httpResponseCode = http.GET();
       int httpResponseCode2 = http2.GET();
       if (httpResponseCode > 0) {
-        // Serial.print("Response code: ");
-        // Serial.println(httpResponseCode);
         response = http.getString();
-        // Serial.println("Server response:");
-        // Serial.println(response);
+        response.trim();  // Remove any whitespace
         int firstseparator = response.indexOf("-");
         int secondseparator = response.indexOf("_");
-        String forwardDistance = response.substring(0,firstseparator);
-        String leftrightdistance = response.substring(firstseparator+1,secondseparator);
-        main_instruction = response.substring(secondseparator+1,response.length());
-        forDis = (forwardDistance.toInt())*feet;
-        rowDis = (leftrightdistance.toInt())*feet;
-        // Serial.println(forDis);
-        // Serial.println(rowDis);
-        // Serial.println(main_instruction);
+        if (firstseparator > 0 && secondseparator > firstseparator) {
+          String forwardDistance = response.substring(0, firstseparator);
+          String leftrightdistance = response.substring(firstseparator + 1, secondseparator);
+          main_instruction = response.substring(secondseparator + 1);
+          if (forwardDistance.toInt() > 0 && leftrightdistance.toInt() > 0) {  // Basic validation
+            forDis = forwardDistance.toInt() * feet;
+            rowDis = leftrightdistance.toInt() * feet;
+            Serial.println("Parsed distances: forDis=" + String(forDis) + ", rowDis=" + String(rowDis));
+            Serial.println("Instruction: " + main_instruction);
+          } else {
+            Serial.println("Invalid distances in response");
+            main_instruction = "";  // Skip processing
+          }
+        } else {
+          Serial.println("Invalid response format");
+          main_instruction = "";
+        }
       } else {
         Serial.print("Error code: ");
         Serial.println(httpResponseCode);
       }
       if (httpResponseCode2 > 0) {
         response2 = http2.getString();
+        response2.trim();
       } else {
         Serial.print("Error code: ");
         Serial.println(httpResponseCode2);
       }
       http.end();
+      http2.end();  // Close the second client too
       vTaskDelay(1000 / portTICK_PERIOD_MS);
       retryCount = 0;
     }
   }
 }
-
 
 void setup(){
   Serial.begin(115200);
@@ -134,36 +142,43 @@ void setup(){
     NULL,
     0
   );
-  
 }
 
 void loop(){
   if(response2 == "start_rover"){
-    for(int i = 0; main_instruction.length() > i; i++){
-      char current_instruction = main_instruction[i];
+    // Snapshot globals to avoid race conditions during processing
+    String local_instruction = main_instruction;
+    int local_forDis = forDis;
+    int local_rowDis = rowDis;
+    for(int i = 0; i < local_instruction.length(); i++){
+      char current_instruction = local_instruction[i];
       if(current_instruction == 'R'){
         move_right(left_right_move_time);
         Serial.println("Finished Moving Right");
         Serial.print("Duration:");
         Serial.println(left_right_move_time);
       }
-      if(current_instruction == 'L'){
+      else if(current_instruction == 'L'){
         move_left(left_right_move_time);
         Serial.println("Finished Moving Left");
         Serial.print("Duration:");
         Serial.println(left_right_move_time);
       }
-      if(current_instruction == 'F'){
-        move_forward(forDis);
+      else if(current_instruction == 'F'){
+        move_forward(local_forDis);
         Serial.println("Finished Moving Forward");
         Serial.print("Duration:");
-        Serial.println(forDis);
+        Serial.println(local_forDis);
       }
-      if(current_instruction == 'f'){
-        move_forward(rowDis);
+      else if(current_instruction == 'f'){
+        move_forward(local_rowDis);
         Serial.println("Finished Moving Forward Small");
         Serial.print("Duration:");
-        Serial.println(rowDis);
+        Serial.println(local_rowDis);
+      }
+      else {
+        Serial.print("Unknown command: ");
+        Serial.println(current_instruction);
       }
       if(response2 == "stop_rover"){
         Serial.println("Rover has been stopped.");
@@ -171,6 +186,6 @@ void loop(){
         break;
       }
     }
+    main_instruction = "";  // Clear after processing
   }
-  main_instruction = "";
 }

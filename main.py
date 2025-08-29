@@ -9,13 +9,14 @@ import time
 import glob
 import logging
 from gtts import gTTS
-from google import genai  
+import genai  # Corrected import (assuming google-generativeai)
 from dotenv import load_dotenv
 from googletrans import Translator
-from fuzzywuzzy import fuzz  # We'll use this for optional fuzzy matching
+from fuzzywuzzy import fuzz
 from flask_caching import Cache
 import threading
 import bleach
+import backoff  # Add this: pip install backoff
 
 load_dotenv()
 
@@ -25,17 +26,17 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize Gemini AI client (new SDK usage)
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))  # ensure GEMINI_API_KEY set in env
+# Initialize Gemini AI client
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 # Caching setup
-app.config['CACHE_TYPE'] = 'simple'  # Use simple in-memory cache
+app.config['CACHE_TYPE'] = 'simple'
 cache = Cache(app)
 
 # Create audio folder if not exist
 os.makedirs("static/audio", exist_ok=True)
 
-# Translator for dynamic translations
+# Translator (using sync version)
 translator = Translator()
 
 # Predefined response translations (extended with soil moisture)
@@ -231,7 +232,7 @@ A: Plant leafy vegetables in October or November.
 def get_system_instruction(lang):
     return SYSTEM_INSTRUCTION_BN if lang == 'bn' else SYSTEM_INSTRUCTION_EN
 
-def split_text(text, max_length=200):
+def split_text(text, max_length=150):  # Reduced max_length to avoid rate limits
     sentences = text.split('।' if '.' not in text else '.')
     chunks = []
     current_chunk = ""
@@ -249,28 +250,33 @@ def split_text(text, max_length=200):
         chunks.append(current_chunk.strip())
     return chunks
 
+@backoff.on_exception(backoff.expo, Exception, max_tries=3)  # Retry with backoff on any exception
+def generate_tts_chunk(text, lang):
+    tts = gTTS(text=text, lang=lang, slow=False)
+    chunk_mp3 = os.path.join("static", "audio", f"{uuid.uuid4()}.mp3")
+    tts.save(chunk_mp3)
+    time.sleep(1)  # Short delay between chunks to avoid hammering the API
+    base = request.host_url.rstrip('/')
+    public_path = f"{base}/{chunk_mp3.replace(os.sep, '/')}"
+    logger.info("TTS saved: %s -> %s", chunk_mp3, public_path)
+    return public_path
+
 def generate_audio_sync(text_chunks, lang):
     audio_urls = []
     for chunk in text_chunks:
         try:
-            # Save file in OS-safe way
-            chunk_mp3 = os.path.join("static", "audio", f"{uuid.uuid4()}.mp3")
-            tts = gTTS(text=chunk, lang=lang, slow=False)
-            tts.save(chunk_mp3)
-            # Build public URL using host_url (works better behind proxies)
-            base = request.host_url.rstrip('/') 
-            public_path = f"{base}/{chunk_mp3.replace(os.sep, '/')}"
+            public_path = generate_tts_chunk(chunk, lang)
             audio_urls.append(public_path)
-            logger.info("TTS saved: %s -> %s", chunk_mp3, public_path)
         except Exception as e:
-            logger.error("TTS error saving chunk: %s", e, exc_info=True)
+            logger.error("TTS error saving chunk after retries: %s", e, exc_info=True)
+            # Fallback: Skip or add a placeholder silent audio if needed
     return audio_urls
 
 def get_english_translation(bn_text):
     if bn_text in RESPONSE_TRANSLATIONS:
         return RESPONSE_TRANSLATIONS[bn_text]
     try:
-        return translator.translate(bn_text, src='bn', dest='en').text
+        return translator.translate(bn_text, src='bn', dest='en').text  # Now sync
     except Exception as e:
         logger.error(f"Translation error: {e}")
         return bn_text + " (Translation unavailable)"
@@ -281,7 +287,7 @@ def get_bangla_translation(en_text):
         if en == en_text:
             return bn
     try:
-        return translator.translate(en_text, src='en', dest='bn').text
+        return translator.translate(en_text, src='en', dest='bn').text  # Now sync
     except Exception as e:
         logger.error(f"Translation error: {e}")
         return en_text + " (অনুবাদ অনুপলব্ধ)"
@@ -334,6 +340,9 @@ def ask_bot():
 
         logger.info("Audio URLs primary: %s", audio_urls_primary)
         logger.info("Audio URLs secondary: %s", audio_urls_secondary)
+
+        if not audio_urls_primary:
+            logger.warning("Primary audio failed; falling back to text-only")
 
         cleanup_audio_files()
 
