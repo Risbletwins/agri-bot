@@ -9,7 +9,7 @@ import time
 import glob
 import logging
 from gtts import gTTS
-import genai  # Corrected import (assuming google-generativeai)
+from google import genai  # Corrected import (assuming google-generativeai)
 from dotenv import load_dotenv
 from googletrans import Translator
 from fuzzywuzzy import fuzz
